@@ -55,7 +55,11 @@ export function useTheme() {
     theme,
     brand,
     resolved,
-    setTheme: (value: ThemePreference) => (theme.value = value),
-    setBrand: (value: Brand) => (brand.value = value),
+    setTheme: (value: ThemePreference) => {
+      theme.value = value
+    },
+    setBrand: (value: Brand) => {
+      brand.value = value
+    },
   }
 }

@@ -32,7 +32,7 @@ const H = 176
 const CX = W / 2
 const CY = H - 10
 const R_OUTER = 150
-const R_INNER = 98
+const R_INNER = 94
 
 const fmt = (v: number) => (props.format ? props.format(v) : formatNumber(v))
 const DEFAULTS = ['var(--r-chart-1)', 'var(--r-chart-1-soft)', 'var(--r-chart-grid)']
@@ -192,7 +192,7 @@ const center = computed(() => {
 .r-gauge__center {
   position: absolute;
   right: 0;
-  bottom: 2%;
+  bottom: 0;
   left: 0;
   display: flex;
   flex-direction: column;
@@ -203,7 +203,7 @@ const center = computed(() => {
 
 .r-gauge__value {
   color: var(--r-text);
-  font-size: clamp(var(--r-text-2xl), 9cqw, var(--r-text-4xl));
+  font-size: clamp(22px, 8.6cqw, 38px);
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
