@@ -1,0 +1,26 @@
+{
+  "name": "rapi-design-system",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Rapi — a quiet, data-first design system for Vue 3, distilled from 24 clean minimalistic dashboard references.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "lucide-vue-next": "^1.0.0",
+    "vue": "^3.5.44",
+    "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "typescript": "~5.9",
+    "vite": "^8.3.5",
+    "vue-tsc": "^3.3.14"
+  }
+}
