@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 /** Current page, starting at 1. */
@@ -18,12 +18,33 @@ const props = withDefaults(
 
 type Item = number | 'gap-start' | 'gap-end'
 
+/* On a narrow screen the row drops siblings (down to 0) rather than overflow its container. */
+const root = ref<HTMLElement | null>(null)
+const room = ref(Infinity)
+let observer: ResizeObserver | undefined
+onMounted(() => {
+  const parent = root.value?.parentElement
+  if (!parent) return
+  observer = new ResizeObserver(([entry]) => (room.value = entry.contentRect.width))
+  observer.observe(parent)
+})
+onBeforeUnmount(() => observer?.disconnect())
+
+const siblings = computed(() => {
+  const button = props.size === 'sm' ? 32 : 38
+  for (let s = props.siblings; s > 0; s--) {
+    // first + last + current + 2 gaps + 2s siblings, plus the two step buttons
+    if ((2 * s + 5 + 2) * button <= room.value) return s
+  }
+  return 0
+})
+
 const range = (from: number, to: number) => Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => from + i)
 
 const items = computed<Item[]>(() => {
   const total = Math.max(1, props.pageCount)
   const current = Math.min(Math.max(1, page.value), total)
-  const s = props.siblings
+  const s = siblings.value
   if (total <= s * 2 + 5) return range(1, total)
   const left = Math.max(current - s, 1)
   const right = Math.min(current + s, total)
@@ -40,7 +61,7 @@ function go(to: number) {
 </script>
 
 <template>
-  <nav class="r-pagination" :class="`r-pagination--${size}`" :aria-label="label">
+  <nav ref="root" class="r-pagination" :class="`r-pagination--${size}`" :aria-label="label">
     <button type="button" class="r-pagination__step" :disabled="page <= 1" aria-label="Previous page" @click="go(page - 1)">
       <ChevronLeft />
     </button>

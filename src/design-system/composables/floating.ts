@@ -46,6 +46,11 @@ export interface UseFloatingOptions {
   padding?: number
   /** Make the floating element at least as wide as its anchor. */
   matchWidth?: boolean
+  /**
+   * Cap the height to the room left on the chosen side, so a tall panel scrolls inside
+   * instead of sliding over its trigger. Give the element `overflow: auto`.
+   */
+  fitHeight?: boolean
 }
 
 interface Box {
@@ -83,7 +88,7 @@ export function computePosition(
   viewport: { width: number; height: number },
   padding = 8,
   crossOffset = 0,
-): { x: number; y: number; placement: Placement } {
+): { x: number; y: number; placement: Placement; available: number } {
   const [side, align] = placement.split('-') as [Side, 'start' | 'end' | undefined]
   const { width: w, height: h } = size
 
@@ -117,7 +122,8 @@ export function computePosition(
       left: anchor.left,
       right: viewport.width - anchor.right,
     }
-    if (fits(other, alt) || room[other] > room[side]) {
+    // Neither side fits: stay on the side that was asked for unless the other has clearly more room.
+    if (fits(other, alt) || room[other] > room[side] * 1.2) {
       finalSide = other
       pos = alt
     }
@@ -126,10 +132,19 @@ export function computePosition(
   if (finalSide === 'top' || finalSide === 'bottom') pos.x += crossOffset
   else pos.y += crossOffset
 
+  // Height left on the chosen side (for panels that should scroll rather than overlap the anchor).
+  const available =
+    finalSide === 'bottom'
+      ? viewport.height - padding - (anchor.bottom + offset)
+      : finalSide === 'top'
+        ? anchor.top - offset - padding
+        : viewport.height - padding * 2
+
   return {
     x: clamp(pos.x, padding, Math.max(padding, viewport.width - w - padding)),
     y: clamp(pos.y, padding, Math.max(padding, viewport.height - h - padding)),
     placement: (align ? `${finalSide}-${align}` : finalSide) as Placement,
+    available: Math.max(0, Math.floor(available)),
   }
 }
 
@@ -153,6 +168,7 @@ export function useFloating(floating: Ref<HTMLElement | null>, options: UseFloat
   const y = ref(0)
   const placement = ref<Placement>(toValue(options.placement) ?? 'bottom')
   const ready = ref(false)
+  const maxHeight = ref<number | null>(null)
   let frame = 0
   let observer: ResizeObserver | null = null
   let listening = false
@@ -179,6 +195,10 @@ export function useFloating(floating: Ref<HTMLElement | null>, options: UseFloat
     el.style.left = `${x.value}px`
     el.style.top = `${y.value}px`
     el.style.visibility = ''
+    if (options.fitHeight) {
+      maxHeight.value = result.available
+      el.style.maxHeight = `${result.available}px`
+    }
   }
 
   function schedule() {
@@ -216,6 +236,7 @@ export function useFloating(floating: Ref<HTMLElement | null>, options: UseFloat
         start()
       } else {
         ready.value = false
+        maxHeight.value = null
       }
     },
     { flush: 'post', immediate: true },
@@ -233,6 +254,7 @@ export function useFloating(floating: Ref<HTMLElement | null>, options: UseFloat
     left: `${x.value}px`,
     top: `${y.value}px`,
     visibility: ready.value ? undefined : 'hidden',
+    maxHeight: options.fitHeight && maxHeight.value !== null ? `${maxHeight.value}px` : undefined,
   }))
 
   return { x, y, placement, ready, style, update }

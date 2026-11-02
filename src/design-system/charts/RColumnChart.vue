@@ -13,11 +13,13 @@ const props = withDefaults(
     /** The column drawn in full colour; the rest are soft. Leave unset for all solid. */
     highlight?: number | null
     color?: string
+    /** Text colour inside a full-colour column. Near-black reads on light and saturated colours; pass #fff for dark ones. */
+    labelColor?: string
     height?: number
     format?: (value: number) => string
     label: string
   }>(),
-  { max: 100, color: 'var(--r-chart-4)', height: 220, highlight: null },
+  { max: 100, color: 'var(--r-chart-4)', labelColor: '#0c0e12', height: 220, highlight: null },
 )
 
 const uid = useId()
@@ -25,16 +27,22 @@ const fmt = (v: number) => (props.format ? props.format(v) : `${formatNumber(v, 
 
 const targetAt = (i: number) => (Array.isArray(props.targets) ? props.targets[i] : props.targets)
 
+// The label sits at the top of the column; when the target tick would cross it, it moves to the bottom.
+const labelZone = computed(() => (34 / Math.max(1, props.height - 30)) * 100)
+
 const columns = computed(() =>
   props.values.map((value, i) => {
     const pct = Math.min(1, Math.max(0, value / props.max))
     const target = targetAt(i)
+    const height = pct * 100
+    const targetPct = target == null ? null : Math.min(1, Math.max(0, target / props.max)) * 100
     return {
       label: props.labels[i],
       value,
-      height: pct * 100,
-      target: target == null ? null : Math.min(1, Math.max(0, target / props.max)) * 100,
+      height,
+      target: targetPct,
       solid: props.highlight == null || props.highlight === i,
+      labelLow: targetPct != null && targetPct <= height && targetPct >= height - labelZone.value,
     }
   }),
 )
@@ -73,24 +81,31 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
           <div
             class="r-columns__bar"
             :class="{ 'is-solid': c.solid }"
-            :style="{ height: grown ? `${c.height}%` : '0%', '--r-col': color, transitionDelay: `${i * 70}ms` }"
+            :style="{
+              height: grown ? `${c.height}%` : '0%',
+              '--r-col': color,
+              '--r-col-text': labelColor,
+              transitionDelay: `${i * 70}ms`,
+            }"
           >
-            <span class="r-columns__value">{{ fmt(c.value) }}</span>
+            <span class="r-columns__value" :class="{ 'is-low': c.labelLow }">{{ fmt(c.value) }}</span>
           </div>
           <span v-if="c.target != null" class="r-columns__target" :style="{ bottom: `${c.target}%` }" />
         </div>
         <span class="r-columns__label">{{ c.label }}</span>
       </div>
     </div>
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <tbody>
-        <tr v-for="(c, i) in columns" :key="i">
-          <th scope="row">{{ c.label }}</th>
-          <td>{{ fmt(c.value) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <tbody>
+          <tr v-for="(c, i) in columns" :key="i">
+            <th scope="row">{{ c.label }}</th>
+            <td>{{ fmt(c.value) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="`${uid}-hint`" hidden>Use the arrow keys to read each column.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>
@@ -108,6 +123,7 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+  container-type: inline-size;
 }
 
 .r-columns__track {
@@ -145,9 +161,28 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
 }
-/* Dark ink on a saturated bar reads in both themes. */
+.r-columns__value.is-low {
+  top: auto;
+  bottom: 10px;
+}
+
+/* Dark ink on a saturated bar reads in both themes; labelColor changes it for dark colours. */
 .r-columns__bar.is-solid .r-columns__value {
-  color: #0c0e12;
+  color: var(--r-col-text);
+}
+
+/* Narrow columns: centre a smaller label so it never runs into the edge. */
+@container (max-width: 64px) {
+  .r-columns__value {
+    right: 0;
+    left: 0;
+    font-size: var(--r-text-2xs);
+    text-align: center;
+  }
+  .r-columns__track,
+  .r-columns__bar {
+    border-radius: var(--r-radius-md);
+  }
 }
 
 .r-columns__target {

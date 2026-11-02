@@ -58,6 +58,7 @@ const subFloating = useFloating(sub, {
   placement: 'right-start',
   offset: 6,
   crossOffset: -7,
+  fitHeight: true,
 })
 
 const subStyle = computed(() => [subFloating.style.value, { '--r-origin': transformOrigin(subFloating.placement.value) }])

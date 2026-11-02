@@ -125,6 +125,7 @@ const checked = computed(() =>
   width: 12px;
   height: 12px;
   color: var(--tone-on-solid);
+  pointer-events: none;
   opacity: 0;
   stroke-width: 3;
   transform: scale(0.5);
@@ -144,6 +145,11 @@ const checked = computed(() =>
 
 .r-checkbox--colored .r-checkbox__box {
   border-color: var(--tone-solid);
+}
+
+/* Identity colours turn light in dark mode, so a coloured box gets a dark check there. */
+[data-theme='dark'] .r-checkbox--colored .r-checkbox__icon {
+  color: var(--r-bg-canvas);
 }
 
 .r-checkbox.is-checked .r-checkbox__box {

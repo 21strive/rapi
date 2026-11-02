@@ -163,23 +163,25 @@ const tooltip = computed(() => {
       :rows="tooltip.rows"
     />
 
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <thead>
-        <tr>
-          <th scope="col">Label</th>
-          <th scope="col">Min</th>
-          <th scope="col">Max</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(l, i) in labels" :key="i">
-          <th scope="row">{{ l }}</th>
-          <td>{{ fmt(bars[i].min) }}</td>
-          <td>{{ fmt(bars[i].max) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Label</th>
+            <th scope="col">Min</th>
+            <th scope="col">Max</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(l, i) in labels" :key="i">
+            <th scope="row">{{ l }}</th>
+            <td>{{ fmt(bars[i].min) }}</td>
+            <td>{{ fmt(bars[i].max) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="`${uid}-hint`" hidden>Use the arrow keys to read each range.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>

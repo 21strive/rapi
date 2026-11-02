@@ -189,8 +189,8 @@ const marker = computed(() => {
             <stop offset="100%" :style="{ stopColor: l.color, stopOpacity: 0 }" />
           </linearGradient>
           <linearGradient v-if="marker" :id="`${uid}-marker`" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" :style="{ stopColor: 'var(--r-ink)', stopOpacity: 0.16 }" />
-            <stop offset="100%" :style="{ stopColor: 'var(--r-ink)', stopOpacity: 0.02 }" />
+            <stop offset="0%" :style="{ stopColor: marker.color, stopOpacity: 0.22 }" />
+            <stop offset="100%" :style="{ stopColor: marker.color, stopOpacity: 0.02 }" />
           </linearGradient>
         </defs>
 
@@ -262,21 +262,23 @@ const marker = computed(() => {
       />
     </div>
 
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <thead>
-        <tr>
-          <th scope="col">Label</th>
-          <th v-for="s in series" :key="s.name" scope="col">{{ s.name }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(l, i) in labels" :key="i">
-          <th scope="row">{{ l }}</th>
-          <td v-for="s in series" :key="s.name">{{ s.values[i] == null ? '—' : fmt(s.values[i] as number) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Label</th>
+            <th v-for="s in series" :key="s.name" scope="col">{{ s.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(l, i) in labels" :key="i">
+            <th scope="row">{{ l }}</th>
+            <td v-for="s in series" :key="s.name">{{ s.values[i] == null ? '—' : fmt(s.values[i] as number) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="hintId" hidden>Use the arrow keys to read each point.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>

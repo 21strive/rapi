@@ -93,7 +93,7 @@ watch(
   border-color: transparent;
   background: #fff;
   color: #15181e;
-  --r-text-tertiary: #6b7382;
+  --r-text-tertiary: #646c7a;
 }
 
 .r-chart-tooltip__title {

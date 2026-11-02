@@ -25,7 +25,7 @@ const groupLabel = computed(() => {
 
 <template>
   <span class="r-avatar-group" :class="`r-avatar-group--${size}`" role="img" :aria-label="groupLabel">
-    <RAvatar v-for="name in visible" :key="name" :name="name" :size="size" ring decorative />
+    <RAvatar v-for="name in visible" :key="name" :name="name" :size="size" ring decorative single />
     <span v-if="rest" class="r-avatar r-avatar--ring r-avatar-group__more" :class="`r-avatar--${size}`" aria-hidden="true">
       +{{ rest }}
     </span>
@@ -40,7 +40,7 @@ const groupLabel = computed(() => {
 }
 
 .r-avatar-group > .r-avatar + .r-avatar {
-  margin-left: calc(var(--r-avatar-size) * -0.3);
+  margin-left: calc(var(--r-avatar-size) * -0.26);
 }
 
 .r-avatar-group__more {

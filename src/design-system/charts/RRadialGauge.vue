@@ -133,15 +133,17 @@ const center = computed(() => {
         {{ s.label }}
       </li>
     </ul>
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <tbody>
-        <tr v-for="s in items" :key="s.label">
-          <th scope="row">{{ s.label }}</th>
-          <td>{{ fmt(s.value) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <tbody>
+          <tr v-for="s in items" :key="s.label">
+            <th scope="row">{{ s.label }}</th>
+            <td>{{ fmt(s.value) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="`${uid}-hint`" hidden>Use the arrow keys to read each segment.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>
@@ -171,10 +173,11 @@ const center = computed(() => {
 .r-gauge__bar {
   stroke-linecap: round;
   animation: r-gauge-in var(--r-duration-slower) var(--r-ease-out) both;
-  transition: opacity var(--r-duration-fast) var(--r-ease-out);
+  transition: stroke var(--r-duration-fast) var(--r-ease-out);
 }
+/* The other segments fall back to the track colour, so even a pale segment stands out. */
 .r-gauge__bar.is-dim {
-  opacity: 0.35;
+  stroke: var(--r-chart-track) !important;
 }
 
 @keyframes r-gauge-in {

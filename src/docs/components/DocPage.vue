@@ -46,9 +46,25 @@ function observe() {
   }
 }
 
-onMounted(() => nextTick(observe))
+// The last sections can be too short to reach the top of the screen, so at the very bottom
+// of the page the outline marks the last one.
+function onScroll() {
+  const doc = document.scrollingElement
+  if (!doc || !sections.value.length) return
+  if (window.innerHeight + window.scrollY >= doc.scrollHeight - 4) {
+    activeId.value = sections.value[sections.value.length - 1].id
+  }
+}
+
+onMounted(() => {
+  nextTick(observe)
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
 watch(() => sections.value.length, () => nextTick(observe))
-onBeforeUnmount(() => observer?.disconnect())
+onBeforeUnmount(() => {
+  observer?.disconnect()
+  window.removeEventListener('scroll', onScroll)
+})
 
 function go(id: string) {
   activeId.value = id

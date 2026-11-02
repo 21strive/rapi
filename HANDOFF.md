@@ -41,7 +41,15 @@ Done:
 - `src/design-system/tokens/tokens.css`: primitive ramps, brand alias ramp, light and dark semantic roles, brand swaps, type/space/radius/control/motion/z-index tokens, reduced motion.
 - `src/design-system/tokens/base.css`: reset, type scale classes, `.r-tone-*` helpers, utilities.
 
-Not done yet, in this order:
+Session 2 (2026-11-02, on the VM, ~/rapi-design-system; references at ~/dribbble-clean-minimalistic):
+
+- Local git repo (no remote yet; the user wants it pushed to a new repo `21strive/rapi` at the end).
+- Font check passed: Plus Jakarta Sans has real tabular figures ("111111" and "000000" both 201.6px at 56px), so it stays.
+- Built: composables (floating, dom, format, identity, theme), all 27 components, 8 charts, `src/design-system/index.ts`, `src/main.ts`, docs shell (sidebar, top bar, ⌘K palette, theme + brand switch, mobile drawer), doc helpers, Introduction page, Weekly schedule example, README. Remaining pages and the other two examples were built in parallel by helper agents.
+- Contrast pass (axe-core, every route, light and dark, blue/violet/flame: 0 violations): neutral-500 is now #646c7a and dark tertiary #868e9c; danger fill rose-600, danger/flame text one step darker; success, warning, flame and sky solids (and the flame brand) carry dark labels.
+- QA scripts (Playwright, Chromium on the VM): `~/worktrees/session-prompts/rapi-design-system/bin/shot.cjs` and `probe.cjs`; screenshots land in `../shots/`.
+
+Original plan, for reference:
 
 1. Composables
 2. `src/main.ts` (it does not exist yet, so `npm run dev` fails until it is added)

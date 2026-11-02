@@ -11,7 +11,8 @@
  */
 
 :root {
-  /* ── Neutral · cool grey. 500 is tuned to pass AA (4.7:1) on white ─────── */
+  /* ── Neutral · cool grey. 500 is tuned to pass AA on white (5.3:1), the canvas (4.9:1)
+        and hover backgrounds (4.6:1), because tertiary text sits on all three ───────── */
   --r-neutral-0: #ffffff;
   --r-neutral-25: #fbfbfc;
   --r-neutral-50: #f6f7f9;
@@ -19,7 +20,7 @@
   --r-neutral-200: #e3e6eb;
   --r-neutral-300: #cdd2da;
   --r-neutral-400: #9aa1ad;
-  --r-neutral-500: #6b7382;
+  --r-neutral-500: #646c7a;
   --r-neutral-600: #535b69;
   --r-neutral-700: #3d4450;
   --r-neutral-800: #272c35;
@@ -218,7 +219,22 @@
   --r-z-tooltip: 160;
 }
 
-/* Brand hue swaps — one attribute re-colours every brand role. */
+/* Brand hue swaps — one attribute re-colours every brand role.
+   'blue' is the default; spelling it out lets a blue island sit inside a violet or flame page. */
+[data-brand='blue'] {
+  --r-brand-50: var(--r-blue-50);
+  --r-brand-100: var(--r-blue-100);
+  --r-brand-200: var(--r-blue-200);
+  --r-brand-300: var(--r-blue-300);
+  --r-brand-400: var(--r-blue-400);
+  --r-brand-500: var(--r-blue-500);
+  --r-brand-600: var(--r-blue-600);
+  --r-brand-700: var(--r-blue-700);
+  --r-brand-800: var(--r-blue-800);
+  --r-brand-900: var(--r-blue-900);
+  --r-brand-950: var(--r-blue-950);
+}
+
 [data-brand='violet'] {
   --r-brand-50: var(--r-violet-50);
   --r-brand-100: var(--r-violet-100);
@@ -296,10 +312,10 @@
   --r-warning-text: var(--r-amber-700);
   --r-warning-border: var(--r-amber-200);
 
-  --r-danger: var(--r-rose-500);
-  --r-danger-hover: var(--r-rose-600);
+  --r-danger: var(--r-rose-600); /* white on rose-500 is 3.8:1; on 600 it is 4.9:1 */
+  --r-danger-hover: var(--r-rose-700);
   --r-danger-soft: var(--r-rose-50);
-  --r-danger-text: var(--r-rose-600);
+  --r-danger-text: var(--r-rose-700); /* 600 measured 4.45:1 on danger-soft; 700 passes AA */
   --r-danger-border: var(--r-rose-200);
 
   --r-violet: var(--r-violet-500);
@@ -311,7 +327,7 @@
   --r-flame: var(--r-flame-500);
   --r-flame-hover: var(--r-flame-600);
   --r-flame-soft: var(--r-flame-50);
-  --r-flame-text: var(--r-flame-600);
+  --r-flame-text: var(--r-flame-700); /* 600 measured 3.9:1 on flame-soft; 700 passes AA */
   --r-flame-border: var(--r-flame-200);
 
   --r-sky: var(--r-sky-500);
@@ -391,7 +407,7 @@
 
   --r-text: #f3f4f7;
   --r-text-secondary: #aab1bd;
-  --r-text-tertiary: #808896;
+  --r-text-tertiary: #868e9c; /* 5.4:1 on surface, 4.6:1 on hover */
   --r-text-disabled: #575f6c;
   --r-text-inverse: #15181e;
 
@@ -434,7 +450,7 @@
   --r-chart-1-soft: color-mix(in srgb, var(--r-brand-500) 34%, #14171c);
   --r-chart-track: #1f232a;
   --r-chart-grid: #262a32;
-  --r-chart-axis: #808896;
+  --r-chart-axis: #868e9c;
 
   --r-bg-track: #1f232a;
   --r-bg-thumb: #30363f;
@@ -462,6 +478,19 @@
   --r-shadow-lg: 0 4px 10px -4px rgb(0 0 0 / 0.4), 0 22px 44px -12px rgb(0 0 0 / 0.6);
   --r-shadow-xl: 0 8px 16px -8px rgb(0 0 0 / 0.45), 0 32px 64px -16px rgb(0 0 0 / 0.7);
   --r-shadow-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+/* Flame is lighter than blue and violet at the same step. White on flame-500 measures 3.4:1 and
+   flame-600 text on white 4.3:1, so on the flame brand text on a brand fill turns dark and brand
+   text in light mode moves one step darker. Fills and chart colours stay vivid. */
+[data-brand='flame'],
+[data-brand='flame'] [data-theme]:not([data-brand]) {
+  --r-on-brand: #15181e;
+}
+
+[data-brand='flame']:not([data-theme='dark']),
+[data-brand='flame'] [data-theme='light']:not([data-brand]) {
+  --r-brand-text: var(--r-brand-700);
 }
 
 @media (prefers-reduced-motion: reduce) {

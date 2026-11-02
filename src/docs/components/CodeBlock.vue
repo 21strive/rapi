@@ -67,7 +67,7 @@ function highlightTag(tag: string): string {
   const open = tag.match(/^<\/?[\w.-]+/)?.[0] ?? ''
   let out = span('tag', open)
   const rest = tag.slice(open.length)
-  const attr = /([:@#]?[\w.-]+(?:\.[\w-]+)*)(=)("[^"]*")|([:@#]?[\w.-]+)|(\/?>)|(\s+)/g
+  const attr = /([:@#]?[\w.:-]+(?:\.[\w-]+)*)(=)("[^"]*"|'[^']*')|([:@#]?[\w.:-]+)|(\/?>)|(\s+)/g
   for (const m of rest.matchAll(attr)) {
     if (m[1]) out += span('attr', m[1]) + escape(m[2]) + span('str', m[3])
     else if (m[4]) out += span('attr', m[4])
@@ -78,7 +78,9 @@ function highlightTag(tag: string): string {
 }
 
 function highlightVue(source: string): string {
-  const pattern = /(<!--[\s\S]*?-->)|(<script[^>]*>)([\s\S]*?)(<\/script>)|(<\/?[\w.-]+(?:\s+[^<>]*?)?\/?>)|(\{\{[\s\S]*?\}\})/g
+  // Quoted attribute values may contain > (arrow functions, comparisons), so a tag ends at the first > outside quotes.
+  const pattern =
+    /(<!--[\s\S]*?-->)|(<script[^>]*>)([\s\S]*?)(<\/script>)|(<\/?[\w.-]+(?:\s(?:"[^"]*"|'[^']*'|[^<>"'])*?)?\/?>)|(\{\{[\s\S]*?\}\})/g
   let out = ''
   let last = 0
   for (const m of source.matchAll(pattern)) {

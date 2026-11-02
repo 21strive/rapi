@@ -81,7 +81,7 @@ const usage = `<RCard title="Overall revenue" variant="brand">
         <RStat :value="25912" prefix="$" size="xl" :trend="1.9" trend-label="than last month" animate />
       </RCard>
 
-      <RCard class="intro-hero__chart" title="Sales summary">
+      <RCard class="intro-hero__chart" title="Sales summary" title-as="p">
         <template #actions>
           <RSegmented v-model="period" :options="periods" size="sm" label="Period" />
         </template>
@@ -96,7 +96,7 @@ const usage = `<RCard title="Overall revenue" variant="brand">
         />
       </RCard>
 
-      <RCard class="intro-hero__gauge" title="Sales category">
+      <RCard class="intro-hero__gauge" title="Sales category" title-as="p">
         <RRadialGauge
           :segments="[
             { label: 'Ecommerce', value: 5120 },
@@ -252,7 +252,8 @@ const usage = `<RCard title="Overall revenue" variant="brand">
       <ul class="doc-list">
         <li>
           Body text and secondary text pass WCAG AA. The tertiary grey, used for hints and axis labels, is tuned to
-          4.78:1 on white and about 5:1 on the dark surface.
+          5.3:1 on white, 4.9:1 on the grey canvas and 5.4:1 on the dark surface. Every ratio on the Colour page is
+          measured live, so you can check it in any theme and brand.
         </li>
         <li>
           Focus is always visible: buttons, chips and tabs get a 2px brand outline, text fields get a brand border with

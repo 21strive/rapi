@@ -306,6 +306,7 @@ watch(page, () => scrollActiveIntoView())
   z-index: var(--r-z-modal);
   inset: 0;
   display: flex;
+  align-items: flex-start;
   justify-content: center;
   padding: max(12vh, 16px) 12px 16px;
   background: var(--r-bg-overlay);

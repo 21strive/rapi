@@ -14,11 +14,13 @@ const props = withDefaults(
     src?: string
     /** Hide from screen readers when the name is already written next to it. */
     decorative?: boolean
+    /** One initial instead of two. Groups use this so the overlap never cuts a letter in half. */
+    single?: boolean
   }>(),
   { size: 'md' },
 )
 
-const initials = computed(() => initialsOf(props.name))
+const initials = computed(() => (props.single ? initialsOf(props.name).slice(0, 1) : initialsOf(props.name)))
 const tone = computed(() => identityIndex(props.name))
 </script>
 

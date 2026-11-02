@@ -128,13 +128,15 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
         </span>
         <span v-if="showValues" class="r-bar-list__value" />
       </div>
+      <!-- Above the end of the bar: to the side it would cover the bars and their labels. -->
       <ChartTooltip
         v-if="tooltip"
         :x="tooltip.x"
-        :y="tooltip.y"
+        :y="tooltip.y - barHeight / 2"
         :bounds="{ width: plotWidth, height: 9999 }"
         :title="tooltip.title"
         :rows="tooltip.rows"
+        placement="top"
       />
     </div>
 
@@ -145,21 +147,23 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
       </li>
     </ul>
 
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <thead>
-        <tr>
-          <th scope="col">Label</th>
-          <th v-for="s in seriesList" :key="s.name" scope="col">{{ s.name }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows" :key="row.label">
-          <th scope="row">{{ row.label }}</th>
-          <td v-for="s in row.segments" :key="s.i">{{ fmt(s.value) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Label</th>
+            <th v-for="s in seriesList" :key="s.name" scope="col">{{ s.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in rows" :key="row.label">
+            <th scope="row">{{ row.label }}</th>
+            <td v-for="s in row.segments" :key="s.i">{{ fmt(s.value) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="`${uid}-hint`" hidden>Use the arrow keys to read each bar.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>

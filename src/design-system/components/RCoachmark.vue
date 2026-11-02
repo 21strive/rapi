@@ -65,7 +65,8 @@ const isLast = computed(() => !!props.step && !!props.total && props.step >= pro
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: min(380px, calc(100vw - 24px));
+  width: 380px;
+  max-width: 100%;
   padding: 22px;
   border: 1px solid var(--r-border-subtle);
   border-radius: var(--r-radius-xl);

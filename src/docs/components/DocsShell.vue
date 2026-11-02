@@ -131,6 +131,10 @@ function skipToContent() {
   border-right: 1px solid var(--r-border-subtle);
 }
 
+.docs-sidebar > * {
+  flex-shrink: 0;
+}
+
 .docs-sidebar__foot {
   margin-top: auto;
   padding: 0 10px;

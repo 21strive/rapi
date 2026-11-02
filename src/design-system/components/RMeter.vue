@@ -204,7 +204,7 @@ const thickness = computed(() => props.height ?? (props.variant === 'ticks' ? 40
   align-items: center;
   gap: 10px;
   min-height: 40px;
-  padding: 0 12px;
+  padding: 8px 12px;
   border-radius: var(--r-radius-md);
   background: var(--r-bg-muted);
   font-size: var(--r-text-sm);
@@ -212,14 +212,13 @@ const thickness = computed(() => props.height ?? (props.variant === 'ticks' ? 40
 .r-meter__list-label {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
   color: var(--r-text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
 }
 .r-meter__list-value {
   color: var(--r-text-tertiary);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .r-meter__list-percent {
   min-width: 42px;

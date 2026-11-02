@@ -90,8 +90,11 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
   }
 }
 
+/* When the actions are wide (a segmented control, two selects) they drop below the title
+   instead of squeezing it. */
 .r-card__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
@@ -102,6 +105,7 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
 }
 
 .r-card__heading {
+  flex: 1 1 160px;
   min-width: 0;
 }
 
@@ -121,9 +125,11 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
 .r-card__actions {
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: -4px -4px -4px 0;
+  max-width: 100%;
+  margin: -4px -4px -4px auto;
 }
 
 .r-card__footer {

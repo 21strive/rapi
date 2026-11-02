@@ -91,15 +91,18 @@ const yTicks = computed(() => {
   return domain.value.ticks.map((v) => ({ v, y: M.top + plotH - (v / domain.value.max) * plotH }))
 })
 
+/* Axis labels are thinned evenly (every 2nd, 3rd…) until the widest one fits, explicit ticks included. */
+const labelWidth = (text: string) => text.length * 6.6 + 10
+
 const xTicks = computed(() => {
   const { colW } = layout.value
-  if (props.ticks) {
-    return props.ticks.map((text, c) => ({ text, x: M.left + colW * (c + 0.5) })).filter((t) => t.text)
-  }
-  const every = Math.max(1, Math.ceil(44 / colW))
-  return props.labels
-    .map((text, c) => ({ text, x: M.left + colW * (c + 0.5), c }))
-    .filter((t) => t.c % every === 0)
+  const all = (props.ticks ?? props.labels).map((text, c) => ({ text, x: M.left + colW * (c + 0.5) }))
+  const visible = all.filter((t) => t.text)
+  if (visible.length < 2) return visible
+  const spacing = (visible[visible.length - 1].x - visible[0].x) / (visible.length - 1)
+  const widest = Math.max(...visible.map((t) => labelWidth(t.text)))
+  const step = Math.max(1, Math.ceil(widest / Math.max(1, spacing)))
+  return visible.filter((_, i) => i % step === 0)
 })
 
 const focus = useChartFocus(
@@ -196,21 +199,23 @@ const tooltip = computed(() => {
       :rows="tooltip.rows"
     />
 
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <thead>
-        <tr>
-          <th scope="col">Period</th>
-          <th v-for="s in series" :key="s.name" scope="col">{{ s.name }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(l, c) in labels" :key="c">
-          <th scope="row">{{ l }}</th>
-          <td v-for="s in series" :key="s.name">{{ fmt(s.values[c] ?? 0) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Period</th>
+            <th v-for="s in series" :key="s.name" scope="col">{{ s.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(l, c) in labels" :key="c">
+            <th scope="row">{{ l }}</th>
+            <td v-for="s in series" :key="s.name">{{ fmt(s.values[c] ?? 0) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="hintId" hidden>Use the arrow keys to read each column.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>

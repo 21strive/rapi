@@ -106,6 +106,11 @@
   margin-top: 72px;
 }
 
+/* A section that follows loose prose or a demo at the top of a page. */
+.doc-page__content > :not(.doc-page__header):not(.doc-section) + .doc-section {
+  margin-top: 56px;
+}
+
 .doc-section--3 {
   margin-top: 40px;
 }
@@ -229,12 +234,21 @@
 }
 
 /* ── Demo stage ───────────────────────────────────────────────────────────── */
+/* :where() keeps the reset at zero specificity, so section spacing (> * + *) still applies. */
+:where(.doc-demo) {
+  margin: 0;
+}
+
 .doc-demo {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 0;
   min-width: 0;
+}
+
+/* `margin: 0` above resets the figure's default margins; keep the section rhythm for demos. */
+.doc-section > * + .doc-demo {
+  margin-top: 20px;
 }
 
 .doc-demo__caption {
@@ -290,7 +304,11 @@
 
 .doc-demo__stage.is-stack {
   flex-direction: column;
+  flex-wrap: nowrap;
   align-items: stretch;
+}
+.doc-demo__stage.is-stack > * {
+  max-width: 100%;
 }
 .doc-demo__stage.is-center {
   justify-content: center;

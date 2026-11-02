@@ -46,6 +46,10 @@ const panel = ref<HTMLElement | null>(null)
 const panelId = useId()
 
 const triggerElement = () => (trigger.value?.firstElementChild as HTMLElement | null) ?? trigger.value
+// A chip wraps its button in a span, so ARIA goes on the first focusable element, not the first element.
+const ariaTarget = () =>
+  trigger.value?.querySelector<HTMLElement>('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])') ??
+  triggerElement()
 const anchor = () => props.point ?? triggerElement()
 
 const floating = useFloating(panel, {
@@ -54,6 +58,7 @@ const floating = useFloating(panel, {
   placement: () => props.placement,
   offset: () => props.offset,
   matchWidth: props.matchWidth,
+  fitHeight: true,
 })
 
 const registry = provideFloatingRegistry()
@@ -90,7 +95,7 @@ useFocusTrap(panel, open, {
 // The trigger gets its ARIA state without the consumer wiring anything up.
 watchEffect(() => {
   if (props.point) return
-  const el = triggerElement()
+  const el = ariaTarget()
   if (!el) return
   el.setAttribute('aria-haspopup', props.kind)
   el.setAttribute('aria-expanded', open.value ? 'true' : 'false')

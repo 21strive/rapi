@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import RCoachmark from './RCoachmark.vue'
 import { useFloating } from '../composables/floating'
 import { prefersReducedMotion, useEscape, useFocusTrap, useLayer } from '../composables/dom'
@@ -116,8 +116,21 @@ const floating = useFloating(card, {
 watch(box, () => requestAnimationFrame(() => floating.update()))
 
 const layer = useLayer(open)
-useFocusTrap(card, () => open.value && !!box.value, { isTop: layer.isTop })
+// Start on the main button, so Enter walks through the steps. The card is patched in place
+// between steps, so that button keeps focus.
+useFocusTrap(card, () => open.value && !!box.value, {
+  isTop: layer.isTop,
+  initialFocus: () => card.value?.querySelector<HTMLElement>('.r-coachmark__actions .r-button:last-child'),
+})
 useEscape(open, () => skip(), layer.isTop)
+
+// If a step change ever drops focus (the card re-renders under it), put it back on the main button.
+watch(index, async () => {
+  await nextTick()
+  const root = card.value
+  if (!open.value || !root || root.contains(document.activeElement)) return
+  root.querySelector<HTMLElement>('.r-coachmark__actions .r-button:last-child')?.focus({ preventScroll: true })
+})
 
 function skip() {
   open.value = false
@@ -146,7 +159,6 @@ function back() {
         <div ref="spot" class="r-tour__spot" :style="spotStyle" aria-hidden="true" />
         <div v-if="current && box" ref="card" class="r-tour__card" :style="floating.style.value">
           <RCoachmark
-            :key="index"
             :title="current.title"
             :step="index + 1"
             :total="steps.length"
@@ -195,6 +207,7 @@ function back() {
 
 .r-tour__card {
   z-index: 1;
+  max-width: calc(100vw - 24px);
   animation: r-fade-in var(--r-duration-base) var(--r-ease-out);
 }
 

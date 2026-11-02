@@ -176,21 +176,23 @@ const legendSteps = [0, 0.25, 0.5, 0.75, 1]
       <span>More</span>
     </div>
 
-    <table class="r-sr-only">
-      <caption>{{ label }}</caption>
-      <thead>
-        <tr>
-          <th scope="col"></th>
-          <th v-for="col in cols" :key="col" scope="col">{{ col }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, r) in rows" :key="row">
-          <th scope="row">{{ row }}</th>
-          <td v-for="(_, c) in cols" :key="c">{{ fmt(values[r]?.[c] ?? 0) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="r-sr-only">
+      <table>
+        <caption>{{ label }}</caption>
+        <thead>
+          <tr>
+            <td></td>
+            <th v-for="col in cols" :key="col" scope="col">{{ col }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, r) in rows" :key="row">
+            <th scope="row">{{ row }}</th>
+            <td v-for="(_, c) in cols" :key="c">{{ fmt(values[r]?.[c] ?? 0) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <span :id="`${uid}-hint`" hidden>Use the arrow keys to move between cells.</span>
     <span class="r-sr-only" aria-live="polite">{{ announce }}</span>
   </figure>

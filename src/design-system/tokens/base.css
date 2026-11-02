@@ -195,7 +195,7 @@ a {
 .r-tone-success {
   --tone-solid: var(--r-success);
   --tone-solid-hover: var(--r-success-hover);
-  --tone-on-solid: #fff;
+  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
   --tone-soft: var(--r-success-soft);
   --tone-soft-hover: color-mix(in srgb, var(--r-success) 14%, var(--r-success-soft));
   --tone-text: var(--r-success-text);
@@ -205,7 +205,7 @@ a {
 .r-tone-warning {
   --tone-solid: var(--r-warning);
   --tone-solid-hover: var(--r-warning-hover);
-  --tone-on-solid: #fff;
+  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
   --tone-soft: var(--r-warning-soft);
   --tone-soft-hover: color-mix(in srgb, var(--r-warning) 14%, var(--r-warning-soft));
   --tone-text: var(--r-warning-text);
@@ -235,7 +235,7 @@ a {
 .r-tone-flame {
   --tone-solid: var(--r-flame);
   --tone-solid-hover: var(--r-flame-hover);
-  --tone-on-solid: #fff;
+  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
   --tone-soft: var(--r-flame-soft);
   --tone-soft-hover: color-mix(in srgb, var(--r-flame) 14%, var(--r-flame-soft));
   --tone-text: var(--r-flame-text);
@@ -245,7 +245,7 @@ a {
 .r-tone-sky {
   --tone-solid: var(--r-sky);
   --tone-solid-hover: var(--r-sky-hover);
-  --tone-on-solid: #fff;
+  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
   --tone-soft: var(--r-sky-soft);
   --tone-soft-hover: color-mix(in srgb, var(--r-sky) 14%, var(--r-sky-soft));
   --tone-text: var(--r-sky-text);

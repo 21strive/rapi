@@ -6,7 +6,7 @@ import { paletteOpen } from '../palette'
 </script>
 
 <template>
-  <div class="example-toolbar" data-theme="dark" role="toolbar" aria-label="Docs">
+  <nav class="example-toolbar" data-theme="dark" aria-label="Docs">
     <RouterLink to="/examples" class="example-toolbar__back">
       <ArrowLeft />
       <span>Docs</span>
@@ -17,13 +17,14 @@ import { paletteOpen } from '../palette'
     <button type="button" class="example-toolbar__palette" aria-label="Open command menu" @click="paletteOpen = true">
       <Command />
     </button>
-  </div>
+  </nav>
 </template>
 
 <style>
 .example-toolbar {
   position: fixed;
-  z-index: var(--r-z-toast);
+  /* Below dialogs, popovers and tours, so their buttons are never covered. */
+  z-index: var(--r-z-overlay);
   bottom: max(16px, env(safe-area-inset-bottom));
   left: 50%;
   display: flex;
