@@ -332,6 +332,35 @@
   --r-chart-grid: var(--r-neutral-200);
   --r-chart-axis: var(--r-neutral-500);
 
+  /* Controls · the recessed track behind segmented controls and the thumb that slides on it */
+  --r-bg-track: var(--r-neutral-100);
+  --r-bg-thumb: var(--r-neutral-0);
+
+  /* Feature surfaces · the two loud cards. Dark enough at the top-left for white text. */
+  --r-feature-brand-from: var(--r-brand-700);
+  --r-feature-brand-to: var(--r-brand-500);
+  --r-feature-flame-from: var(--r-flame-700);
+  --r-feature-flame-to: var(--r-flame-500);
+
+  /* Identity · avatars and event colours. Fixed hues, so a person or a calendar keeps its
+     colour when the brand changes. Backgrounds are opaque so overlapping avatars stay clean. */
+  --r-identity-1: var(--r-blue-100);
+  --r-identity-1-text: var(--r-blue-700);
+  --r-identity-2: var(--r-violet-100);
+  --r-identity-2-text: var(--r-violet-700);
+  --r-identity-3: #fce4f3;
+  --r-identity-3-text: #a1236b;
+  --r-identity-4: var(--r-rose-100);
+  --r-identity-4-text: var(--r-rose-700);
+  --r-identity-5: var(--r-flame-100);
+  --r-identity-5-text: var(--r-flame-700);
+  --r-identity-6: var(--r-amber-100);
+  --r-identity-6-text: var(--r-amber-800);
+  --r-identity-7: var(--r-green-100);
+  --r-identity-7-text: var(--r-green-700);
+  --r-identity-8: #d3f4f1;
+  --r-identity-8-text: #0e6b63;
+
   /* Elevation · light, wide and low-opacity — never a hard drop shadow */
   --r-shadow-xs: 0 1px 2px rgb(16 20 28 / 0.04);
   --r-shadow-sm: 0 1px 2px rgb(16 20 28 / 0.04), 0 2px 6px -1px rgb(16 20 28 / 0.05);
@@ -406,6 +435,26 @@
   --r-chart-track: #1f232a;
   --r-chart-grid: #262a32;
   --r-chart-axis: #808896;
+
+  --r-bg-track: #1f232a;
+  --r-bg-thumb: #30363f;
+
+  --r-identity-1: color-mix(in srgb, var(--r-blue-500) 26%, #14171c);
+  --r-identity-1-text: var(--r-blue-300);
+  --r-identity-2: color-mix(in srgb, var(--r-violet-500) 26%, #14171c);
+  --r-identity-2-text: var(--r-violet-300);
+  --r-identity-3: color-mix(in srgb, #db2b8c 24%, #14171c);
+  --r-identity-3-text: #f5a3d3;
+  --r-identity-4: color-mix(in srgb, var(--r-rose-500) 24%, #14171c);
+  --r-identity-4-text: var(--r-rose-300);
+  --r-identity-5: color-mix(in srgb, var(--r-flame-500) 24%, #14171c);
+  --r-identity-5-text: var(--r-flame-300);
+  --r-identity-6: color-mix(in srgb, var(--r-amber-500) 22%, #14171c);
+  --r-identity-6-text: var(--r-amber-300);
+  --r-identity-7: color-mix(in srgb, var(--r-green-500) 22%, #14171c);
+  --r-identity-7-text: var(--r-green-300);
+  --r-identity-8: color-mix(in srgb, #14b8a6 22%, #14171c);
+  --r-identity-8-text: #6ee7d8;
 
   --r-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
   --r-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px -1px rgb(0 0 0 / 0.3);

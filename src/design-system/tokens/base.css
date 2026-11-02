@@ -271,6 +271,38 @@ a {
   margin: 0;
 }
 
+/* Lucide icons draw a touch lighter than their 2px default, closer to the references. */
+.lucide {
+  flex-shrink: 0;
+  stroke-width: 1.75;
+}
+
+/* The floating surface shared by popovers, menus and submenus. */
+.r-panel {
+  background: var(--r-bg-raised);
+  border: 1px solid var(--r-border-subtle);
+  border-radius: var(--r-radius-lg);
+  box-shadow: var(--r-shadow-lg);
+  color: var(--r-text);
+}
+
+[data-theme='dark'] .r-panel,
+.r-panel[data-theme='dark'] {
+  border-color: var(--r-border);
+}
+
+@keyframes r-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes r-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--r-border-strong) transparent;
