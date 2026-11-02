@@ -26,7 +26,7 @@ How the user likes to work:
 |---|---|
 | `~/Projects/rapi-design-system/` | This project |
 | `~/Projects/dribbble-clean-minimalistic/` | The 66 reference images + 2 mp4 animations from the user's Dribbble collection "Clean Minimalistic". Files are `NN-shot-slug-KK.ext`: `NN` = shot order in the collection, `KK` = image order on the shot page. Non-UI images (studio promo banners, testimonial slides, logo outros) were already removed on purpose. |
-| `handoff/contact-sheets/sheet-1..5.png` | Numbered thumbnails of all 66 images. `index.txt` maps each number to its file. Look at these first; open the originals only for detail. |
+| `handoff/contact-sheets/sheet-1..5.png` | Numbered thumbnails of all 66 images. `index.txt` maps each number to its file. Look at these first; open the originals only for detail. Local only: `handoff/` is git-ignored because the thumbnails are other designers' work. |
 | `handoff/PROMPT.md` | The prompt the user pastes to start this session |
 
 ## 3. Status
