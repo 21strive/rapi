@@ -37,12 +37,11 @@ const imbalance = computed(() => (bidLots.value / Math.max(1, bidLots.value + as
       <span class="is-right">Total</span>
       <span>Depth</span>
     </div>
-    <div class="s-tt-book__side" role="list" aria-label="Asks, highest first">
+    <div class="s-tt-book__side" role="group" aria-label="Asks, highest first">
       <button
         v-for="l in askRows"
         :key="`a${l.price}`"
         type="button"
-        role="listitem"
         class="s-tt-book__row is-ask"
         :aria-label="`Ask ${price(l.price)}, ${lots(l.lots)} lots, ${l.orders} orders. Use this price to buy.`"
         @click="emit('pick', l.price, 'buy')"
@@ -62,12 +61,11 @@ const imbalance = computed(() => (bidLots.value / Math.max(1, bidLots.value + as
       <span class="r-label">Spread</span>
       <span class="s-tt-book__spread-value">{{ price(spread.abs) }} · {{ spread.bps.toFixed(1) }} bps</span>
     </div>
-    <div class="s-tt-book__side" role="list" aria-label="Bids, highest first">
+    <div class="s-tt-book__side" role="group" aria-label="Bids, highest first">
       <button
         v-for="l in bidRows"
         :key="`b${l.price}`"
         type="button"
-        role="listitem"
         class="s-tt-book__row is-bid"
         :aria-label="`Bid ${price(l.price)}, ${lots(l.lots)} lots, ${l.orders} orders. Use this price to sell.`"
         @click="emit('pick', l.price, 'sell')"

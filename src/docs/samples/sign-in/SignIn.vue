@@ -40,7 +40,7 @@ const help = () => show({ title: t.value.toast.help.title, body: t.value.toast.h
 </script>
 
 <template>
-  <div class="s-sign-in" :lang="locale">
+  <main class="s-sign-in" :lang="locale">
     <h1 class="r-sr-only">{{ t.pageTitle }}</h1>
 
     <RCard variant="brand" padding="lg" class="s-sign-in-brand">
@@ -80,7 +80,7 @@ const help = () => show({ title: t.value.toast.help.title, body: t.value.toast.h
         </p>
       </footer>
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>

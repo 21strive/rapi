@@ -105,7 +105,12 @@ const drawerOpen = computed({
 })
 
 function scrollToRow(id: string) {
-  nextTick(() => document.getElementById(`s-issues-row-${id}`)?.scrollIntoView({ block: 'nearest' }))
+  nextTick(() => {
+    const row = document.getElementById(`s-issues-row-${id}`)
+    row?.scrollIntoView({ block: 'nearest' })
+    // Roving focus: when the keyboard is in the list, focus follows the selection.
+    if ((document.activeElement as HTMLElement | null)?.closest?.('.s-issues__list')) row?.focus({ preventScroll: true })
+  })
 }
 
 function move(step: 1 | -1) {
@@ -407,13 +412,7 @@ const viewOptions = [
     </template>
 
     <div class="s-issues" :class="{ 'has-pane': wide && openIssue }">
-      <div
-        class="s-issues__list"
-        role="listbox"
-        tabindex="0"
-        aria-label="Issues grouped by status"
-        :aria-activedescendant="selectedId ? `s-issues-row-${selectedId}` : undefined"
-      >
+      <div class="s-issues__list">
         <div class="s-issues__bar">
           <RSegmented v-model="view" :options="viewOptions" size="sm" label="Issues to show" />
           <span class="r-label">{{ totals.count }} issues · {{ totals.points }} points · by priority</span>
@@ -432,8 +431,9 @@ const viewOptions = [
               v-for="issue in group.issues"
               :id="`s-issues-row-${issue.id}`"
               :key="issue.id"
-              role="option"
-              :aria-selected="issue.id === selectedId"
+              role="button"
+              :tabindex="issue.id === selectedId ? 0 : -1"
+              :aria-current="issue.id === selectedId ? 'true' : undefined"
               class="s-issues__row"
               :class="{ 'is-selected': issue.id === selectedId, 'is-open': issue.id === openId }"
               @click="open(issue)"

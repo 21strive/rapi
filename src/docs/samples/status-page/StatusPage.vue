@@ -133,6 +133,7 @@ function jump(id: string) {
   <div class="s-status-page">
     <header class="s-status-page__top">
       <div class="s-status-page__inner s-status-page__top-row">
+        <h1 class="r-sr-only">21 Strive status</h1>
         <a class="s-status-page__brand" href="#/samples/status-page" aria-label="21 Strive status, home">
           <RLogo brand="21strive" variant="mark" :size="16" label="" />
           <span class="s-status-page__brand-name">21 Strive</span>

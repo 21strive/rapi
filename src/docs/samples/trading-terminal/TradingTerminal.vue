@@ -331,6 +331,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
 <template>
   <SampleShell product="Markets" padding="none">
+    <h1 class="r-sr-only">Markets terminal</h1>
     <template #strip>
       <span class="s-tt-strip-ctx">/ BNX · Equities</span>
     </template>

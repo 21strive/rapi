@@ -501,7 +501,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  color: var(--r-text-disabled);
+  color: var(--r-text-tertiary);
   font-family: var(--r-font-mono);
   font-size: var(--r-text-3xs);
   line-height: 1;

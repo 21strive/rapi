@@ -202,7 +202,7 @@ const highlighted = computed(() => {
         </thead>
         <tbody>
           <tr v-for="c in items" :key="c.id">
-            <th scope="row">{{ c.label ?? c.id }}</th>
+            <th scope="row">{{ c.label || c.id }}</th>
             <td>{{ c.word }}</td>
             <td>{{ String(Math.round(c.bearing)).padStart(3, '0') }}°</td>
             <td>{{ c.range }}{{ c.beyond ? ' (beyond scope)' : '' }}</td>

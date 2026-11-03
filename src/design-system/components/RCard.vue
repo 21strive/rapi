@@ -27,9 +27,10 @@ const props = withDefaults(
     interactive?: boolean
     as?: string
     /** Heading element for the title. */
+    /** Heading level of the title. h2 suits a card on an app page under its h1; use h3 inside a section. */
     titleAs?: 'h2' | 'h3' | 'h4' | 'p'
   }>(),
-  { padding: 'md', variant: 'surface', as: 'div', titleAs: 'h3', supergraphic: true },
+  { padding: 'md', variant: 'surface', as: 'div', titleAs: 'h2', supergraphic: true },
 )
 
 const slots = useSlots()

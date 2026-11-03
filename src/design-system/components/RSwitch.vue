@@ -31,7 +31,13 @@ const buttonAttrs = computed(() => {
 </script>
 
 <template>
-  <label class="r-switch" :class="[`r-switch--${size}`, { 'is-on': model, 'is-disabled': disabled }]" v-bind="rootAttrs">
+  <!-- aria-disabled marks the label text as part of an inactive control (exempt from contrast). -->
+  <label
+    class="r-switch"
+    :class="[`r-switch--${size}`, { 'is-on': model, 'is-disabled': disabled }]"
+    :aria-disabled="disabled || undefined"
+    v-bind="rootAttrs"
+  >
     <button
       :id="switchId"
       type="button"

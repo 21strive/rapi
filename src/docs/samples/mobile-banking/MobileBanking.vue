@@ -92,7 +92,8 @@ function soon(label: string) {
 </script>
 
 <template>
-  <div class="s-mb">
+  <main class="s-mb">
+    <h1 class="r-sr-only">Mobile banking: home, transfer review and receipt</h1>
     <div class="s-mb__row">
       <Phone index="01" title="Home">
         <HomeScreen :accounts="accounts" :activity="activity" @action="soon" />
@@ -128,7 +129,7 @@ function soon(label: string) {
         </template>
       </Phone>
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>

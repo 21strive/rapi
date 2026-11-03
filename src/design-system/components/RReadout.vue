@@ -76,11 +76,13 @@ const cells = (value: string) => Array.from(value, (ch) => ({ ch, digit: /\d/.te
     </div>
     <div class="r-readout__figure">
       <span class="r-readout__value">
+        <!-- The ghost is drawn with generated content, so it is decoration, not text: no screen
+             reader reads it and contrast checkers do not mistake it for faint copy. -->
         <span v-if="mask" class="r-readout__ghost" aria-hidden="true">
           <template v-if="cellDigits">
-            <span v-for="(c, i) in cells(mask)" :key="i" :class="{ 'r-readout__cell': c.digit }">{{ c.ch }}</span>
+            <span v-for="(c, i) in cells(mask)" :key="i" :class="{ 'r-readout__cell': c.digit }" :data-ch="c.ch" />
           </template>
-          <template v-else>{{ mask }}</template>
+          <span v-else :data-ch="mask" />
         </span>
         <span v-if="cellDigits" class="r-readout__digits">
           <span class="r-sr-only">{{ text }}</span>
@@ -241,6 +243,10 @@ const cells = (value: string) => Array.from(value, (ch) => ({ ch, digit: /\d/.te
 .r-readout__ghost {
   opacity: 0.09;
   user-select: none;
+}
+
+.r-readout__ghost [data-ch]::before {
+  content: attr(data-ch);
 }
 
 .r-readout__unit {

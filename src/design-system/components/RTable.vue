@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-vue-next'
 import RCheckbox from './RCheckbox.vue'
 import type { TableColumn, TableSort } from '../types'
@@ -45,6 +45,23 @@ defineSlots<{
 }>()
 
 const instance = getCurrentInstance()
+
+// A table that scrolls (a max height, or a narrow screen) becomes a focusable, named region so
+// keyboard users can scroll it too. Clickable rows already take focus, so they need no extra stop.
+const root = ref<HTMLElement | null>(null)
+const scrollable = ref(false)
+function measure() {
+  const el = root.value
+  if (el) scrollable.value = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+}
+let observer: ResizeObserver | null = null
+onMounted(() => {
+  measure()
+  observer = new ResizeObserver(measure)
+  if (root.value) observer.observe(root.value)
+})
+onBeforeUnmount(() => observer?.disconnect())
+watch(() => props.rows.length, () => requestAnimationFrame(measure))
 const clickable = computed(() => !!instance?.vnode.props?.onRowClick)
 
 const keyOf = (row: Row): Key => (typeof props.rowKey === 'function' ? props.rowKey(row) : row[props.rowKey])
@@ -102,9 +119,13 @@ function toggleRow(row: Row) {
 
 <template>
   <div
+    ref="root"
     class="r-table"
     :class="[`r-table--${density}`, { 'r-table--sticky': stickyHeader, 'r-table--clickable': clickable }]"
     :style="maxHeight ? { maxHeight } : undefined"
+    :tabindex="scrollable && !clickable ? 0 : undefined"
+    :role="scrollable && !clickable ? 'region' : undefined"
+    :aria-label="scrollable && !clickable ? caption ?? 'Table' : undefined"
   >
     <table class="r-table__table">
       <caption v-if="caption" class="r-sr-only">{{ caption }}</caption>

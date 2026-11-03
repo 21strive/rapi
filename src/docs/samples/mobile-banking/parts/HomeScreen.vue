@@ -49,7 +49,7 @@ const actions = [
 
 <template>
   <div class="s-mb-home">
-    <header class="s-mb-appbar">
+    <div class="s-mb-appbar">
       <RAvatar :name="user.name" size="md" decorative />
       <div class="s-mb-appbar__title">
         <p class="r-label">Good morning</p>
@@ -57,7 +57,7 @@ const actions = [
       </div>
       <RIconButton label="Scan a QR code" variant="ghost" @click="emit('action', 'Scan')"><ScanLine /></RIconButton>
       <RIconButton label="Notifications, 2 new" variant="ghost" dot @click="emit('action', 'Notifications')"><Bell /></RIconButton>
-    </header>
+    </div>
 
     <section class="s-mb-balance" aria-label="Balance">
       <RSegmented v-model="accountId" :options="accounts.map((a) => ({ label: a.label, value: a.id }))" size="sm" block label="Account" />

@@ -30,11 +30,11 @@ const specs = computed<SpecItem[]>(() => [
 
 <template>
   <div class="s-mb-review">
-    <header class="s-mb-appbar">
+    <div class="s-mb-appbar">
       <RIconButton label="Back to amount" variant="ghost" @click="emit('back')"><ChevronLeft /></RIconButton>
       <p class="s-mb-appbar__title">Review transfer</p>
       <span class="r-label s-mb-appbar__step">Step 2 of 3</span>
-    </header>
+    </div>
 
     <section class="s-mb-amount" aria-label="Amount">
       <RStat label="You send" :value="transfer.amount" prefix="Rp" locale="id-ID" size="lg" />

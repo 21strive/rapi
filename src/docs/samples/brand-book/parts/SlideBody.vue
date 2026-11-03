@@ -230,20 +230,17 @@ const ramp = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
     </div>
     <dl class="s-bb-type-spec">
       <div style="top: 0">
-        <span class="s-bb-type__i">01</span>
-        <dt>Small header</dt>
+        <dt><span class="s-bb-type__i">01</span>Small header</dt>
         <dd>Geist Mono Bold</dd>
         <dd class="s-bb-type-spec__rule">All caps · 10% letter spacing</dd>
       </div>
       <div style="top: 150px">
-        <span class="s-bb-type__i">02</span>
-        <dt>Big header</dt>
+        <dt><span class="s-bb-type__i">02</span>Big header</dt>
         <dd>Geist Semi Bold</dd>
         <dd class="s-bb-type-spec__rule">−4% letter spacing</dd>
       </div>
       <div style="top: 336px">
-        <span class="s-bb-type__i">03</span>
-        <dt>Body text</dt>
+        <dt><span class="s-bb-type__i">03</span>Body text</dt>
         <dd>Geist Regular</dd>
         <dd class="s-bb-type-spec__rule">1.5 line spacing</dd>
       </div>
@@ -780,6 +777,11 @@ const ramp = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
 }
 .s-bb-block__meta {
   opacity: 0.78;
+}
+.s-bb-block--peri .s-bb-block__meta {
+  opacity: 1;
+}
+.s-bb-block__meta {
   font-family: var(--r-font-mono);
   font-size: 9.5px;
   letter-spacing: 0.04em;

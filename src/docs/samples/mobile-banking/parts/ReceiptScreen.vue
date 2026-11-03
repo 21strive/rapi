@@ -27,11 +27,11 @@ const specs = computed<SpecItem[]>(() => [
 
 <template>
   <div class="s-mb-receipt">
-    <header class="s-mb-appbar">
+    <div class="s-mb-appbar">
       <RIconButton label="Close receipt" variant="ghost" @click="emit('close')"><X /></RIconButton>
       <p class="s-mb-appbar__title">Receipt</p>
       <RIconButton label="Share receipt" variant="ghost" @click="emit('share')"><Share2 /></RIconButton>
-    </header>
+    </div>
 
     <section class="s-mb-done" aria-live="polite">
       <span class="s-mb-done__mark" aria-hidden="true"><Check /></span>
