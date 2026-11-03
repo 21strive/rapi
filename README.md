@@ -1,4 +1,9 @@
-# Rapi
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/rapi-logo-white.svg">
+    <img src=".github/assets/rapi-logo-black.svg" alt="Rapi" height="64">
+  </picture>
+</h1>
 
 A quiet, data-first design system for Vue 3. *Rapi* is Indonesian for tidy.
 
