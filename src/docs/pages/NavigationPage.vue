@@ -204,8 +204,8 @@ const paginationProps: PropRow[] = [
         <Demo title="Solid" note="The ink fill says where you are.">
           <div class="nav-demo-sidebar">
             <div class="nav-demo-sidebar__brand">
-              <span class="nav-demo-sidebar__logo" aria-hidden="true">F</span>
-              Finanzen
+              <span class="nav-demo-sidebar__logo" aria-hidden="true">L</span>
+              Ledger
             </div>
             <p class="nav-demo-sidebar__group">Main menu</p>
             <RNavItem
@@ -240,8 +240,8 @@ const paginationProps: PropRow[] = [
         <Demo title="Soft, with counts" note="A grey row and an ink rule. Quieter, for apps where the content does the talking.">
           <div class="nav-demo-sidebar">
             <div class="nav-demo-sidebar__brand">
-              <span class="nav-demo-sidebar__logo nav-demo-sidebar__logo--soft" aria-hidden="true">O</span>
-              Ofative
+              <span class="nav-demo-sidebar__logo nav-demo-sidebar__logo--soft" aria-hidden="true">S</span>
+              Schedule
             </div>
             <RNavItem
               v-for="item in calendarMenu"

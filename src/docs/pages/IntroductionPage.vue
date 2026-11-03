@@ -144,7 +144,7 @@ const routes = [
 const changes = [
   {
     topic: 'Shape',
-    before: 'Soft corners from the Dribbble references: 20px cards, 10px controls, pills, wide faint shadows.',
+    before: 'Soft corners: 20px cards, 10px controls, pills, wide faint shadows.',
     after: 'Square everywhere. Circles only for points and states. Hairline rules instead of shadows.',
   },
   {
@@ -401,7 +401,7 @@ const changes = [
     <DocSection
       id="changes"
       title="What changed from 0.1"
-      description="Rapi 0.1 was a soft, rounded system distilled from Dribbble shots. In 0.2 it became the language of 21 Strive, and almost every surface changed with it."
+      description="Rapi 0.1 was a soft, rounded system. In 0.2 it became the language of 21 Strive, and almost every surface changed with it."
     >
       <dl class="intro-changes">
         <div v-for="c in changes" :key="c.topic" class="intro-change">
@@ -413,8 +413,7 @@ const changes = [
       <p class="doc-p">
         The 0.1 token names are gone. Code written for 0.1 moves over with a short list: radius tokens become
         <code class="doc-c">--r-radius-surface</code> and <code class="doc-c">--r-radius-control</code>, the violet and
-        flame tones become brand and signal, and the brand ramp becomes the cobalt ramp. The References page credits
-        the shots that started it all.
+        flame tones become brand and signal, and the brand ramp becomes the cobalt ramp.
       </p>
     </DocSection>
 

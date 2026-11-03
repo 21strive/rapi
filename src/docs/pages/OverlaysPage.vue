@@ -62,7 +62,7 @@ import type { PropRow } from '../types'
 
 const mod = isMac ? '⌘' : 'Ctrl+'
 
-/* ── Popover: a Finanzen-style filter ─────────────────────────────────────── */
+/* ── Popover: a filter panel ───────────────────────────────────────────────── */
 interface Filters {
   from: string
   to: string
@@ -351,7 +351,7 @@ const roles: SelectOption[] = [
   { label: 'Viewer — can read and comment', value: 'viewer' },
 ]
 const emailError = computed(() =>
-  inviteTried.value && !/^\S+@\S+\.\S+$/.test(invite.email) ? 'Enter a work email, like kim@finanzen.co.' : '',
+  inviteTried.value && !/^\S+@\S+\.\S+$/.test(invite.email) ? 'Enter a work email, like kim@example.com.' : '',
 )
 function openInvite() {
   inviteTried.value = false
@@ -965,7 +965,7 @@ const tourProps: PropRow[] = [
             v-model="invite.email"
             label="Work email"
             type="email"
-            placeholder="kim@finanzen.co"
+            placeholder="kim@example.com"
             autocomplete="email"
             :error="emailError"
           />

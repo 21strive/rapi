@@ -1,0 +1,12 @@
+{
+  // rapi.21strive.com: the Rapi docs, served as static assets by a Cloudflare Worker.
+  // Build first (npm run build), then deploy with ./scripts/deploy.sh or `npx wrangler@4 deploy`.
+  // The custom domain needs the 21strive.com zone in the same Cloudflare account.
+  "name": "rapi-docs",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  },
+  "routes": [{ "pattern": "rapi.21strive.com", "custom_domain": true }],
+  "workers_dev": true
+}

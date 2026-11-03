@@ -7,12 +7,14 @@ import Demo from '../components/Demo.vue'
 import CodeBlock from '../components/CodeBlock.vue'
 import DoDont from '../components/DoDont.vue'
 
-/* ── The four marks ─────────────────────────────────────────────────────────── */
+/* ── The six marks ─────────────────────────────────────────────────────────── */
 const marks = [
   { brand: '21strive', variant: 'lockup', name: '21 Strive lockup', use: 'The company signature: documents, sites, the corner of a product.' },
   { brand: '21strive', variant: 'mark', name: '21 Strive mark', use: 'Favicons, app icons, the start of a strip, anywhere the name is already close.' },
   { brand: 'rapi', variant: 'lockup', name: 'Rapi lockup', use: 'The design language: these docs, the library, talks about the system.' },
   { brand: 'rapi', variant: 'mark', name: 'Rapi mark', use: 'The docs favicon and small corners where Rapi is already written.' },
+  { brand: 'pakem', variant: 'lockup', name: 'Pakem lockup', use: 'The backend standard: its docs site and anything that speaks for it.' },
+  { brand: 'pakem', variant: 'mark', name: 'Pakem mark', use: 'The Pakem favicon. Its p is the r closed into a bowl and cut at the family diagonal.' },
 ] as const
 const grounds = [
   { id: 'light', label: 'Light' },
@@ -98,7 +100,7 @@ const misuse = [
   <DocPage eyebrow="Foundations" title="Brand">
     <template #lead>
       The 21 Strive logogram is a 2 and a 1 cut from one block. Rapi, the design language, takes its r from the same
-      geometry. This page shows the four marks, how they are built, how they become supergraphics, and what not to do
+      geometry. This page shows the six marks, how they are built, how they become supergraphics, and what not to do
       with them.
     </template>
 
@@ -419,7 +421,7 @@ const misuse = [
 </template>
 
 <style>
-/* ── The four marks on three grounds ─────────────────────────────────────── */
+/* ── The six marks on three grounds ─────────────────────────────────────── */
 .brand-marks {
   border-top: 1px solid var(--r-border-strong);
 }

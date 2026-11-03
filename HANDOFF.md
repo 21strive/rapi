@@ -1,8 +1,8 @@
 # Rapi — handoff
 
 Read this before changing anything. `DESIGN.md` holds the language itself; this file holds the
-brief, the decisions behind it and how the work is organised. The 0.1 handoff (the Dribbble-based
-first version) is in git history at commit `10c4580`.
+brief, the decisions behind it and how the work is organised. The 0.1 handoff is in git history at
+commit `10c4580`.
 
 ## 1. The brief
 

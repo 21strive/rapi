@@ -3,5 +3,8 @@ dist
 *.local
 .DS_Store
 
-# Session hand-off material (the prompt and thumbnails of third-party Dribbble shots). Kept locally, never committed.
+# Local session hand-off material. Kept locally, never committed.
 handoff/
+
+# Wrangler build cache
+.wrangler

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RAPI_LOCKUP, RAPI_MARK, STRIVE_MARK } from '../brand/marks'
+import { PAKEM_LOCKUP, PAKEM_MARK, RAPI_LOCKUP, RAPI_MARK, STRIVE_MARK } from '../brand/marks'
 
 const props = withDefaults(
   defineProps<{
-    /** Which family member. Rapi is the design language; 21 Strive is the company. */
-    brand?: 'rapi' | '21strive'
+    /** Which family member. 21 Strive is the company; Rapi the design language; Pakem the backend standard. */
+    brand?: 'rapi' | 'pakem' | '21strive'
     /** `lockup` adds the word; `mark` is the logogram alone. */
     variant?: 'lockup' | 'mark'
     /** Height of the logogram in px. The word in a lockup is sized from it. */
@@ -16,10 +16,14 @@ const props = withDefaults(
   { brand: 'rapi', variant: 'lockup', size: 24 },
 )
 
-const name = computed(() => props.label ?? (props.brand === 'rapi' ? 'Rapi' : '21 Strive'))
+const name = computed(() => props.label ?? (props.brand === 'rapi' ? 'Rapi' : props.brand === 'pakem' ? 'Pakem' : '21 Strive'))
 
 const box = computed(() => {
   if (props.brand === '21strive') return { w: STRIVE_MARK.width, h: STRIVE_MARK.height }
+  if (props.brand === 'pakem')
+    return props.variant === 'mark'
+      ? { w: PAKEM_MARK.width, h: PAKEM_MARK.height }
+      : { w: PAKEM_LOCKUP.width, h: PAKEM_LOCKUP.height }
   return props.variant === 'mark'
     ? { w: RAPI_MARK.width, h: RAPI_MARK.height }
     : { w: RAPI_LOCKUP.width, h: RAPI_LOCKUP.height }
@@ -48,6 +52,9 @@ const width = computed(() => (props.size * box.value.w) / box.value.h)
       <template v-if="brand === '21strive'">
         <path :d="STRIVE_MARK.two" />
         <path :d="STRIVE_MARK.one" />
+      </template>
+      <template v-else-if="brand === 'pakem'">
+        <path :d="variant === 'mark' ? PAKEM_MARK.d : PAKEM_LOCKUP.d" />
       </template>
       <path v-else-if="variant === 'mark'" :d="RAPI_MARK.d" />
       <path v-else :d="RAPI_LOCKUP.d" />
