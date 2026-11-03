@@ -19,6 +19,9 @@ import {
   Wallet,
 } from 'lucide-vue-next'
 import { RBadge, RNavItem, RPagination, RTabs, RTooltip, formatNumber } from '@/design-system'
+import BreadcrumbSection from '../sections/BreadcrumbSection.vue'
+import StepsSection from '../sections/StepsSection.vue'
+import RuleSection from '../sections/RuleSection.vue'
 import DocPage from '../components/DocPage.vue'
 import DocSection from '../components/DocSection.vue'
 import Demo from '../components/Demo.vue'
@@ -322,6 +325,10 @@ const paginationProps: PropRow[] = [
       />
     </DocSection>
 
+    <BreadcrumbSection />
+
+    <StepsSection />
+
     <DocSection
       id="pagination"
       title="Pagination"
@@ -350,6 +357,8 @@ const paginationProps: PropRow[] = [
         dont="Don't paginate short lists. Under a hundred rows, a single scrolling table is easier to scan."
       />
     </DocSection>
+
+    <RuleSection />
   </DocPage>
 </template>
 

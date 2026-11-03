@@ -36,6 +36,11 @@ import {
   type TableSort,
   type Tone,
 } from '@/design-system'
+import ReadoutSection from '../sections/ReadoutSection.vue'
+import StatusSection from '../sections/StatusSection.vue'
+import SpecListSection from '../sections/SpecListSection.vue'
+import TimelineSection from '../sections/TimelineSection.vue'
+import CodeBlockSection from '../sections/CodeBlockSection.vue'
 import DocPage from '../components/DocPage.vue'
 import DocSection from '../components/DocSection.vue'
 import Demo from '../components/Demo.vue'
@@ -616,6 +621,8 @@ const kbdProps = [
       </DoDont>
     </DocSection>
 
+    <ReadoutSection />
+
     <!-- ── Trend ──────────────────────────────────────────────────────── -->
     <DocSection
       id="trend"
@@ -687,6 +694,8 @@ const kbdProps = [
         dont="Rely on colour alone. Some people can't tell the tones apart, so Done and Late must also read differently."
       />
     </DocSection>
+
+    <StatusSection />
 
     <!-- ── Avatar ─────────────────────────────────────────────────────── -->
     <DocSection
@@ -875,6 +884,12 @@ const kbdProps = [
         dont="Truncate the first column to fit everything on screen. It's the column people scan; let the others scroll."
       />
     </DocSection>
+
+    <SpecListSection />
+
+    <TimelineSection />
+
+    <CodeBlockSection />
 
     <!-- ── Kbd ────────────────────────────────────────────────────────── -->
     <DocSection

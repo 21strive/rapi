@@ -120,7 +120,7 @@ function select(option: RadioOption) {
   width: 16px;
   height: 16px;
   margin-top: 2px;
-  border: 1px solid var(--r-border-strong);
+  border: 1px solid var(--r-border-control);
   border-radius: var(--r-radius-round);
   background: var(--r-bg-surface);
   transition:
@@ -144,7 +144,7 @@ function select(option: RadioOption) {
 }
 
 .r-radio:hover:not(.is-disabled) .r-radio__control {
-  border-color: var(--r-text-tertiary);
+  border-color: var(--r-text-secondary);
 }
 
 .r-radio.is-checked .r-radio__control,

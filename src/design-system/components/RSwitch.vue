@@ -85,7 +85,7 @@ const buttonAttrs = computed(() => {
   height: var(--r-switch-h);
   margin-top: calc((var(--r-switch-line) - var(--r-switch-h)) / 2);
   padding: 0;
-  border: 1px solid var(--r-text-tertiary);
+  border: 1px solid var(--r-border-control);
   border-radius: var(--r-radius-control);
   background: var(--r-bg-surface);
   cursor: inherit;

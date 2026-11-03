@@ -88,7 +88,7 @@ defineExpose({ focus: () => textarea.value?.focus(), textarea })
   min-height: var(--r-control-md);
   margin: 0;
   padding: 6px 10px;
-  border: 1px solid var(--r-border-strong);
+  border: 1px solid var(--r-border-control);
   border-radius: var(--r-radius-control);
   outline: none;
   background: var(--r-bg-surface);
@@ -110,7 +110,7 @@ defineExpose({ focus: () => textarea.value?.focus(), textarea })
 }
 
 .r-textarea:hover:not(.is-disabled, .is-readonly, :focus) {
-  border-color: var(--r-text-tertiary);
+  border-color: var(--r-text-secondary);
 }
 
 .r-textarea:focus,

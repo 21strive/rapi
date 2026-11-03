@@ -2,6 +2,10 @@
 import { computed, ref } from 'vue'
 import { CalendarDays, LayoutGrid, Mail, Monitor, Moon, Rows3, Search, Sun } from 'lucide-vue-next'
 import { RCheckbox, RInput, RKbd, RSegmented, RSelect, RSwitch, type SelectOption } from '@/design-system'
+import TextareaSection from '../sections/TextareaSection.vue'
+import RadioGroupSection from '../sections/RadioGroupSection.vue'
+import SliderSection from '../sections/SliderSection.vue'
+import KnobSection from '../sections/KnobSection.vue'
 import DocPage from '../components/DocPage.vue'
 import DocSection from '../components/DocSection.vue'
 import Demo from '../components/Demo.vue'
@@ -364,6 +368,8 @@ const segmentedProps = [
       </DoDont>
     </DocSection>
 
+    <TextareaSection />
+
     <!-- ── Select ─────────────────────────────────────────────────────── -->
     <DocSection
       id="select"
@@ -470,6 +476,8 @@ const segmentedProps = [
       />
     </DocSection>
 
+    <RadioGroupSection />
+
     <!-- ── Switch ─────────────────────────────────────────────────────── -->
     <DocSection
       id="switch"
@@ -563,6 +571,10 @@ const segmentedProps = [
         </template>
       </DoDont>
     </DocSection>
+
+    <SliderSection />
+
+    <KnobSection />
   </DocPage>
 </template>
 

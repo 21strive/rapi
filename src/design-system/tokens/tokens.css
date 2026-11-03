@@ -229,6 +229,9 @@
   --r-border: var(--r-neutral-150);
   --r-border-strong: var(--r-neutral-300);
   --r-border-inverse: var(--r-neutral-900);
+  /* The outline of a field, checkbox, radio or switch: 3.4:1 on white, so the control can be
+     found without its label (WCAG 1.4.11). Panels keep the quieter --r-border. */
+  --r-border-control: #8a8a8a;
 
   --r-text: var(--r-neutral-900);
   --r-text-secondary: var(--r-neutral-600);
@@ -383,6 +386,7 @@
   --r-border: #2a2a2a;
   --r-border-strong: #424242;
   --r-border-inverse: #ededed;
+  --r-border-control: #707070; /* 3.7:1 on the surface, 3.2:1 on hover */
 
   --r-text: #ededed;
   --r-text-secondary: #b4b4b4;
@@ -430,6 +434,9 @@
   --r-danger-border: color-mix(in srgb, var(--r-red-500) 40%, transparent);
 
   --r-focus: var(--r-cobalt-400);
+  /* Re-declared so a dark island resolves its own surface and focus colours. */
+  --r-focus-ring: 0 0 0 1px var(--r-bg-surface), 0 0 0 3px var(--r-focus);
+  --r-chart-surface: var(--r-bg-surface);
 
   /* Validated against #151515: adjacent CVD ΔE ≥ 9.2, normal-vision ΔE ≥ 20.6, all ≥ 3:1 */
   --r-chart-1: var(--r-cobalt-500);

@@ -202,7 +202,7 @@ defineExpose({ focus: () => input.value?.focus(), input })
   display: flex;
   align-items: center;
   height: var(--r-input-h);
-  border: 1px solid var(--r-border-strong);
+  border: 1px solid var(--r-border-control);
   border-radius: var(--r-radius-control);
   background: var(--r-bg-surface);
   color: var(--r-text);
@@ -214,7 +214,7 @@ defineExpose({ focus: () => input.value?.focus(), input })
 }
 
 .r-input:hover:not(.is-disabled, .is-readonly, :focus-within) {
-  border-color: var(--r-text-tertiary);
+  border-color: var(--r-text-secondary);
 }
 
 .r-input:focus-within {
@@ -235,12 +235,12 @@ defineExpose({ focus: () => input.value?.focus(), input })
 /* Filled: a muted field with only a bottom rule, the way Carbon draws its fields. */
 .r-input--filled {
   border-color: transparent;
-  border-bottom-color: var(--r-border-strong);
+  border-bottom-color: var(--r-border-control);
   background: var(--r-bg-muted);
 }
 .r-input--filled:hover:not(.is-disabled, .is-readonly, :focus-within) {
   border-color: transparent;
-  border-bottom-color: var(--r-text-tertiary);
+  border-bottom-color: var(--r-text-secondary);
   background: var(--r-bg-hover);
 }
 

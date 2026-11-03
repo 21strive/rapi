@@ -112,7 +112,7 @@ const checked = computed(() =>
   width: var(--r-checkbox-box);
   height: var(--r-checkbox-box);
   margin-top: calc((var(--r-checkbox-line) - var(--r-checkbox-box)) / 2);
-  border: 1px solid var(--r-text-tertiary);
+  border: 1px solid var(--r-border-control);
   border-radius: var(--r-radius-mark);
   background: var(--r-bg-surface);
   transition:
