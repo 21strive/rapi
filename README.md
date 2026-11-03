@@ -43,11 +43,12 @@ ssh -L 5180:localhost:5180 <user>@<host>
 
 The docs are a static build served by a Cloudflare Worker with static assets (`wrangler.jsonc`). The
 custom domain `rapi.21strive.com` is attached on deploy, which needs the `21strive.com` zone in the
-same Cloudflare account.
+same Cloudflare account. `wrangler.jsonc` pins that account (21 Strive), so the login only needs access to it.
 
 ```bash
-# once: log in as 21 Strive, in its own config dir so other logins on the machine stay put
-XDG_CONFIG_HOME=$HOME/.config/21strive npx wrangler@4 login
+# once: log in to Cloudflare in its own config dir so other logins on the machine stay put;
+# --device prints a link to approve on any device (works on a headless machine)
+XDG_CONFIG_HOME=$HOME/.config/21strive npx wrangler@4 login --device
 
 ./scripts/deploy.sh            # npm run build + wrangler deploy
 ./scripts/deploy.sh --dry-run  # check without uploading

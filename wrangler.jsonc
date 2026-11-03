@@ -8,5 +8,9 @@
     "directory": "./dist"
   },
   "routes": [{ "pattern": "rapi.21strive.com", "custom_domain": true }],
-  "workers_dev": true
+  // Only the custom domain serves the site: no workers.dev URL, no preview URLs.
+  "workers_dev": false,
+  "preview_urls": false,
+  // The 21 Strive Cloudflare account, pinned so a login that sees several accounts never deploys elsewhere.
+  "account_id": "3575e13cd5c74a5f07b96789b7c400a5"
 }
