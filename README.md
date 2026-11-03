@@ -13,7 +13,7 @@ It starts from the 21 Strive brand book (the logogram, cobalt `#1B3AAB` and `#7E
 - 1px rules carry the structure; only floating things get a (short) shadow.
 - Geist for reading, Geist Mono in capitals for labels, Geist Pixel for the occasional readout.
 - Ink and greys do most of the work; cobalt marks the brand and the selection; International Orange (`#FF4F00`) marks what is live or now.
-- 42 components, 15 charts drawn as plain SVG from the tokens, light and dark themes, theme islands.
+- 44 components, 15 charts drawn as plain SVG from the tokens, light and dark themes, theme islands.
 - 36 sample screens across banking, security and defense, aerospace and operations, instruments, developer platforms, workspace tools and brand work, plus the three original examples restyled.
 - No runtime dependencies beyond Vue and lucide-vue-next; no chart library.
 
