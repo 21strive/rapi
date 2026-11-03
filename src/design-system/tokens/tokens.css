@@ -1,142 +1,121 @@
 /*
- * Rapi design tokens
+ * Rapi design tokens · the design language of 21 Strive
  *
  * Two layers:
- *   1. Primitives  — raw ramps (--r-blue-500). Never used directly by components.
+ *   1. Primitives  — raw ramps (--r-cobalt-700). Components never read them.
  *   2. Semantic    — roles (--r-bg-surface, --r-text-secondary). Components only read these.
  *
- * Theming happens by re-pointing semantic tokens:
- *   [data-theme='dark']  → dark surfaces (works on <html> or on any island element)
- *   [data-brand='violet' | 'flame'] → swaps the brand ramp everywhere
+ * Theming re-points the semantic layer:
+ *   [data-theme='dark']  → dark surfaces, on <html> or on any island element
+ *
+ * Every ramp is built in OKLCH on one lightness scale, so step 600 of any hue sits at the same
+ * perceived lightness. The 21 Strive colours are exact stops: cobalt-700 #1B3AAB,
+ * cobalt-400 #7E94E2, neutral-900 #151515. International Orange (#FF4F00) is the signal colour.
  */
 
 :root {
-  /* ── Neutral · cool grey. 500 is tuned to pass AA on white (5.3:1), the canvas (4.9:1)
-        and hover backgrounds (4.6:1), because tertiary text sits on all three ───────── */
+  /* ── Neutral · pure grey, no tint. 900 is the 21 Strive black. ─────────────────────── */
   --r-neutral-0: #ffffff;
-  --r-neutral-25: #fbfbfc;
-  --r-neutral-50: #f6f7f9;
-  --r-neutral-100: #eef0f3;
-  --r-neutral-200: #e3e6eb;
-  --r-neutral-300: #cdd2da;
-  --r-neutral-400: #9aa1ad;
-  --r-neutral-500: #646c7a;
-  --r-neutral-600: #535b69;
-  --r-neutral-700: #3d4450;
-  --r-neutral-800: #272c35;
-  --r-neutral-850: #1d2129;
-  --r-neutral-900: #15181e;
-  --r-neutral-950: #0c0e12;
+  --r-neutral-25: #fafafa;
+  --r-neutral-50: #f4f4f4;
+  --r-neutral-100: #ededed;
+  --r-neutral-150: #e5e5e5;
+  --r-neutral-200: #d9d9d9;
+  --r-neutral-300: #c2c2c2;
+  --r-neutral-400: #a3a3a3;
+  --r-neutral-500: #6b6b6b; /* 5.3:1 on white, 4.9:1 on neutral-50, 4.6:1 on neutral-100 */
+  --r-neutral-600: #525252;
+  --r-neutral-700: #3d3d3d;
+  --r-neutral-800: #2a2a2a;
+  --r-neutral-850: #1f1f1f;
+  --r-neutral-900: #151515;
+  --r-neutral-950: #0e0e0e;
 
-  /* ── Blue · sampled from Coinex, Finanzen, Untitled UI (≈ #3860F8) ─────── */
-  --r-blue-50: #eef3ff;
-  --r-blue-100: #dfe8ff;
-  --r-blue-200: #c3d3ff;
-  --r-blue-300: #9ab4ff;
-  --r-blue-400: #6b8cfb;
-  --r-blue-500: #3f66f6;
-  --r-blue-600: #2c50e6;
-  --r-blue-700: #243fc4;
-  --r-blue-800: #23379c;
-  --r-blue-900: #22327b;
-  --r-blue-950: #161d48;
+  /* ── Cobalt · 21 Strive primary #1B3AAB (700) and secondary #7E94E2 (400) ────────── */
+  --r-cobalt-50: #f3f7ff;
+  --r-cobalt-100: #e5edff;
+  --r-cobalt-200: #c9d9fe;
+  --r-cobalt-300: #a4befe;
+  --r-cobalt-400: #7e94e2;
+  --r-cobalt-500: #4970eb;
+  --r-cobalt-600: #3254cc;
+  --r-cobalt-700: #1b3aab;
+  --r-cobalt-800: #172c86;
+  --r-cobalt-900: #102168;
+  --r-cobalt-950: #081547;
 
-  /* ── Violet · Chainx, Trenning, Finalytic filters (≈ #5838F8 / #9050F8) ── */
-  --r-violet-50: #f4f1ff;
-  --r-violet-100: #ebe5ff;
-  --r-violet-200: #d8ceff;
-  --r-violet-300: #bcaaff;
-  --r-violet-400: #9c80fd;
-  --r-violet-500: #7d59f7;
-  --r-violet-600: #6b3ded;
-  --r-violet-700: #5b2fd3;
-  --r-violet-800: #4b29ab;
-  --r-violet-900: #3e2589;
-  --r-violet-950: #25155c;
+  /* ── Signal · International Orange, the aerospace safety colour. Markers, live, now. ── */
+  --r-signal-50: #fff4f1;
+  --r-signal-100: #ffe7e0;
+  --r-signal-200: #feccbc;
+  --r-signal-300: #fda68b;
+  --r-signal-400: #fe8863;
+  --r-signal-500: #ff4f00;
+  --r-signal-600: #d44303;
+  --r-signal-700: #aa3607;
+  --r-signal-800: #862803;
+  --r-signal-900: #691c00;
+  --r-signal-950: #471101;
 
-  /* ── Flame · the banking "Statistics" card (≈ #F84820) ─────────────────── */
-  --r-flame-50: #fff3ee;
-  --r-flame-100: #ffe3d6;
-  --r-flame-200: #ffc4ab;
-  --r-flame-300: #ff9b75;
-  --r-flame-400: #ff7144;
-  --r-flame-500: #f9501f;
-  --r-flame-600: #e43a12;
-  --r-flame-700: #bd2c0f;
-  --r-flame-800: #962613;
-  --r-flame-900: #792313;
-  --r-flame-950: #420e06;
+  /* ── Green · good ─────────────────────────────────────────────────────────────────── */
+  --r-green-50: #eefbf0;
+  --r-green-100: #daf5df;
+  --r-green-200: #b6e8bf;
+  --r-green-300: #87d497;
+  --r-green-400: #52bd6f;
+  --r-green-500: #0fa44d;
+  --r-green-600: #0d873e;
+  --r-green-700: #046c30;
+  --r-green-800: #015423;
+  --r-green-900: #003f18;
+  --r-green-950: #01290e;
 
-  /* ── Green · positive deltas, "Done" (≈ #08B868) ───────────────────────── */
-  --r-green-50: #ecfdf3;
-  --r-green-100: #d2f8e3;
-  --r-green-200: #a8efcb;
-  --r-green-300: #6fdfab;
-  --r-green-400: #35c989;
-  --r-green-500: #13b26a;
-  --r-green-600: #089256;
-  --r-green-700: #077447;
-  --r-green-800: #095c3a;
-  --r-green-900: #084c31;
-  --r-green-950: #032c1c;
+  /* ── Amber · warning ──────────────────────────────────────────────────────────────── */
+  --r-amber-50: #fff5e8;
+  --r-amber-100: #fceacf;
+  --r-amber-200: #f5d4a0;
+  --r-amber-300: #fbc876;
+  --r-amber-400: #f2b037;
+  --r-amber-500: #e39f07;
+  --r-amber-600: #c08601;
+  --r-amber-700: #8e6206;
+  --r-amber-800: #6e4b00;
+  --r-amber-900: #553a02;
+  --r-amber-950: #382501;
 
-  /* ── Amber · "Pending", "Waiting approval" ────────────────────────────── */
-  --r-amber-50: #fff9eb;
-  --r-amber-100: #fff0c9;
-  --r-amber-200: #ffe095;
-  --r-amber-300: #ffc857;
-  --r-amber-400: #fdae2b;
-  --r-amber-500: #f59211;
-  --r-amber-600: #d97007;
-  --r-amber-700: #b3520a;
-  --r-amber-800: #91410f;
-  --r-amber-900: #773610;
-  --r-amber-950: #451a04;
+  /* ── Red · critical, destructive ──────────────────────────────────────────────────── */
+  --r-red-50: #fff4f3;
+  --r-red-100: #ffe6e4;
+  --r-red-200: #fecbc6;
+  --r-red-300: #fea39d;
+  --r-red-400: #fe6f6b;
+  --r-red-500: #e94649;
+  --r-red-600: #cb2430;
+  --r-red-700: #a8081f;
+  --r-red-800: #850416;
+  --r-red-900: #65010e;
+  --r-red-950: #440107;
 
-  /* ── Rose · negative deltas, destructive, heart-rate ranges ────────────── */
-  --r-rose-50: #fff1f2;
-  --r-rose-100: #ffe1e4;
-  --r-rose-200: #ffc8cd;
-  --r-rose-300: #ff9ea7;
-  --r-rose-400: #fb6a7a;
-  --r-rose-500: #ef3e52;
-  --r-rose-600: #d8283f;
-  --r-rose-700: #b51e33;
-  --r-rose-800: #961c30;
-  --r-rose-900: #7e1c2d;
-  --r-rose-950: #460913;
+  /* ── Teal and magenta · data only (categorical slots 3 and 5, identity colours) ─────── */
+  --r-teal-100: #d6f4f2;
+  --r-teal-300: #76d2ce;
+  --r-teal-500: #149d99;
+  --r-teal-800: #03504e;
+  --r-magenta-100: #ffe5f0;
+  --r-magenta-300: #fb9eca;
+  --r-magenta-500: #d45198;
+  --r-magenta-800: #781550;
 
-  /* ── Sky · Syncrowave's cyan, secondary data series ────────────────────── */
-  --r-sky-50: #effaff;
-  --r-sky-100: #def3ff;
-  --r-sky-200: #b7e9ff;
-  --r-sky-300: #77d8fe;
-  --r-sky-400: #2fc3fa;
-  --r-sky-500: #06a9e6;
-  --r-sky-600: #0087c4;
-  --r-sky-700: #016b9f;
-  --r-sky-800: #065a83;
-  --r-sky-900: #0b4b6d;
-  --r-sky-950: #072f48;
+  /* ── Typography · Geist for everything, Geist Mono for labels and figures in columns,
+        Geist Pixel for the occasional instrument readout ─────────────────────────────── */
+  --r-font-sans: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --r-font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas,
+    monospace;
+  --r-font-pixel: 'Geist Pixel Circle', 'Geist Mono Variable', ui-monospace, monospace;
+  --r-font-pixel-square: 'Geist Pixel Square', 'Geist Mono Variable', ui-monospace, monospace;
 
-  /* ── Brand ramp · an alias layer so the whole product can change hue ───── */
-  --r-brand-50: var(--r-blue-50);
-  --r-brand-100: var(--r-blue-100);
-  --r-brand-200: var(--r-blue-200);
-  --r-brand-300: var(--r-blue-300);
-  --r-brand-400: var(--r-blue-400);
-  --r-brand-500: var(--r-blue-500);
-  --r-brand-600: var(--r-blue-600);
-  --r-brand-700: var(--r-blue-700);
-  --r-brand-800: var(--r-blue-800);
-  --r-brand-900: var(--r-blue-900);
-  --r-brand-950: var(--r-blue-950);
-
-  /* ── Typography ───────────────────────────────────────────────────────── */
-  --r-font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui,
-    -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --r-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-
+  --r-text-3xs: 0.625rem; /* 10 */
   --r-text-2xs: 0.6875rem; /* 11 */
   --r-text-xs: 0.75rem; /* 12 */
   --r-text-sm: 0.8125rem; /* 13 */
@@ -147,25 +126,29 @@
   --r-text-3xl: 2rem; /* 32 */
   --r-text-4xl: 2.5rem; /* 40 */
   --r-text-5xl: 3.5rem; /* 56 */
+  --r-text-6xl: 4.5rem; /* 72 */
+  --r-text-7xl: 6rem; /* 96 */
 
   --r-leading-none: 1;
-  --r-leading-tight: 1.12;
+  --r-leading-tight: 1.1;
   --r-leading-snug: 1.3;
-  --r-leading-normal: 1.5;
-  --r-leading-relaxed: 1.65;
+  --r-leading-normal: 1.5; /* the brand's body spacing */
+  --r-leading-relaxed: 1.6;
 
-  --r-tracking-tighter: -0.035em;
-  --r-tracking-tight: -0.02em;
-  --r-tracking-snug: -0.01em;
+  --r-tracking-display: -0.04em; /* brand "Big Header": Geist SemiBold, −4% */
+  --r-tracking-tighter: -0.032em;
+  --r-tracking-tight: -0.022em;
+  --r-tracking-snug: -0.011em;
   --r-tracking-normal: 0em;
   --r-tracking-wide: 0.04em;
+  --r-tracking-caps: 0.1em; /* brand "Small Header": Geist Mono Bold, all caps, +10% */
 
   --r-weight-regular: 400;
   --r-weight-medium: 500;
   --r-weight-semibold: 600;
   --r-weight-bold: 700;
 
-  /* ── Space · 4px grid ─────────────────────────────────────────────────── */
+  /* ── Space · 4px grid ─────────────────────────────────────────────────────────────── */
   --r-space-0: 0;
   --r-space-px: 1px;
   --r-space-0_5: 2px;
@@ -183,33 +166,39 @@
   --r-space-12: 48px;
   --r-space-16: 64px;
   --r-space-20: 80px;
+  --r-space-24: 96px;
 
-  /* ── Radius · soft geometry; nested radius = outer radius − padding ────── */
-  --r-radius-xs: 6px;
-  --r-radius-sm: 8px;
-  --r-radius-md: 10px;
-  --r-radius-lg: 14px;
-  --r-radius-xl: 20px;
-  --r-radius-2xl: 28px;
-  --r-radius-full: 999px;
+  /* ── Shape · square by default. Corners are 0; the only circles are status lamps, radio
+        buttons and data dots, and a circle always means "a point" or "a state". ───────── */
+  --r-radius-none: 0px;
+  --r-radius-surface: 0px; /* cards, panels, tables, dialogs, menus */
+  --r-radius-control: 0px; /* buttons, inputs, chips, segmented controls */
+  --r-radius-mark: 0px; /* checkboxes, keys, badges, bars in charts */
+  --r-radius-round: 999px; /* lamps, radios, dots — never a container */
 
-  /* ── Control heights ──────────────────────────────────────────────────── */
+  /* ── Lines · 1px rules carry the structure that shadows used to ───────────────────── */
+  --r-rule: 1px;
+  --r-rule-strong: 2px;
+
+  /* ── Control heights · dense, desktop-first ───────────────────────────────────────── */
   --r-control-xs: 24px;
-  --r-control-sm: 32px;
-  --r-control-md: 40px;
-  --r-control-lg: 48px;
+  --r-control-sm: 28px;
+  --r-control-md: 32px;
+  --r-control-lg: 40px;
+  --r-control-xl: 48px;
 
-  /* ── Motion ───────────────────────────────────────────────────────────── */
-  --r-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --r-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --r-ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
-  --r-duration-instant: 80ms;
-  --r-duration-fast: 140ms;
-  --r-duration-base: 200ms;
-  --r-duration-slow: 320ms;
-  --r-duration-slower: 600ms;
+  /* ── Motion · short and linear-ish. Nothing bounces. ──────────────────────────────── */
+  --r-ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --r-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --r-ease-linear: linear;
+  --r-ease-step: steps(4, end); /* for TE-style ticking readouts */
+  --r-duration-instant: 70ms;
+  --r-duration-fast: 110ms;
+  --r-duration-base: 160ms;
+  --r-duration-slow: 240ms;
+  --r-duration-slower: 420ms;
 
-  /* ── Layers ───────────────────────────────────────────────────────────── */
+  /* ── Layers ───────────────────────────────────────────────────────────────────────── */
   --r-z-sticky: 10;
   --r-z-dropdown: 50;
   --r-z-overlay: 80;
@@ -219,67 +208,27 @@
   --r-z-tooltip: 160;
 }
 
-/* Brand hue swaps — one attribute re-colours every brand role.
-   'blue' is the default; spelling it out lets a blue island sit inside a violet or flame page. */
-[data-brand='blue'] {
-  --r-brand-50: var(--r-blue-50);
-  --r-brand-100: var(--r-blue-100);
-  --r-brand-200: var(--r-blue-200);
-  --r-brand-300: var(--r-blue-300);
-  --r-brand-400: var(--r-blue-400);
-  --r-brand-500: var(--r-blue-500);
-  --r-brand-600: var(--r-blue-600);
-  --r-brand-700: var(--r-blue-700);
-  --r-brand-800: var(--r-blue-800);
-  --r-brand-900: var(--r-blue-900);
-  --r-brand-950: var(--r-blue-950);
-}
-
-[data-brand='violet'] {
-  --r-brand-50: var(--r-violet-50);
-  --r-brand-100: var(--r-violet-100);
-  --r-brand-200: var(--r-violet-200);
-  --r-brand-300: var(--r-violet-300);
-  --r-brand-400: var(--r-violet-400);
-  --r-brand-500: var(--r-violet-500);
-  --r-brand-600: var(--r-violet-600);
-  --r-brand-700: var(--r-violet-700);
-  --r-brand-800: var(--r-violet-800);
-  --r-brand-900: var(--r-violet-900);
-  --r-brand-950: var(--r-violet-950);
-}
-
-[data-brand='flame'] {
-  --r-brand-50: var(--r-flame-50);
-  --r-brand-100: var(--r-flame-100);
-  --r-brand-200: var(--r-flame-200);
-  --r-brand-300: var(--r-flame-300);
-  --r-brand-400: var(--r-flame-400);
-  --r-brand-500: var(--r-flame-500);
-  --r-brand-600: var(--r-flame-600);
-  --r-brand-700: var(--r-flame-700);
-  --r-brand-800: var(--r-flame-800);
-  --r-brand-900: var(--r-flame-900);
-  --r-brand-950: var(--r-flame-950);
-}
-
-/* ── Semantic roles · light ──────────────────────────────────────────────── */
+/* ── Semantic roles · light ──────────────────────────────────────────────────────────── */
 :root,
 [data-theme='light'] {
   color-scheme: light;
 
-  --r-bg-canvas: var(--r-neutral-50);
+  --r-bg-canvas: var(--r-neutral-25);
   --r-bg-surface: var(--r-neutral-0);
   --r-bg-raised: var(--r-neutral-0);
   --r-bg-muted: var(--r-neutral-50);
   --r-bg-hover: var(--r-neutral-100);
-  --r-bg-pressed: var(--r-neutral-200);
+  --r-bg-pressed: var(--r-neutral-150);
+  --r-bg-selected: var(--r-cobalt-50);
   --r-bg-inverse: var(--r-neutral-900);
-  --r-bg-overlay: rgb(12 14 18 / 0.36);
+  --r-bg-overlay: rgb(14 14 14 / 0.42);
+  --r-bg-track: var(--r-neutral-100);
+  --r-bg-thumb: var(--r-neutral-0);
 
   --r-border-subtle: var(--r-neutral-100);
-  --r-border: var(--r-neutral-200);
+  --r-border: var(--r-neutral-150);
   --r-border-strong: var(--r-neutral-300);
+  --r-border-inverse: var(--r-neutral-900);
 
   --r-text: var(--r-neutral-900);
   --r-text-secondary: var(--r-neutral-600);
@@ -287,210 +236,247 @@
   --r-text-disabled: var(--r-neutral-400);
   --r-text-inverse: var(--r-neutral-0);
 
+  /* Ink · near-black emphasis: the default button, the active nav item, the current page */
   --r-ink: var(--r-neutral-900);
-  --r-ink-hover: var(--r-neutral-800);
+  --r-ink-hover: var(--r-neutral-700);
   --r-on-ink: var(--r-neutral-0);
 
-  --r-brand: var(--r-brand-500);
-  --r-brand-hover: var(--r-brand-600);
-  --r-brand-pressed: var(--r-brand-700);
-  --r-brand-soft: var(--r-brand-50);
-  --r-brand-soft-hover: var(--r-brand-100);
-  --r-brand-text: var(--r-brand-600);
-  --r-brand-border: var(--r-brand-200);
+  /* Brand · 21 Strive cobalt. Selection, focus, links, the primary moment on a screen. */
+  --r-brand: var(--r-cobalt-700);
+  --r-brand-hover: var(--r-cobalt-800);
+  --r-brand-pressed: var(--r-cobalt-900);
+  --r-brand-soft: var(--r-cobalt-50);
+  --r-brand-soft-hover: var(--r-cobalt-100);
+  --r-brand-text: var(--r-cobalt-700);
+  --r-brand-border: var(--r-cobalt-200);
+  --r-brand-secondary: var(--r-cobalt-400);
   --r-on-brand: #ffffff;
 
-  --r-success: var(--r-green-500);
-  --r-success-hover: var(--r-green-600);
+  /* Signal · International Orange. Live, now, the one thing that needs eyes. Black labels. */
+  --r-signal: var(--r-signal-500);
+  --r-signal-hover: var(--r-signal-600);
+  --r-signal-soft: var(--r-signal-50);
+  --r-signal-text: var(--r-signal-700);
+  --r-signal-border: var(--r-signal-200);
+  --r-on-signal: var(--r-neutral-900);
+
+  --r-success: var(--r-green-600);
+  --r-success-hover: var(--r-green-700);
   --r-success-soft: var(--r-green-50);
   --r-success-text: var(--r-green-700);
   --r-success-border: var(--r-green-200);
+  --r-on-success: #ffffff;
 
-  --r-warning: var(--r-amber-500);
-  --r-warning-hover: var(--r-amber-600);
+  --r-warning: var(--r-amber-400);
+  --r-warning-hover: var(--r-amber-500);
   --r-warning-soft: var(--r-amber-50);
   --r-warning-text: var(--r-amber-700);
   --r-warning-border: var(--r-amber-200);
+  --r-on-warning: var(--r-neutral-900);
 
-  --r-danger: var(--r-rose-600); /* white on rose-500 is 3.8:1; on 600 it is 4.9:1 */
-  --r-danger-hover: var(--r-rose-700);
-  --r-danger-soft: var(--r-rose-50);
-  --r-danger-text: var(--r-rose-700); /* 600 measured 4.45:1 on danger-soft; 700 passes AA */
-  --r-danger-border: var(--r-rose-200);
+  --r-danger: var(--r-red-600);
+  --r-danger-hover: var(--r-red-700);
+  --r-danger-soft: var(--r-red-50);
+  --r-danger-text: var(--r-red-700);
+  --r-danger-border: var(--r-red-200);
+  --r-on-danger: #ffffff;
 
-  --r-violet: var(--r-violet-500);
-  --r-violet-hover: var(--r-violet-600);
-  --r-violet-soft: var(--r-violet-50);
-  --r-violet-text: var(--r-violet-600);
-  --r-violet-border: var(--r-violet-200);
+  /* Focus · a crisp 2px cobalt line, never a soft halo */
+  --r-focus: var(--r-cobalt-700);
+  --r-focus-ring: 0 0 0 1px var(--r-bg-surface), 0 0 0 3px var(--r-focus);
 
-  --r-flame: var(--r-flame-500);
-  --r-flame-hover: var(--r-flame-600);
-  --r-flame-soft: var(--r-flame-50);
-  --r-flame-text: var(--r-flame-700); /* 600 measured 3.9:1 on flame-soft; 700 passes AA */
-  --r-flame-border: var(--r-flame-200);
-
-  --r-sky: var(--r-sky-500);
-  --r-sky-hover: var(--r-sky-600);
-  --r-sky-soft: var(--r-sky-50);
-  --r-sky-text: var(--r-sky-700);
-  --r-sky-border: var(--r-sky-200);
-
-  /* Data visualisation */
-  --r-chart-1: var(--r-brand-500);
-  --r-chart-1-soft: var(--r-brand-200);
-  --r-chart-2: var(--r-violet-400);
-  --r-chart-3: var(--r-flame-500);
-  --r-chart-4: var(--r-green-500);
-  --r-chart-5: var(--r-sky-500);
-  --r-chart-6: var(--r-amber-400);
+  /* ── Data visualisation · validated with the dataviz six checks (light surface #fff):
+        adjacent CVD ΔE ≥ 11.9, normal-vision ΔE ≥ 25; slots 1–3 pass all-pairs.
+        Amber (4) and periwinkle (7) sit under 3:1 on white, so charts always carry a
+        table view and direct labels where they use them. ─────────────────────────────── */
+  --r-chart-1: var(--r-cobalt-600);
+  --r-chart-2: var(--r-signal-500);
+  --r-chart-3: var(--r-teal-500);
+  --r-chart-4: var(--r-amber-500);
+  --r-chart-5: var(--r-magenta-500);
+  --r-chart-6: var(--r-green-600);
+  --r-chart-7: var(--r-cobalt-400);
+  --r-chart-8: var(--r-red-600);
+  --r-chart-context: var(--r-neutral-300); /* the "everything else" grey in emphasis charts */
+  --r-chart-ink: var(--r-neutral-900); /* targets, reference marks */
+  --r-chart-now: var(--r-signal-500); /* the current-time line, live points */
+  --r-chart-grid: var(--r-neutral-100);
+  --r-chart-axis: var(--r-neutral-300);
+  --r-chart-label: var(--r-neutral-500);
   --r-chart-track: var(--r-neutral-100);
-  --r-chart-grid: var(--r-neutral-200);
-  --r-chart-axis: var(--r-neutral-500);
+  --r-chart-surface: var(--r-bg-surface);
+  /* Sequential (magnitude) · one hue, cobalt, light → dark */
+  --r-seq-0: var(--r-neutral-50);
+  --r-seq-1: var(--r-cobalt-100);
+  --r-seq-2: var(--r-cobalt-200);
+  --r-seq-3: var(--r-cobalt-300);
+  --r-seq-4: var(--r-cobalt-400);
+  --r-seq-5: var(--r-cobalt-500);
+  --r-seq-6: var(--r-cobalt-600);
+  --r-seq-7: var(--r-cobalt-700);
+  --r-seq-8: var(--r-cobalt-900);
+  /* Diverging (polarity) · cobalt ↔ orange through a grey that reads as nothing */
+  --r-div-pos: var(--r-cobalt-600);
+  --r-div-pos-soft: var(--r-cobalt-300);
+  --r-div-mid: var(--r-neutral-150);
+  --r-div-neg-soft: var(--r-signal-300);
+  --r-div-neg: var(--r-signal-600);
+  /* Status (state) · fixed, never themed, always shipped with an icon and a label */
+  --r-status-good: var(--r-green-500);
+  --r-status-warning: var(--r-amber-400);
+  --r-status-serious: var(--r-signal-400);
+  --r-status-critical: var(--r-red-600);
+  --r-status-off: var(--r-neutral-400);
 
-  /* Controls · the recessed track behind segmented controls and the thumb that slides on it */
-  --r-bg-track: var(--r-neutral-100);
-  --r-bg-thumb: var(--r-neutral-0);
+  /* Feature surfaces · the solid cobalt and the ink panel */
+  --r-feature-brand: var(--r-cobalt-700);
+  --r-feature-ink: var(--r-neutral-900);
 
-  /* Feature surfaces · the two loud cards. Dark enough at the top-left for white text. */
-  --r-feature-brand-from: var(--r-brand-700);
-  --r-feature-brand-to: var(--r-brand-500);
-  --r-feature-flame-from: var(--r-flame-700);
-  --r-feature-flame-to: var(--r-flame-500);
+  /* Identity · avatars and calendar colours. Fixed hues, so a person keeps their colour. */
+  --r-identity-1: var(--r-cobalt-100);
+  --r-identity-1-text: var(--r-cobalt-800);
+  --r-identity-2: var(--r-signal-100);
+  --r-identity-2-text: var(--r-signal-800);
+  --r-identity-3: var(--r-teal-100);
+  --r-identity-3-text: var(--r-teal-800);
+  --r-identity-4: var(--r-amber-100);
+  --r-identity-4-text: var(--r-amber-800);
+  --r-identity-5: var(--r-magenta-100);
+  --r-identity-5-text: var(--r-magenta-800);
+  --r-identity-6: var(--r-green-100);
+  --r-identity-6-text: var(--r-green-800);
+  --r-identity-7: var(--r-neutral-100);
+  --r-identity-7-text: var(--r-neutral-700);
+  --r-identity-8: var(--r-red-100);
+  --r-identity-8-text: var(--r-red-800);
 
-  /* Identity · avatars and event colours. Fixed hues, so a person or a calendar keeps its
-     colour when the brand changes. Backgrounds are opaque so overlapping avatars stay clean. */
-  --r-identity-1: var(--r-blue-100);
-  --r-identity-1-text: var(--r-blue-700);
-  --r-identity-2: var(--r-violet-100);
-  --r-identity-2-text: var(--r-violet-700);
-  --r-identity-3: #fce4f3;
-  --r-identity-3-text: #a1236b;
-  --r-identity-4: var(--r-rose-100);
-  --r-identity-4-text: var(--r-rose-700);
-  --r-identity-5: var(--r-flame-100);
-  --r-identity-5-text: var(--r-flame-700);
-  --r-identity-6: var(--r-amber-100);
-  --r-identity-6-text: var(--r-amber-800);
-  --r-identity-7: var(--r-green-100);
-  --r-identity-7-text: var(--r-green-700);
-  --r-identity-8: #d3f4f1;
-  --r-identity-8-text: #0e6b63;
-
-  /* Elevation · light, wide and low-opacity — never a hard drop shadow */
-  --r-shadow-xs: 0 1px 2px rgb(16 20 28 / 0.04);
-  --r-shadow-sm: 0 1px 2px rgb(16 20 28 / 0.04), 0 2px 6px -1px rgb(16 20 28 / 0.05);
-  --r-shadow-md: 0 2px 4px -1px rgb(16 20 28 / 0.04), 0 12px 24px -6px rgb(16 20 28 / 0.08);
-  --r-shadow-lg: 0 4px 10px -4px rgb(16 20 28 / 0.06), 0 22px 44px -12px rgb(16 20 28 / 0.16);
-  --r-shadow-xl: 0 8px 16px -8px rgb(16 20 28 / 0.08), 0 32px 64px -16px rgb(16 20 28 / 0.24);
-  --r-shadow-highlight: inset 0 1px 0 rgb(255 255 255 / 0.14);
-
-  --r-focus-ring: 0 0 0 3px color-mix(in srgb, var(--r-brand) 26%, transparent);
+  /* Elevation · only things that float get a shadow, and it is short */
+  --r-shadow-none: none;
+  --r-shadow-xs: none;
+  --r-shadow-sm: 0 1px 2px rgb(14 14 14 / 0.06);
+  --r-shadow-md: 0 1px 2px rgb(14 14 14 / 0.05), 0 4px 12px -4px rgb(14 14 14 / 0.12);
+  --r-shadow-lg: 0 1px 3px rgb(14 14 14 / 0.06), 0 10px 24px -10px rgb(14 14 14 / 0.2);
+  --r-shadow-xl: 0 2px 6px rgb(14 14 14 / 0.08), 0 24px 48px -18px rgb(14 14 14 / 0.32);
+  --r-shadow-highlight: none;
 }
 
-/* ── Semantic roles · dark ───────────────────────────────────────────────── */
+/* ── Semantic roles · dark ───────────────────────────────────────────────────────────── */
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --r-bg-canvas: #0c0e12;
-  --r-bg-surface: #14171c;
-  --r-bg-raised: #1a1d23;
-  --r-bg-muted: #1a1d23;
-  --r-bg-hover: #22262e;
-  --r-bg-pressed: #2b3039;
-  --r-bg-inverse: #f6f7f9;
-  --r-bg-overlay: rgb(0 0 0 / 0.56);
+  --r-bg-canvas: var(--r-neutral-950);
+  --r-bg-surface: var(--r-neutral-900);
+  --r-bg-raised: #1b1b1b;
+  --r-bg-muted: #1b1b1b;
+  --r-bg-hover: #222222;
+  --r-bg-pressed: var(--r-neutral-800);
+  --r-bg-selected: color-mix(in srgb, var(--r-cobalt-500) 16%, var(--r-neutral-900));
+  --r-bg-inverse: #ededed;
+  --r-bg-overlay: rgb(0 0 0 / 0.62);
+  --r-bg-track: #222222;
+  --r-bg-thumb: #3a3a3a;
 
-  --r-border-subtle: #1f232a;
-  --r-border: #282d36;
-  --r-border-strong: #363c47;
+  --r-border-subtle: #212121;
+  --r-border: #2a2a2a;
+  --r-border-strong: #424242;
+  --r-border-inverse: #ededed;
 
-  --r-text: #f3f4f7;
-  --r-text-secondary: #aab1bd;
-  --r-text-tertiary: #868e9c; /* 5.4:1 on surface, 4.6:1 on hover */
-  --r-text-disabled: #575f6c;
-  --r-text-inverse: #15181e;
+  --r-text: #ededed;
+  --r-text-secondary: #b4b4b4;
+  --r-text-tertiary: #8f8f8f; /* 5.7:1 on surface, 5.0:1 on hover */
+  --r-text-disabled: #5e5e5e;
+  --r-text-inverse: var(--r-neutral-900);
 
-  --r-ink: #f3f4f7;
+  --r-ink: #ededed;
   --r-ink-hover: #ffffff;
-  --r-on-ink: #15181e;
+  --r-on-ink: var(--r-neutral-900);
 
-  --r-brand: var(--r-brand-500);
-  --r-brand-hover: var(--r-brand-400);
-  --r-brand-pressed: var(--r-brand-300);
-  --r-brand-soft: color-mix(in srgb, var(--r-brand-500) 16%, transparent);
-  --r-brand-soft-hover: color-mix(in srgb, var(--r-brand-500) 24%, transparent);
-  --r-brand-text: var(--r-brand-300);
-  --r-brand-border: color-mix(in srgb, var(--r-brand-500) 40%, transparent);
+  --r-brand: var(--r-cobalt-600); /* white label 6.4:1 */
+  --r-brand-hover: var(--r-cobalt-500);
+  --r-brand-pressed: var(--r-cobalt-700);
+  --r-brand-soft: color-mix(in srgb, var(--r-cobalt-500) 15%, transparent);
+  --r-brand-soft-hover: color-mix(in srgb, var(--r-cobalt-500) 24%, transparent);
+  --r-brand-text: var(--r-cobalt-300);
+  --r-brand-border: color-mix(in srgb, var(--r-cobalt-500) 42%, transparent);
+  --r-brand-secondary: var(--r-cobalt-400);
 
-  --r-success-soft: rgb(19 178 106 / 0.14);
+  --r-signal-soft: color-mix(in srgb, var(--r-signal-500) 14%, transparent);
+  --r-signal-text: var(--r-signal-300);
+  --r-signal-border: color-mix(in srgb, var(--r-signal-500) 40%, transparent);
+
+  --r-success: var(--r-green-500);
+  --r-success-hover: var(--r-green-400);
+  --r-success-soft: color-mix(in srgb, var(--r-green-500) 14%, transparent);
   --r-success-text: var(--r-green-300);
-  --r-success-border: rgb(19 178 106 / 0.34);
+  --r-success-border: color-mix(in srgb, var(--r-green-500) 36%, transparent);
+  --r-on-success: var(--r-neutral-900);
 
-  --r-warning-soft: rgb(245 146 17 / 0.14);
+  --r-warning-soft: color-mix(in srgb, var(--r-amber-400) 13%, transparent);
   --r-warning-text: var(--r-amber-300);
-  --r-warning-border: rgb(245 146 17 / 0.34);
+  --r-warning-border: color-mix(in srgb, var(--r-amber-400) 36%, transparent);
 
-  --r-danger-soft: rgb(239 62 82 / 0.14);
-  --r-danger-text: var(--r-rose-300);
-  --r-danger-border: rgb(239 62 82 / 0.36);
+  --r-danger: var(--r-red-600);
+  --r-danger-hover: var(--r-red-500);
+  --r-danger-soft: color-mix(in srgb, var(--r-red-500) 15%, transparent);
+  --r-danger-text: var(--r-red-300);
+  --r-danger-border: color-mix(in srgb, var(--r-red-500) 40%, transparent);
 
-  --r-violet-soft: rgb(125 89 247 / 0.16);
-  --r-violet-text: var(--r-violet-300);
-  --r-violet-border: rgb(125 89 247 / 0.38);
+  --r-focus: var(--r-cobalt-400);
 
-  --r-flame-soft: rgb(249 80 31 / 0.15);
-  --r-flame-text: var(--r-flame-300);
-  --r-flame-border: rgb(249 80 31 / 0.36);
+  /* Validated against #151515: adjacent CVD ΔE ≥ 9.2, normal-vision ΔE ≥ 20.6, all ≥ 3:1 */
+  --r-chart-1: var(--r-cobalt-500);
+  --r-chart-2: var(--r-signal-500);
+  --r-chart-3: var(--r-teal-500);
+  --r-chart-4: var(--r-amber-600);
+  --r-chart-5: var(--r-magenta-500);
+  --r-chart-6: var(--r-green-500);
+  --r-chart-7: #7487d6;
+  --r-chart-8: var(--r-red-500);
+  --r-chart-context: #4a4a4a;
+  --r-chart-ink: #ededed;
+  --r-chart-grid: #222222;
+  --r-chart-axis: #424242;
+  --r-chart-label: #8f8f8f;
+  --r-chart-track: #222222;
+  --r-seq-0: #1b1b1b;
+  --r-seq-1: color-mix(in srgb, var(--r-cobalt-700) 45%, #151515);
+  --r-seq-2: var(--r-cobalt-800);
+  --r-seq-3: var(--r-cobalt-700);
+  --r-seq-4: var(--r-cobalt-600);
+  --r-seq-5: var(--r-cobalt-500);
+  --r-seq-6: var(--r-cobalt-400);
+  --r-seq-7: var(--r-cobalt-300);
+  --r-seq-8: var(--r-cobalt-200);
+  --r-div-pos: var(--r-cobalt-500);
+  --r-div-pos-soft: var(--r-cobalt-800);
+  --r-div-mid: #333333;
+  --r-div-neg-soft: var(--r-signal-800);
+  --r-div-neg: var(--r-signal-500);
 
-  --r-sky-soft: rgb(6 169 230 / 0.14);
-  --r-sky-text: var(--r-sky-300);
-  --r-sky-border: rgb(6 169 230 / 0.34);
+  --r-feature-brand: var(--r-cobalt-700);
+  --r-feature-ink: #000000;
 
-  --r-chart-1-soft: color-mix(in srgb, var(--r-brand-500) 34%, #14171c);
-  --r-chart-track: #1f232a;
-  --r-chart-grid: #262a32;
-  --r-chart-axis: #868e9c;
+  --r-identity-1: color-mix(in srgb, var(--r-cobalt-500) 24%, #151515);
+  --r-identity-1-text: var(--r-cobalt-200);
+  --r-identity-2: color-mix(in srgb, var(--r-signal-500) 22%, #151515);
+  --r-identity-2-text: var(--r-signal-200);
+  --r-identity-3: color-mix(in srgb, var(--r-teal-500) 24%, #151515);
+  --r-identity-3-text: var(--r-teal-300);
+  --r-identity-4: color-mix(in srgb, var(--r-amber-500) 22%, #151515);
+  --r-identity-4-text: var(--r-amber-300);
+  --r-identity-5: color-mix(in srgb, var(--r-magenta-500) 24%, #151515);
+  --r-identity-5-text: var(--r-magenta-300);
+  --r-identity-6: color-mix(in srgb, var(--r-green-500) 22%, #151515);
+  --r-identity-6-text: var(--r-green-300);
+  --r-identity-7: #2a2a2a;
+  --r-identity-7-text: #d9d9d9;
+  --r-identity-8: color-mix(in srgb, var(--r-red-500) 24%, #151515);
+  --r-identity-8-text: var(--r-red-300);
 
-  --r-bg-track: #1f232a;
-  --r-bg-thumb: #30363f;
-
-  --r-identity-1: color-mix(in srgb, var(--r-blue-500) 26%, #14171c);
-  --r-identity-1-text: var(--r-blue-300);
-  --r-identity-2: color-mix(in srgb, var(--r-violet-500) 26%, #14171c);
-  --r-identity-2-text: var(--r-violet-300);
-  --r-identity-3: color-mix(in srgb, #db2b8c 24%, #14171c);
-  --r-identity-3-text: #f5a3d3;
-  --r-identity-4: color-mix(in srgb, var(--r-rose-500) 24%, #14171c);
-  --r-identity-4-text: var(--r-rose-300);
-  --r-identity-5: color-mix(in srgb, var(--r-flame-500) 24%, #14171c);
-  --r-identity-5-text: var(--r-flame-300);
-  --r-identity-6: color-mix(in srgb, var(--r-amber-500) 22%, #14171c);
-  --r-identity-6-text: var(--r-amber-300);
-  --r-identity-7: color-mix(in srgb, var(--r-green-500) 22%, #14171c);
-  --r-identity-7-text: var(--r-green-300);
-  --r-identity-8: color-mix(in srgb, #14b8a6 22%, #14171c);
-  --r-identity-8-text: #6ee7d8;
-
-  --r-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
-  --r-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px -1px rgb(0 0 0 / 0.3);
-  --r-shadow-md: 0 2px 4px -1px rgb(0 0 0 / 0.3), 0 12px 24px -6px rgb(0 0 0 / 0.45);
-  --r-shadow-lg: 0 4px 10px -4px rgb(0 0 0 / 0.4), 0 22px 44px -12px rgb(0 0 0 / 0.6);
-  --r-shadow-xl: 0 8px 16px -8px rgb(0 0 0 / 0.45), 0 32px 64px -16px rgb(0 0 0 / 0.7);
-  --r-shadow-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
-}
-
-/* Flame is lighter than blue and violet at the same step. White on flame-500 measures 3.4:1 and
-   flame-600 text on white 4.3:1, so on the flame brand text on a brand fill turns dark and brand
-   text in light mode moves one step darker. Fills and chart colours stay vivid. */
-[data-brand='flame'],
-[data-brand='flame'] [data-theme]:not([data-brand]) {
-  --r-on-brand: #15181e;
-}
-
-[data-brand='flame']:not([data-theme='dark']),
-[data-brand='flame'] [data-theme='light']:not([data-brand]) {
-  --r-brand-text: var(--r-brand-700);
+  --r-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --r-shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px -4px rgb(0 0 0 / 0.5);
+  --r-shadow-lg: 0 1px 3px rgb(0 0 0 / 0.45), 0 10px 24px -10px rgb(0 0 0 / 0.65);
+  --r-shadow-xl: 0 2px 6px rgb(0 0 0 / 0.5), 0 24px 48px -18px rgb(0 0 0 / 0.8);
 }
 
 @media (prefers-reduced-motion: reduce) {

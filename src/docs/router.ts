@@ -1,10 +1,12 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
+import { samples } from './samples/registry'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', component: () => import('./pages/IntroductionPage.vue'), meta: { title: 'Introduction' } },
   { path: '/foundations/colour', component: () => import('./pages/ColourPage.vue'), meta: { title: 'Colour' } },
   { path: '/foundations/typography', component: () => import('./pages/TypographyPage.vue'), meta: { title: 'Typography' } },
-  { path: '/foundations/layout', component: () => import('./pages/LayoutPage.vue'), meta: { title: 'Layout & elevation' } },
+  { path: '/foundations/layout', component: () => import('./pages/LayoutPage.vue'), meta: { title: 'Shape, space & motion' } },
+  { path: '/foundations/brand', component: () => import('./pages/BrandPage.vue'), meta: { title: 'Brand' } },
   { path: '/components/actions', component: () => import('./pages/ActionsPage.vue'), meta: { title: 'Actions' } },
   { path: '/components/forms', component: () => import('./pages/FormsPage.vue'), meta: { title: 'Forms' } },
   { path: '/components/data-display', component: () => import('./pages/DataDisplayPage.vue'), meta: { title: 'Data display' } },
@@ -27,6 +29,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./examples/WeeklySchedule.vue'),
     meta: { title: 'Weekly schedule', bare: true },
   },
+  { path: '/samples', component: () => import('./pages/SamplesPage.vue'), meta: { title: 'Samples' } },
+  ...samples.map<RouteRecordRaw>((sample) => ({
+    path: `/samples/${sample.id}`,
+    component: sample.load,
+    meta: { title: sample.title, bare: true, sample: sample.id },
+  })),
   { path: '/references', component: () => import('./pages/ReferencesPage.vue'), meta: { title: 'References' } },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
@@ -43,7 +51,7 @@ export const router = createRouter({
 
 router.afterEach((to) => {
   const title = to.meta.title as string | undefined
-  document.title = title && to.path !== '/' ? `${title} · Rapi` : 'Rapi Design System'
+  document.title = title && to.path !== '/' ? `${title} · Rapi` : 'Rapi · 21 Strive design language'
 })
 
 declare module 'vue-router' {
@@ -52,5 +60,7 @@ declare module 'vue-router' {
     bare?: boolean
     /** The page handles ⌘K itself (e.g. to focus its own search). */
     ownsModK?: boolean
+    /** Id of the sample screen this route shows. */
+    sample?: string
   }
 }

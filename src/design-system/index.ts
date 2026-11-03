@@ -1,5 +1,5 @@
 /*
- * Rapi — library entry.
+ * Rapi — library entry. The design language of 21 Strive.
  *
  *   import { RapiPlugin } from '@/design-system'
  *   app.use(RapiPlugin)            // registers every component globally
@@ -10,8 +10,10 @@
  *
  * Importing this file also brings in the font, the tokens and the base layer.
  */
-import '@fontsource-variable/plus-jakarta-sans'
+import '@fontsource-variable/geist'
+import '@fontsource-variable/geist-mono'
 import './tokens/tokens.css'
+import './tokens/compat.css'
 import './tokens/base.css'
 
 import type { App, Plugin } from 'vue'
@@ -52,6 +54,30 @@ import RLineChart from './charts/RLineChart.vue'
 import RRadialGauge from './charts/RRadialGauge.vue'
 import RRangeBars from './charts/RRangeBars.vue'
 import RSparkline from './charts/RSparkline.vue'
+import RAlert from './components/RAlert.vue'
+import RBreadcrumb from './components/RBreadcrumb.vue'
+import RCodeBlock from './components/RCodeBlock.vue'
+import REmpty from './components/REmpty.vue'
+import RKnob from './components/RKnob.vue'
+import RLogo from './components/RLogo.vue'
+import RRadioGroup from './components/RRadioGroup.vue'
+import RReadout from './components/RReadout.vue'
+import RRule from './components/RRule.vue'
+import RSlider from './components/RSlider.vue'
+import RSpecList from './components/RSpecList.vue'
+import RStatus from './components/RStatus.vue'
+import RSteps from './components/RSteps.vue'
+import RSupergraphic from './components/RSupergraphic.vue'
+import RTextarea from './components/RTextarea.vue'
+import RTimeline from './components/RTimeline.vue'
+import RToaster from './components/RToaster.vue'
+import RBulletChart from './charts/RBulletChart.vue'
+import RCandlestickChart from './charts/RCandlestickChart.vue'
+import RDial from './charts/RDial.vue'
+import RGanttChart from './charts/RGanttChart.vue'
+import RRadarScope from './charts/RRadarScope.vue'
+import RScatterChart from './charts/RScatterChart.vue'
+import RWaterfallChart from './charts/RWaterfallChart.vue'
 
 export {
   RAvatar,
@@ -89,6 +115,30 @@ export {
   RRadialGauge,
   RRangeBars,
   RSparkline,
+  RAlert,
+  RBreadcrumb,
+  RCodeBlock,
+  REmpty,
+  RKnob,
+  RLogo,
+  RRadioGroup,
+  RReadout,
+  RRule,
+  RSlider,
+  RSpecList,
+  RStatus,
+  RSteps,
+  RSupergraphic,
+  RTextarea,
+  RTimeline,
+  RToaster,
+  RBulletChart,
+  RCandlestickChart,
+  RDial,
+  RGanttChart,
+  RRadarScope,
+  RScatterChart,
+  RWaterfallChart,
 }
 
 export * from './composables/dom'
@@ -96,6 +146,8 @@ export * from './composables/floating'
 export * from './composables/format'
 export * from './composables/identity'
 export * from './composables/theme'
+export * from './composables/toast'
+export * from './brand/marks'
 export type * from './types'
 
 const components = {
@@ -134,6 +186,30 @@ const components = {
   RRadialGauge,
   RRangeBars,
   RSparkline,
+  RAlert,
+  RBreadcrumb,
+  RCodeBlock,
+  REmpty,
+  RKnob,
+  RLogo,
+  RRadioGroup,
+  RReadout,
+  RRule,
+  RSlider,
+  RSpecList,
+  RStatus,
+  RSteps,
+  RSupergraphic,
+  RTextarea,
+  RTimeline,
+  RToaster,
+  RBulletChart,
+  RCandlestickChart,
+  RDial,
+  RGanttChart,
+  RRadarScope,
+  RScatterChart,
+  RWaterfallChart,
 }
 
 /** `app.use(RapiPlugin)` registers every component under its R-name. */
@@ -182,5 +258,29 @@ declare module 'vue' {
     RRadialGauge: typeof RRadialGauge
     RRangeBars: typeof RRangeBars
     RSparkline: typeof RSparkline
+    RAlert: typeof RAlert
+    RBreadcrumb: typeof RBreadcrumb
+    RCodeBlock: typeof RCodeBlock
+    REmpty: typeof REmpty
+    RKnob: typeof RKnob
+    RLogo: typeof RLogo
+    RRadioGroup: typeof RRadioGroup
+    RReadout: typeof RReadout
+    RRule: typeof RRule
+    RSlider: typeof RSlider
+    RSpecList: typeof RSpecList
+    RStatus: typeof RStatus
+    RSteps: typeof RSteps
+    RSupergraphic: typeof RSupergraphic
+    RTextarea: typeof RTextarea
+    RTimeline: typeof RTimeline
+    RToaster: typeof RToaster
+    RBulletChart: typeof RBulletChart
+    RCandlestickChart: typeof RCandlestickChart
+    RDial: typeof RDial
+    RGanttChart: typeof RGanttChart
+    RRadarScope: typeof RRadarScope
+    RScatterChart: typeof RScatterChart
+    RWaterfallChart: typeof RWaterfallChart
   }
 }

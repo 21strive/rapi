@@ -3,11 +3,17 @@ import type { Placement } from './composables/floating'
 
 export type Size = 'sm' | 'md' | 'lg'
 
-/** Every tone has a matching `.r-tone-*` class in base.css. */
-export type Tone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'violet' | 'flame' | 'sky'
+/**
+ * Every tone has a matching `.r-tone-*` class in base.css.
+ * 'violet' | 'flame' | 'sky' are leftovers from Rapi 0.1 and are removed before 0.2 ships.
+ */
+export type Tone = 'neutral' | 'brand' | 'signal' | 'success' | 'warning' | 'danger' | 'violet' | 'flame' | 'sky'
+
+/** The six tones of the 21 Strive language. */
+export type StatusTone = 'neutral' | 'brand' | 'signal' | 'success' | 'warning' | 'danger'
 
 export type ButtonVariant = 'solid' | 'soft' | 'outline' | 'ghost'
-export type ButtonTone = 'neutral' | 'brand' | 'danger' | 'success'
+export type ButtonTone = 'neutral' | 'brand' | 'signal' | 'danger' | 'success'
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 export type AvatarStatus = 'online' | 'away' | 'busy' | 'offline'
@@ -120,4 +126,158 @@ export interface ChartSeries {
   values: (number | null)[]
   /** Any CSS colour; defaults to the chart palette in order. */
   color?: string
+}
+
+/* ── 0.2 additions ─────────────────────────────────────────────────────────────────── */
+
+/** A row of a datasheet (RSpecList). */
+export interface SpecItem {
+  label: string
+  value?: string | number
+  /** Monospace value: ids, hashes, coordinates, amounts in a column. */
+  mono?: boolean
+  /** Quiet second line under the value. */
+  hint?: string
+  /** Shows a status lamp before the value. */
+  tone?: StatusTone
+}
+
+/** An entry in RTimeline: audit logs, incident updates, mission events. */
+export interface TimelineItem {
+  id?: string | number
+  /** Already formatted, e.g. "14:02:11" or "T+00:01:12". */
+  time: string
+  title: string
+  body?: string
+  /** Quiet text on the right, e.g. an actor or an id. */
+  meta?: string
+  tone?: StatusTone
+  icon?: Component
+}
+
+export interface StepItem {
+  label: string
+  description?: string
+  /** Overrides what RSteps derives from `current`. */
+  status?: 'complete' | 'current' | 'upcoming' | 'error'
+}
+
+export interface BreadcrumbItem {
+  label: string
+  href?: string
+  /** Passed to the `as` component (e.g. RouterLink) as its `to`. */
+  to?: string | Record<string, unknown>
+}
+
+export interface RadioOption {
+  label: string
+  value: string | number
+  description?: string
+  disabled?: boolean
+}
+
+export interface SliderMark {
+  value: number
+  label?: string
+}
+
+export interface ToastOptions {
+  title: string
+  body?: string
+  tone?: StatusTone
+  /** ms; 0 keeps it until dismissed. Default 5000. */
+  duration?: number
+  action?: { label: string; onClick: () => void }
+}
+
+/* ── Chart data ────────────────────────────────────────────────────────────────────── */
+
+/** A horizontal line across a chart: a target, a threshold or an average. Dashed. */
+export interface ChartReference {
+  value: number
+  label?: string
+  kind?: 'target' | 'threshold' | 'average'
+}
+
+/** One row of a bullet chart (Stephen Few): a measure against a target and qualitative bands. */
+export interface BulletRow {
+  label: string
+  value: number
+  target?: number
+  /** Upper edges of the qualitative bands, ascending, e.g. [60, 85, 100]. The last is the max. */
+  ranges?: number[]
+  /** Optional comparison, e.g. last period, drawn as a thin bar inside the measure. */
+  previous?: number
+  sublabel?: string
+}
+
+export interface CandlePoint {
+  /** Category label for the x axis, e.g. "09:30" or "12 Nov". */
+  t: string
+  open: number
+  high: number
+  low: number
+  close: number
+  volume?: number
+}
+
+export interface WaterfallStep {
+  label: string
+  value: number
+  /** `total` bars start at zero and show the running total at that point. */
+  kind?: 'delta' | 'total'
+}
+
+export type StatusLevel = 'good' | 'warning' | 'serious' | 'critical'
+
+/** A coloured band on a dial, e.g. the red line of a gauge. */
+export interface DialZone {
+  from: number
+  to: number
+  level: StatusLevel
+}
+
+export interface ScatterPoint {
+  x: number
+  y: number
+  label?: string
+  /** Shown in the tooltip and table. */
+  id?: string
+}
+
+export interface ScatterSeries {
+  name: string
+  points: ScatterPoint[]
+  color?: string
+}
+
+export interface GanttItem {
+  start: number
+  end: number
+  label?: string
+  /** brand (default), context (grey), signal, success, warning, danger. */
+  tone?: 'brand' | 'context' | 'signal' | 'success' | 'warning' | 'danger'
+  /** A point in time drawn as a diamond; `end` is ignored. */
+  milestone?: boolean
+  /** Hatched: planned, tentative or a maintenance window. */
+  hatch?: boolean
+}
+
+export interface GanttRow {
+  id: string | number
+  label: string
+  meta?: string
+  items: GanttItem[]
+}
+
+/** A contact on a radar scope. Bearing in degrees clockwise from north, range in scope units. */
+export interface RadarContact {
+  id: string
+  bearing: number
+  range: number
+  label?: string
+  /** friendly = cobalt, unknown = amber, hostile = signal, neutral = grey. Always labelled. */
+  kind?: 'friendly' | 'unknown' | 'hostile' | 'neutral'
+  /** Heading in degrees; draws a short velocity leader. */
+  heading?: number
 }

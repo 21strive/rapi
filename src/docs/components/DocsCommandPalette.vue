@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Check, CircleDot, Hash, LayoutGrid, Moon, Palette, Sun } from 'lucide-vue-next'
-import { RCommandPalette, useTheme, type Brand, type CommandItem } from '@/design-system'
+import { Hash, LayoutGrid, Moon, Sun } from 'lucide-vue-next'
+import { RCommandPalette, useTheme, type CommandItem } from '@/design-system'
 import { allLinks } from '../nav'
 import { paletteOpen } from '../palette'
 
 const router = useRouter()
 const route = useRoute()
-const { brand, resolved, setBrand, setTheme } = useTheme()
-
-const brandNames: Record<Brand, string> = { blue: 'Blue', violet: 'Violet', flame: 'Flame' }
+const { resolved, setTheme } = useTheme()
 
 const items = computed<CommandItem[]>(() => {
   const pages: CommandItem[] = [
@@ -50,22 +48,6 @@ const items = computed<CommandItem[]>(() => {
       group: 'Preferences',
       keywords: ['theme', 'dark', 'light', 'mode', 'appearance'],
       onSelect: () => setTheme(resolved.value === 'dark' ? 'light' : 'dark'),
-    },
-    {
-      id: 'brand',
-      label: 'Brand',
-      icon: Palette,
-      group: 'Preferences',
-      keywords: ['colour', 'color', 'accent', 'hue'],
-      meta: brandNames[brand.value],
-      placeholder: 'Pick a brand colour',
-      children: (Object.keys(brandNames) as Brand[]).map((value) => ({
-        id: `brand:${value}`,
-        label: brandNames[value],
-        icon: value === brand.value ? Check : CircleDot,
-        meta: value === brand.value ? 'Current' : undefined,
-        onSelect: () => setBrand(value),
-      })),
     },
   ]
 

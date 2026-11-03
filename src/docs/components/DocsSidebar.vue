@@ -10,7 +10,9 @@ const isActive = (link: DocLink) => route.path === link.path
 <template>
   <nav class="docs-nav" aria-label="Documentation">
     <div v-for="(group, g) in navGroups" :key="g" class="docs-nav__group">
-      <p v-if="group.title" class="docs-nav__title">{{ group.title }}</p>
+      <p v-if="group.title" class="docs-nav__title">
+        <span class="r-index">{{ String(g).padStart(2, '0') }}</span>{{ group.title }}
+      </p>
       <RNavItem
         v-for="link in group.links"
         :key="link.path"
@@ -28,7 +30,7 @@ const isActive = (link: DocLink) => route.path === link.path
 .docs-nav {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 24px;
 }
 
 .docs-nav__group {
@@ -38,9 +40,15 @@ const isActive = (link: DocLink) => route.path === link.path
 }
 
 .docs-nav__title {
-  padding: 0 10px 6px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 8px 8px;
+  color: var(--r-text);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 </style>

@@ -120,11 +120,11 @@ export function readableOn(c: RGBA | null | undefined): string {
 
 /**
  * Resolves a list of tokens in the context of `root` and re-reads them whenever the theme or the
- * brand changes. Returns a map from token to colour.
+ * theme changes. Returns a map from token to colour.
  */
 export function useTokenColors(root: Ref<HTMLElement | null>, tokens: () => string[]) {
   const colors = ref<Record<string, RGBA | null>>({})
-  const { resolved, brand } = useTheme()
+  const { resolved } = useTheme()
 
   function read() {
     const el = root.value
@@ -144,7 +144,7 @@ export function useTokenColors(root: Ref<HTMLElement | null>, tokens: () => stri
   }
 
   onMounted(read)
-  watch([resolved, brand, () => tokens().join()], soon)
+  watch([resolved, () => tokens().join()], soon)
 
   return { colors, read }
 }
@@ -152,7 +152,7 @@ export function useTokenColors(root: Ref<HTMLElement | null>, tokens: () => stri
 /** Plain CSS custom property values (spacing, radius, shadows) that follow the theme. */
 export function useTokenValues(tokens: () => string[]) {
   const values = ref<Record<string, string>>({})
-  const { resolved, brand } = useTheme()
+  const { resolved } = useTheme()
 
   function read() {
     const style = getComputedStyle(document.documentElement)
@@ -162,7 +162,7 @@ export function useTokenValues(tokens: () => string[]) {
   }
 
   onMounted(read)
-  watch([resolved, brand], () => nextTick(() => requestAnimationFrame(read)))
+  watch([resolved], () => nextTick(() => requestAnimationFrame(read)))
 
   return { values, read }
 }

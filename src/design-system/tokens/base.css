@@ -1,4 +1,22 @@
-/* Rapi base layer: reset, type scale, tone helpers, utilities. */
+/* Rapi base layer: fonts, reset, type scale, tones, utilities. */
+
+/* Geist Pixel ships with the Geist family (SIL OFL 1.1, see ../fonts/GEIST-OFL.txt). It is
+   only for instrument readouts, so it loads on first use and never blocks text. */
+@font-face {
+  font-family: 'Geist Pixel Circle';
+  src: url('../fonts/GeistPixel-Circle.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Pixel Square';
+  src: url('../fonts/GeistPixel-Square.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 *,
 *::before,
@@ -70,57 +88,61 @@ a {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--r-brand) 22%, transparent);
+  background: var(--r-brand);
+  color: var(--r-on-brand);
 }
 
 :focus-visible {
-  outline: 2px solid var(--r-brand);
+  outline: 2px solid var(--r-focus);
   outline-offset: 2px;
 }
 
-/* A theme island (e.g. a dark command palette inside a light page) re-reads its own text colour. */
+/* A theme island (a dark console inside a light page) re-reads its own text colour. */
 [data-theme]:not(html) {
   color: var(--r-text);
 }
 
-/* ── Type scale ───────────────────────────────────────────────────────────── */
+/* ── Type scale ─────────────────────────────────────────────────────────────────────
+   Headings are Geist SemiBold with negative tracking (the brand's Big Header). Labels are
+   Geist Mono in capitals with +10% tracking (the brand's Small Header). Body is Geist Regular
+   at 1.5. */
 .r-display-xl {
-  font-size: var(--r-text-5xl);
-  line-height: 1.04;
-  letter-spacing: var(--r-tracking-tighter);
+  font-size: var(--r-text-6xl);
+  line-height: 0.98;
+  letter-spacing: var(--r-tracking-display);
   font-weight: var(--r-weight-semibold);
 }
 
 .r-display {
-  font-size: var(--r-text-4xl);
-  line-height: 1.08;
-  letter-spacing: var(--r-tracking-tighter);
+  font-size: var(--r-text-5xl);
+  line-height: 1;
+  letter-spacing: var(--r-tracking-display);
   font-weight: var(--r-weight-semibold);
 }
 
 .r-h1 {
   font-size: var(--r-text-3xl);
-  line-height: 1.16;
-  letter-spacing: var(--r-tracking-tight);
+  line-height: 1.1;
+  letter-spacing: var(--r-tracking-tighter);
   font-weight: var(--r-weight-semibold);
 }
 
 .r-h2 {
   font-size: var(--r-text-2xl);
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: var(--r-tracking-tight);
   font-weight: var(--r-weight-semibold);
 }
 
 .r-h3 {
   font-size: var(--r-text-xl);
-  line-height: 1.35;
+  line-height: 1.3;
   letter-spacing: var(--r-tracking-snug);
   font-weight: var(--r-weight-semibold);
 }
 
 .r-title {
-  font-size: var(--r-text-lg);
+  font-size: var(--r-text-md);
   line-height: 1.4;
   letter-spacing: var(--r-tracking-snug);
   font-weight: var(--r-weight-semibold);
@@ -128,17 +150,17 @@ a {
 
 .r-body-lg {
   font-size: var(--r-text-lg);
-  line-height: var(--r-leading-relaxed);
+  line-height: var(--r-leading-normal);
 }
 
 .r-body {
   font-size: var(--r-text-md);
-  line-height: 1.55;
+  line-height: var(--r-leading-normal);
 }
 
 .r-body-sm {
   font-size: var(--r-text-sm);
-  line-height: 1.5;
+  line-height: var(--r-leading-normal);
 }
 
 .r-caption {
@@ -146,12 +168,36 @@ a {
   line-height: 1.4;
 }
 
+/* The brand's Small Header: section names, card eyebrows, table heads. */
+.r-eyebrow,
 .r-overline {
+  font-family: var(--r-font-mono);
   font-size: var(--r-text-2xs);
   line-height: 1.4;
-  letter-spacing: var(--r-tracking-wide);
+  letter-spacing: var(--r-tracking-caps);
   text-transform: uppercase;
   font-weight: var(--r-weight-semibold);
+}
+
+/* Metadata: axis ticks, timestamps, units, ids. Quieter than an eyebrow. */
+.r-label {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: var(--r-weight-medium);
+  color: var(--r-text-tertiary);
+}
+
+/* A running index, "01" "02", as on the 21 Strive spec pages. */
+.r-index {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--r-text-tertiary);
 }
 
 .r-numeric {
@@ -161,6 +207,14 @@ a {
 .r-mono {
   font-family: var(--r-font-mono);
   font-size: 0.92em;
+  letter-spacing: 0;
+}
+
+.r-pixel {
+  font-family: var(--r-font-pixel);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .r-text-secondary {
@@ -171,7 +225,7 @@ a {
   color: var(--r-text-tertiary);
 }
 
-/* ── Tones · components read --tone-* so one class re-colours a whole part ── */
+/* ── Tones · components read --tone-* so one class re-colours a whole part ─────────── */
 .r-tone-neutral {
   --tone-solid: var(--r-ink);
   --tone-solid-hover: var(--r-ink-hover);
@@ -179,7 +233,8 @@ a {
   --tone-soft: var(--r-bg-hover);
   --tone-soft-hover: var(--r-bg-pressed);
   --tone-text: var(--r-text-secondary);
-  --tone-border: var(--r-border);
+  --tone-border: var(--r-border-strong);
+  --tone-lamp: var(--r-status-off);
 }
 
 .r-tone-brand {
@@ -190,69 +245,54 @@ a {
   --tone-soft-hover: var(--r-brand-soft-hover);
   --tone-text: var(--r-brand-text);
   --tone-border: var(--r-brand-border);
+  --tone-lamp: var(--r-brand);
+}
+
+.r-tone-signal {
+  --tone-solid: var(--r-signal);
+  --tone-solid-hover: var(--r-signal-hover);
+  --tone-on-solid: var(--r-on-signal);
+  --tone-soft: var(--r-signal-soft);
+  --tone-soft-hover: color-mix(in srgb, var(--r-signal) 16%, var(--r-signal-soft));
+  --tone-text: var(--r-signal-text);
+  --tone-border: var(--r-signal-border);
+  --tone-lamp: var(--r-signal);
 }
 
 .r-tone-success {
   --tone-solid: var(--r-success);
   --tone-solid-hover: var(--r-success-hover);
-  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
+  --tone-on-solid: var(--r-on-success);
   --tone-soft: var(--r-success-soft);
   --tone-soft-hover: color-mix(in srgb, var(--r-success) 14%, var(--r-success-soft));
   --tone-text: var(--r-success-text);
   --tone-border: var(--r-success-border);
+  --tone-lamp: var(--r-status-good);
 }
 
 .r-tone-warning {
   --tone-solid: var(--r-warning);
   --tone-solid-hover: var(--r-warning-hover);
-  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
+  --tone-on-solid: var(--r-on-warning);
   --tone-soft: var(--r-warning-soft);
-  --tone-soft-hover: color-mix(in srgb, var(--r-warning) 14%, var(--r-warning-soft));
+  --tone-soft-hover: color-mix(in srgb, var(--r-warning) 16%, var(--r-warning-soft));
   --tone-text: var(--r-warning-text);
   --tone-border: var(--r-warning-border);
+  --tone-lamp: var(--r-status-warning);
 }
 
 .r-tone-danger {
   --tone-solid: var(--r-danger);
   --tone-solid-hover: var(--r-danger-hover);
-  --tone-on-solid: #fff;
+  --tone-on-solid: var(--r-on-danger);
   --tone-soft: var(--r-danger-soft);
   --tone-soft-hover: color-mix(in srgb, var(--r-danger) 14%, var(--r-danger-soft));
   --tone-text: var(--r-danger-text);
   --tone-border: var(--r-danger-border);
+  --tone-lamp: var(--r-status-critical);
 }
 
-.r-tone-violet {
-  --tone-solid: var(--r-violet);
-  --tone-solid-hover: var(--r-violet-hover);
-  --tone-on-solid: #fff;
-  --tone-soft: var(--r-violet-soft);
-  --tone-soft-hover: color-mix(in srgb, var(--r-violet) 14%, var(--r-violet-soft));
-  --tone-text: var(--r-violet-text);
-  --tone-border: var(--r-violet-border);
-}
-
-.r-tone-flame {
-  --tone-solid: var(--r-flame);
-  --tone-solid-hover: var(--r-flame-hover);
-  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
-  --tone-soft: var(--r-flame-soft);
-  --tone-soft-hover: color-mix(in srgb, var(--r-flame) 14%, var(--r-flame-soft));
-  --tone-text: var(--r-flame-text);
-  --tone-border: var(--r-flame-border);
-}
-
-.r-tone-sky {
-  --tone-solid: var(--r-sky);
-  --tone-solid-hover: var(--r-sky-hover);
-  --tone-on-solid: #15181e; /* white measures under 3.4:1 on this fill */
-  --tone-soft: var(--r-sky-soft);
-  --tone-soft-hover: color-mix(in srgb, var(--r-sky) 14%, var(--r-sky-soft));
-  --tone-text: var(--r-sky-text);
-  --tone-border: var(--r-sky-border);
-}
-
-/* ── Utilities ───────────────────────────────────────────────────────────── */
+/* ── Utilities ──────────────────────────────────────────────────────────────────────── */
 .r-sr-only {
   position: absolute;
   width: 1px;
@@ -267,28 +307,78 @@ a {
 
 .r-hairline {
   border: 0;
-  border-top: 1px solid var(--r-border-subtle);
+  border-top: 1px solid var(--r-border);
   margin: 0;
 }
 
-/* Lucide icons draw a touch lighter than their 2px default, closer to the references. */
+/* Ruled grid: cells separated by 1px rules, the spec-sheet layout. Children are the cells.
+   Each cell draws its own right and bottom rule, so a short last row leaves no grey gap. */
+.r-grid-ruled {
+  display: grid;
+  border-top: 1px solid var(--r-border);
+  border-left: 1px solid var(--r-border);
+}
+
+.r-grid-ruled > * {
+  min-width: 0;
+  border-right: 1px solid var(--r-border);
+  border-bottom: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
+}
+
+/* Registration marks: four corner ticks, for instrument panels and hero frames. */
+.r-marks {
+  position: relative;
+}
+
+.r-marks::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  --m: 9px;
+  --c: var(--r-text);
+  background:
+    linear-gradient(var(--c), var(--c)) left top / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) left top / 1px var(--m),
+    linear-gradient(var(--c), var(--c)) right top / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) right top / 1px var(--m),
+    linear-gradient(var(--c), var(--c)) left bottom / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) left bottom / 1px var(--m),
+    linear-gradient(var(--c), var(--c)) right bottom / var(--m) 1px,
+    linear-gradient(var(--c), var(--c)) right bottom / 1px var(--m);
+  background-repeat: no-repeat;
+}
+
+/* Hatching at 45°: means "no data", "forecast" or "out of window". Never decoration. */
+.r-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--r-border-strong) 0 1px,
+    transparent 1px 6px
+  );
+}
+
+/* Lucide icons: a lighter 1.5 stroke with square ends, so they sit with Geist. */
 .lucide {
   flex-shrink: 0;
-  stroke-width: 1.75;
+  stroke-width: 1.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
 }
 
 /* The floating surface shared by popovers, menus and submenus. */
 .r-panel {
   background: var(--r-bg-raised);
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-surface);
   box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
 }
 
 [data-theme='dark'] .r-panel,
 .r-panel[data-theme='dark'] {
-  border-color: var(--r-border);
+  border-color: var(--r-border-strong);
 }
 
 @keyframes r-spin {
@@ -300,6 +390,18 @@ a {
 @keyframes r-fade-in {
   from {
     opacity: 0;
+  }
+}
+
+/* A live lamp blinks like an instrument, in two steps, not a soft pulse. */
+@keyframes r-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.25;
   }
 }
 

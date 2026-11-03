@@ -13,7 +13,6 @@ import {
   identityIndex,
   initialsOf,
   useTheme,
-  type Brand,
   type TableColumn,
 } from '@/design-system'
 import DocPage from '../components/DocPage.vue'
@@ -24,7 +23,9 @@ import DoDont from '../components/DoDont.vue'
 import ColorRamp from '../components/ColorRamp.vue'
 import TokenRows, { type TokenRow } from '../components/TokenRows.vue'
 
-const { resolved, brand } = useTheme()
+const { resolved } = useTheme()
+const brand = { value: 'blue' as Brand }
+type Brand = 'blue' | 'violet' | 'flame'
 
 const RAMP = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950']
 const ramp = (name: string) => RAMP.map((step) => ({ token: `--r-${name}-${step}`, label: step }))

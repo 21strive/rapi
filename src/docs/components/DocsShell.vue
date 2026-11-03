@@ -1,18 +1,25 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, Search, X } from 'lucide-vue-next'
-import { RIconButton, RKbd, useEscape, useFocusTrap, useHotkey, useLayer, useScrollLock } from '@/design-system'
+import { RIconButton, RKbd, RLogo, useEscape, useFocusTrap, useHotkey, useLayer, useScrollLock } from '@/design-system'
 import DocsSidebar from './DocsSidebar.vue'
 import ThemeSwitch from './ThemeSwitch.vue'
-import BrandPicker from './BrandPicker.vue'
 import RapiLogo from './RapiLogo.vue'
+import { allLinks } from '../nav'
 import { paletteOpen } from '../palette'
 
 defineSlots<{ default?(): unknown }>()
 
 const route = useRoute()
 const drawerOpen = ref(false)
+
+// "FOUNDATIONS / COLOUR" in the top strip, like the running header of the brand book.
+const crumb = computed(() => {
+  const link = allLinks.find((l) => l.path === route.path)
+  if (!link) return route.meta.title ? [String(route.meta.title)] : []
+  return link.group ? [link.group, link.title] : [link.title]
+})
 const drawer = ref<HTMLElement | null>(null)
 const main = ref<HTMLElement | null>(null)
 
@@ -41,10 +48,13 @@ function skipToContent() {
     <aside class="docs-sidebar">
       <RouterLink to="/" class="docs-brand" aria-label="Rapi, introduction">
         <RapiLogo />
-        <span class="docs-brand__version">0.1</span>
+        <span class="docs-brand__version">0.2</span>
       </RouterLink>
       <DocsSidebar />
-      <p class="docs-sidebar__foot">Rapi means tidy in Indonesian.</p>
+      <div class="docs-sidebar__foot">
+        <RLogo brand="21strive" variant="mark" :size="12" label="" />
+        <p>The design language of 21&nbsp;Strive. <em>Rapi</em> is Indonesian for tidy.</p>
+      </div>
     </aside>
 
     <div class="docs-body">
@@ -55,6 +65,9 @@ function skipToContent() {
         <RouterLink to="/" class="docs-brand docs-topbar__brand" aria-label="Rapi, introduction">
           <RapiLogo />
         </RouterLink>
+        <p class="docs-topbar__crumb" aria-hidden="true">
+          <template v-for="(c, i) in crumb" :key="i"><span v-if="i" class="docs-topbar__sep">/</span>{{ c }}</template>
+        </p>
         <button type="button" class="docs-search" aria-label="Search docs" @click="paletteOpen = true">
           <Search />
           <span class="docs-search__text">Search docs</span>
@@ -62,7 +75,6 @@ function skipToContent() {
         </button>
         <div class="docs-topbar__actions">
           <ThemeSwitch />
-          <BrandPicker />
         </div>
       </header>
 
@@ -84,7 +96,6 @@ function skipToContent() {
             <DocsSidebar />
             <div class="docs-drawer__prefs">
               <ThemeSwitch />
-              <BrandPicker />
             </div>
           </div>
         </div>
@@ -105,7 +116,6 @@ function skipToContent() {
   top: 8px;
   left: 8px;
   padding: 8px 12px;
-  border-radius: var(--r-radius-md);
   background: var(--r-ink);
   color: var(--r-on-ink);
   font-weight: var(--r-weight-medium);
@@ -122,13 +132,14 @@ function skipToContent() {
   top: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
   flex-shrink: 0;
-  width: 264px;
+  width: 256px;
   height: 100dvh;
-  padding: 20px 16px 24px;
+  padding: 0 12px 20px;
   overflow-y: auto;
-  border-right: 1px solid var(--r-border-subtle);
+  border-right: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
 }
 
 .docs-sidebar > * {
@@ -136,31 +147,41 @@ function skipToContent() {
 }
 
 .docs-sidebar__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: auto;
-  padding: 0 10px;
+  padding: 16px 8px 0;
+  border-top: 1px solid var(--r-border);
   color: var(--r-text-tertiary);
   font-size: var(--r-text-xs);
+  line-height: 1.5;
+}
+.docs-sidebar__foot .r-logo {
+  color: var(--r-text);
 }
 
 .docs-brand {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  align-self: flex-start;
-  padding: 4px 10px 4px 6px;
-  border-radius: var(--r-radius-md);
+  height: 56px;
+  margin: 0 -12px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--r-border);
   color: inherit;
   text-decoration: none;
 }
 
 .docs-brand__version {
-  padding: 2px 6px;
-  border-radius: var(--r-radius-xs);
-  background: var(--r-bg-hover);
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-2xs);
+  padding: 1px 5px;
+  border: 1px solid var(--r-border-strong);
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
 .docs-body {
@@ -177,11 +198,30 @@ function skipToContent() {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 64px;
-  padding: 0 32px;
-  border-bottom: 1px solid var(--r-border-subtle);
-  background: color-mix(in srgb, var(--r-bg-canvas) 82%, transparent);
-  backdrop-filter: saturate(1.4) blur(12px);
+  height: 56px;
+  padding: 0 24px 0 40px;
+  border-bottom: 1px solid var(--r-border);
+  background: color-mix(in srgb, var(--r-bg-surface) 88%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.docs-topbar__crumb {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  margin-right: auto;
+  overflow: hidden;
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.docs-topbar__sep {
+  color: var(--r-text-disabled);
 }
 
 .docs-topbar__menu,
@@ -193,13 +233,11 @@ function skipToContent() {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: min(360px, 100%);
-  height: 38px;
-  padding: 0 8px 0 12px;
+  width: min(320px, 100%);
+  height: 32px;
+  padding: 0 6px 0 10px;
   border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-md);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
   color: var(--r-text-tertiary);
   font-size: var(--r-text-sm);
   cursor: pointer;
@@ -297,7 +335,15 @@ function skipToContent() {
   }
   .docs-search {
     width: auto;
-    margin-left: auto;
+  }
+  .docs-topbar__crumb {
+    display: none;
+  }
+  .docs-topbar__brand {
+    height: auto;
+    margin: 0 auto 0 0;
+    padding: 0;
+    border: 0;
   }
 }
 
@@ -306,7 +352,7 @@ function skipToContent() {
     display: none;
   }
   .docs-search {
-    width: 40px;
+    width: 32px;
     justify-content: center;
     padding: 0;
   }
