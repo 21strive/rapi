@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft, Command } from 'lucide-vue-next'
+import { ArrowLeft, Command, Moon, Sun } from 'lucide-vue-next'
+import { RSegmented } from '@/design-system'
 import ThemeSwitch from './ThemeSwitch.vue'
 import { paletteOpen } from '../palette'
 import { sampleById } from '../samples/registry'
+import { sampleTheme } from '../samples/theme'
+
+const themeOptions = [
+  { label: 'Light', value: 'light', icon: Sun },
+  { label: 'Dark', value: 'dark', icon: Moon },
+]
 
 const route = useRoute()
 const sample = computed(() => (route.meta.sample ? sampleById(route.meta.sample) : undefined))
@@ -18,7 +25,16 @@ const sample = computed(() => (route.meta.sample ? sampleById(route.meta.sample)
     </RouterLink>
     <span v-if="sample" class="example-toolbar__id">{{ sample.index }} · {{ sample.title }}</span>
     <span class="example-toolbar__divider" aria-hidden="true" />
-    <ThemeSwitch />
+    <RSegmented
+      v-if="sample"
+      :model-value="sampleTheme"
+      :options="themeOptions"
+      size="sm"
+      icon-only
+      label="Theme of this sample"
+      @update:model-value="(value) => (sampleTheme = value as 'light' | 'dark')"
+    />
+    <ThemeSwitch v-else />
     <button type="button" class="example-toolbar__palette" aria-label="Open command menu" @click="paletteOpen = true">
       <Command />
     </button>

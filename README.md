@@ -5,15 +5,19 @@
   </picture>
 </h1>
 
-A quiet, data-first design system for Vue 3. *Rapi* is Indonesian for tidy.
+Rapi is the design language and the design system of 21 Strive, built for Vue 3. *Rapi* is Indonesian for tidy.
 
-It grew out of a close reading of 24 dashboard shots from the Dribbble collection *Clean Minimalistic*. We measured colour coverage, type sizes, corner radii and how focus and selection are shown, then kept what those screens agree on: calm near-white surfaces, big tabular numbers, soft corners, ink for emphasis, and a keyboard for everything. The docs site (this repo) shows every token, component and chart, plus three full example screens built only from the library.
+It starts from the 21 Strive brand book (the logogram, cobalt `#1B3AAB` and `#7E94E2` on black `#151515` and white, Geist and Geist Mono, spec pages ruled into columns) and takes its seriousness from IBM Carbon, Linear, Cloudflare's dashboard and VoidZero, with a Teenage Engineering twist: instrument readouts, knobs, dot-matrix digits and one orange. Think of a treasury desk, a security operations floor or launch control. Nothing floats, nothing bounces, and the data is the loudest thing on screen.
 
-- 27 components: buttons, chips, form controls, cards, stats, tables, menus, popovers, dialogs, a command palette, onboarding coachmarks and a guided tour
-- 8 charts drawn as plain SVG from the tokens: dot matrix, line, sparkline, radial gauge, heatmap, range bars, bar list and columns
-- Light and dark themes, three brand hues (blue, violet, flame), theme islands
-- Plus Jakarta Sans Variable, by Tokotype in Jakarta
-- No runtime dependencies beyond Vue and lucide-vue-next icons; no chart library
+- Square by default: every corner is 0. A circle always means a point or a state.
+- 1px rules carry the structure; only floating things get a (short) shadow.
+- Geist for reading, Geist Mono in capitals for labels, Geist Pixel for the occasional readout.
+- Ink and greys do most of the work; cobalt marks the brand and the selection; International Orange (`#FF4F00`) marks what is live or now.
+- 42 components, 15 charts drawn as plain SVG from the tokens, light and dark themes, theme islands.
+- 36 sample screens across banking, security and defense, aerospace and operations, instruments, developer platforms, workspace tools and brand work, plus the three original examples restyled.
+- No runtime dependencies beyond Vue and lucide-vue-next; no chart library.
+
+`DESIGN.md` is the source of truth for the language: principles, tokens to reach for, layout patterns, component and chart rules, copy and what not to do.
 
 ## Run the docs
 
@@ -38,27 +42,31 @@ ssh -L 5180:localhost:5180 <user>@<host>
 ## Project layout
 
 ```
+DESIGN.md                 the language, for the people who build with it
 src/
   design-system/          the library
-    tokens/tokens.css     primitives, brand ramp, semantic roles (light + dark), sizes, motion
-    tokens/base.css       reset, type scale classes, tone classes, utilities
-    composables/          floating positioning, focus trap, scroll lock, hotkeys, formatting, theme
-    components/           R-components (RButton.vue, RTable.vue, …)
-    charts/               SVG charts and their shared maths
-    types.ts              shared prop types (MenuItem, TableColumn, CommandItem, …)
+    tokens/tokens.css     primitives (OKLCH ramps), semantic roles (light + dark), sizes, motion
+    tokens/base.css       fonts, reset, type scale, tone classes, utilities
+    fonts/                Geist Pixel (SIL OFL 1.1)
+    brand/marks.ts        21 Strive and Rapi logo geometry
+    composables/          floating positioning, focus trap, scroll lock, hotkeys, formatting, theme, toasts
+    components/           R-components (RButton.vue, RTable.vue, RReadout.vue, …)
+    charts/               SVG charts, their shared frame (chart.css) and maths
+    types.ts              shared prop types
     index.ts              library entry and RapiPlugin
   docs/                   the documentation site
     pages/                one page per section of the docs
-    examples/             Sales overview, Projects, Weekly schedule
-    components/           docs-only building blocks (demo frames, code blocks, props tables)
+    samples/              the 36 sample screens, one folder each, and their registry
+    examples/             the three original examples
+    components/           docs-only building blocks
 ```
 
 ## Using the library in another Vue app
 
-The library is plain source; copy `src/design-system/` into your app (or point an alias at it) and install its two dependencies:
+The library is plain source; copy `src/design-system/` into your app (or point an alias at it) and install its dependencies:
 
 ```bash
-npm install @fontsource-variable/plus-jakarta-sans lucide-vue-next
+npm install @fontsource-variable/geist @fontsource-variable/geist-mono lucide-vue-next
 ```
 
 Register everything at once:
@@ -76,77 +84,70 @@ or import only what you use:
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RButton, RCard, RStat, RSegmented } from './design-system'
+import { RButton, RCard, RLineChart, RSegmented, RStat } from './design-system'
 
-const period = ref('month')
+const range = ref('30d')
 </script>
 
 <template>
-  <RCard title="Overall revenue" variant="brand">
-    <RStat :value="25912" prefix="$" :trend="1.9" trend-label="than last month" />
+  <RCard eyebrow="Treasury" title="Net liquidity" meta="IDR bn">
+    <RStat label="Total cash" :value="4820" suffix=" bn" :trend="1.9" trend-label="vs last week" />
+    <RLineChart
+      :labels="weeks"
+      :series="[{ name: 'Net liquidity', values: liquidity }]"
+      :forecast-from="12"
+      :now="12"
+      label="Net liquidity by week with a six-week forecast"
+    />
   </RCard>
-  <RSegmented
-    v-model="period"
-    :options="[{ label: 'Week', value: 'week' }, { label: 'Month', value: 'month' }]"
-    label="Period"
-  />
-  <RButton>Continue</RButton>
+  <RSegmented v-model="range" :options="[{ label: '7D', value: '7d' }, { label: '30D', value: '30d' }]" label="Range" />
+  <RButton tone="brand">New transfer</RButton>
 </template>
 ```
 
-Importing `design-system/index.ts` (directly or through the plugin) also loads the font, `tokens.css` and `base.css`. `RapiPlugin` adds type declarations for every global component, so templates get autocompletion.
+Importing `design-system/index.ts` (directly or through the plugin) also loads Geist, Geist Mono, `tokens.css`, `base.css` and the chart frame. `RapiPlugin` adds type declarations for every global component.
 
 ## How the tokens work
 
 There are two layers.
 
-**Primitives** are raw ramps: `--r-neutral-*`, `--r-blue-*`, `--r-violet-*`, `--r-flame-*`, `--r-green-*`, `--r-amber-*`, `--r-rose-*`, `--r-sky-*`. Components never read them. A third ramp, `--r-brand-*`, is an alias that points at blue, violet or flame.
+**Primitives** are raw ramps built in OKLCH on one lightness scale: `--r-neutral-*` (pure grey; 900 is the 21 Strive black), `--r-cobalt-*` (700 is `#1B3AAB`, 400 is `#7E94E2`), `--r-signal-*` (500 is International Orange), `--r-green-*`, `--r-amber-*`, `--r-red-*`, and a few teal and magenta steps for data. Components never read them.
 
 **Semantic tokens** describe a role, and components only read these:
 
 | Group | Examples |
 |---|---|
-| Surfaces | `--r-bg-canvas`, `--r-bg-surface`, `--r-bg-raised`, `--r-bg-muted`, `--r-bg-hover`, `--r-bg-track` |
+| Surfaces | `--r-bg-canvas`, `--r-bg-surface`, `--r-bg-muted`, `--r-bg-hover`, `--r-bg-selected` |
 | Text | `--r-text`, `--r-text-secondary`, `--r-text-tertiary`, `--r-text-disabled` |
 | Lines | `--r-border-subtle`, `--r-border`, `--r-border-strong` |
-| Emphasis | `--r-ink`, `--r-on-ink`, `--r-brand`, `--r-brand-soft`, `--r-brand-text` |
-| Status | `--r-success*`, `--r-warning*`, `--r-danger*`, plus `--r-violet*`, `--r-flame*`, `--r-sky*` |
-| Data | `--r-chart-1` … `--r-chart-6`, `--r-chart-track`, `--r-chart-grid`, `--r-chart-axis` |
-| Identity | `--r-identity-1` … `8` and `-text` pairs, for avatars and calendar colours |
-| Shape and motion | `--r-radius-*`, `--r-space-*`, `--r-control-*`, `--r-shadow-*`, `--r-duration-*`, `--r-ease-*`, `--r-z-*` |
+| Emphasis | `--r-ink`, `--r-brand`, `--r-brand-soft`, `--r-brand-text`, `--r-signal`, `--r-on-signal` |
+| Status | `--r-success*`, `--r-warning*`, `--r-danger*`, lamps `--r-status-good / warning / serious / critical / off` |
+| Data | `--r-chart-1` … `--r-chart-8`, `--r-chart-context`, `--r-chart-now`, `--r-chart-grid`, `--r-chart-axis`, `--r-seq-0` … `--r-seq-8`, `--r-div-*` |
+| Shape and size | `--r-radius-surface`, `--r-radius-control`, `--r-radius-mark` (all 0), `--r-radius-round`, `--r-control-*`, `--r-space-*` |
+| Motion | `--r-duration-*`, `--r-ease-out`, `--r-ease-in-out` |
 
-Status colours reach components through **tone classes**. A component reads `--tone-solid`, `--tone-solid-hover`, `--tone-on-solid`, `--tone-soft`, `--tone-soft-hover`, `--tone-text` and `--tone-border`; the classes `.r-tone-neutral`, `.r-tone-brand`, `.r-tone-success`, `.r-tone-warning`, `.r-tone-danger`, `.r-tone-violet`, `.r-tone-flame` and `.r-tone-sky` fill them in. That is why `RBadge`, `RButton` and `RChip` take a `tone` prop instead of a variant per colour.
+The chart palette was checked with a colour-vision validator in both themes: neighbouring slots stay apart under protanopia and deuteranopia, and the first three slots stay apart in any pairing, which is what scatter plots need.
+
+Status and brand colours reach components through **tone classes**: `.r-tone-neutral`, `.r-tone-brand`, `.r-tone-signal`, `.r-tone-success`, `.r-tone-warning` and `.r-tone-danger` fill `--tone-solid`, `--tone-on-solid`, `--tone-soft`, `--tone-text`, `--tone-border` and `--tone-lamp`.
 
 ## Theming
 
-Themes are attributes, not class names or separate stylesheets.
-
 ```html
-<html data-theme="dark" data-brand="violet">
+<html data-theme="dark">
 ```
 
-- `data-theme="light" | "dark"` re-points every semantic token. It works on any element, not only `<html>`: the command palette and tooltips are dark islands inside a light page.
-- `data-brand="violet" | "flame"` swaps the brand ramp (leave it off for blue). Set it on `<html>`.
-- Coloured cards (`RCard variant="brand"` or `"flame"`) re-point text, border and chart tokens locally, so anything inside them reads on colour.
+`data-theme="light" | "dark"` re-points every semantic token. It works on any element, not only `<html>`: a console panel, a code block or a tooltip can be a dark island inside a light page. `useTheme()` keeps the attribute in sync with a stored preference (`light`, `dark` or `system`); the inline script in `index.html` applies it before the first paint.
 
-`useTheme()` keeps both attributes in sync with a stored preference (`light`, `dark` or `system`) and the brand, using the localStorage keys `rapi-theme` and `rapi-brand`. The inline script in `index.html` applies them before the first paint, so there is no flash of the wrong theme.
-
-```ts
-import { useTheme } from './design-system'
-
-const { theme, brand, resolved, setTheme, setBrand } = useTheme()
-setTheme('dark')
-setBrand('flame')
-```
+Rapi 0.1 could swap brand hues. 0.2 is the 21 Strive language and has one brand, cobalt.
 
 ## Accessibility
 
-- Text colours pass WCAG AA; the tertiary grey is 5.3:1 on white, 4.9:1 on the canvas and 5.4:1 on the dark surface. Solid fills in light tones (success, warning, flame, sky, and the flame brand) carry dark labels, because white on them falls below 4.5:1.
-- Focus is always visible: a 2px brand outline on buttons, chips and tabs; a brand border with a soft 3px halo on text fields.
-- Widgets use the expected roles and keys: tablist, radiogroup with arrow keys, switch, menu with typeahead and submenus, dialog with a focus trap and focus restore, combobox and listbox in the command palette.
-- Charts have a label, a visually hidden data table, and arrow-key exploration with a live region.
-- With reduced motion on, durations drop to almost nothing and count-up numbers appear at once.
+- Text colours pass WCAG AA in both themes. White fails on International Orange, so signal fills carry black labels.
+- Focus is always visible: a 2px cobalt line.
+- Widgets use the expected roles and keys: tablist, radiogroup, switch, slider (including the knob), menu with typeahead and submenus, dialog with a focus trap, combobox and listbox in the command palette.
+- Every chart has a label, a hidden data table and arrow-key exploration with a live region; no chart relies on colour alone.
+- With reduced motion on, durations drop to almost nothing, live lamps stop blinking and the radar sweep stops.
 
 ## Credits
 
-The design references are listed with their designers on the References page of the docs. Nothing was copied from them; they were studied and measured. Plus Jakarta Sans is by Tokotype. Icons are from Lucide.
+The 21 Strive brand book defines the marks, colours and type. Geist, Geist Mono and Geist Pixel are by Vercel with basement.studio, under the SIL Open Font License. Icons are from Lucide. The References page of the docs lists the products that shaped the language.

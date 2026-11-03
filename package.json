@@ -1,9 +1,9 @@
 {
   "name": "rapi-design-system",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Rapi — a quiet, data-first design system for Vue 3, distilled from 24 clean minimalistic dashboard references.",
+  "description": "Rapi \u2014 the design language and design system of 21 Strive, for Vue 3.",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",

@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ArrowUpRight } from 'lucide-vue-next'
+
+const originals = [
+  { path: '/examples/sales', title: 'Sales overview', summary: 'The first Rapi example, restyled: KPIs, a sales dot matrix, categories on a tick ring, transactions and orders by hour.' },
+  { path: '/examples/projects', title: 'Projects', summary: 'A filterable projects list with a filter popover, bulk actions, row menus and pagination.' },
+  { path: '/examples/schedule', title: 'Weekly schedule', summary: 'A week calendar with a mini month, calendar list, context menu and an event dialog.' },
+]
 import DocPage from '../components/DocPage.vue'
 import { sampleGroups, samples } from '../samples/registry'
 
@@ -29,6 +35,25 @@ const groups = computed(() =>
           </span>
           <span class="samples-card__title">{{ s.title }}</span>
           <span class="samples-card__summary">{{ s.summary }}</span>
+          <ArrowUpRight class="samples-card__arrow" :size="16" aria-hidden="true" />
+        </RouterLink>
+      </div>
+    </section>
+
+    <section class="samples-group">
+      <header class="samples-group__head">
+        <span class="r-index">{{ String(groups.length + 1).padStart(2, '0') }}</span>
+        <h2 class="r-eyebrow">From Rapi 0.1</h2>
+        <span class="samples-group__count r-label">3 screens</span>
+      </header>
+      <div class="samples-grid r-grid-ruled">
+        <RouterLink v-for="(o, i) in originals" :key="o.path" :to="o.path" class="samples-card">
+          <span class="samples-card__top">
+            <span class="r-index">E{{ i + 1 }}</span>
+            <span class="samples-card__theme r-label">restyled</span>
+          </span>
+          <span class="samples-card__title">{{ o.title }}</span>
+          <span class="samples-card__summary">{{ o.summary }}</span>
           <ArrowUpRight class="samples-card__arrow" :size="16" aria-hidden="true" />
         </RouterLink>
       </div>
