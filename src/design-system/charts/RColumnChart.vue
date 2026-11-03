@@ -128,7 +128,9 @@ const xEvery = computed(() => Math.max(1, Math.ceil(44 / geometry.value.band)))
 const refs = computed(() =>
   (props.references ?? []).map((r) => {
     const text = r.label ?? `${r.kind ?? 'target'} ${fmt(r.value)}`
-    return { ...r, y: geometry.value.y(r.value), text, w: text.length * 6.2 + 8 }
+    const w = text.length * 6.2 + 8
+    const start = r.align === 'start'
+    return { ...r, y: geometry.value.y(r.value), text, w, rx: start ? geometry.value.left : geometry.value.right - w, tx: start ? geometry.value.left + 4 : geometry.value.right - 4, anchor: start ? 'start' : 'end' }
   }),
 )
 
@@ -229,8 +231,8 @@ const legendItems = computed(() =>
 
         <g v-for="r in refs" :key="`r${r.value}`" class="r-chart__ref" :class="`r-chart__ref--${r.kind ?? 'target'}`">
           <line :x1="geometry.left" :x2="geometry.right" :y1="crisp(r.y)" :y2="crisp(r.y)" />
-          <rect :x="geometry.right - r.w" :y="r.y - 15" :width="r.w" height="12" />
-          <text :x="geometry.right - 4" :y="r.y - 6" text-anchor="end">{{ r.text }}</text>
+          <rect :x="r.rx" :y="r.y - 15" :width="r.w" height="12" />
+          <text :x="r.tx" :y="r.y - 6" :text-anchor="r.anchor">{{ r.text }}</text>
         </g>
       </svg>
       <ChartTooltip v-if="tip" :x="tip.x" :y="tip.y" :bounds="{ width, height }" :title="tip.title" :rows="tip.rows" placement="top" />

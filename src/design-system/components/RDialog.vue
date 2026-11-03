@@ -42,6 +42,7 @@ defineSlots<{
 const panel = ref<HTMLElement | null>(null)
 const body = ref<HTMLElement | null>(null)
 const titleId = useId()
+const headingId = useId()
 const descriptionId = useId()
 
 const layer = useLayer(open)
@@ -82,13 +83,13 @@ function onBackdrop(event: PointerEvent) {
           :class="`r-dialog__panel--${size}`"
           role="dialog"
           aria-modal="true"
-          :aria-labelledby="title ? titleId : undefined"
+          :aria-labelledby="title ? titleId : $slots.header ? headingId : undefined"
           :aria-describedby="description ? descriptionId : undefined"
           tabindex="-1"
           v-bind="$attrs"
         >
           <div v-if="title || description || eyebrow || $slots.header || closable" class="r-dialog__header">
-            <div class="r-dialog__heading">
+            <div :id="headingId" class="r-dialog__heading">
               <slot name="header">
                 <p v-if="eyebrow" class="r-dialog__eyebrow">{{ eyebrow }}</p>
                 <h2 v-if="title" :id="titleId" class="r-dialog__title">{{ title }}</h2>

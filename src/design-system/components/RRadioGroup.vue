@@ -13,6 +13,8 @@ withDefaults(
     orientation?: 'vertical' | 'horizontal'
     /** `card` = each option a bordered tile with its description, for plan or mode pickers. */
     variant?: 'default' | 'card'
+    /** Horizontal card tiles per row (one per row under 560px). Defaults to as many as fit. */
+    columns?: number
   }>(),
   { orientation: 'vertical', variant: 'default' },
 )
@@ -31,7 +33,8 @@ function select(option: RadioOption) {
 <template>
   <div
     class="r-radio-group"
-    :class="[`r-radio-group--${orientation}`, `r-radio-group--${variant}`]"
+    :class="[`r-radio-group--${orientation}`, `r-radio-group--${variant}`, { 'has-columns': columns }]"
+    :style="columns ? { '--r-radio-columns': String(columns) } : undefined"
     role="radiogroup"
     :aria-labelledby="labelId"
   >
@@ -255,5 +258,15 @@ function select(option: RadioOption) {
 
 .r-radio--card.is-disabled {
   background: var(--r-bg-muted);
+}
+
+.r-radio-group--card.r-radio-group--horizontal.has-columns .r-radio-group__options {
+  grid-template-columns: repeat(var(--r-radio-columns), minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+  .r-radio-group--card.r-radio-group--horizontal.has-columns .r-radio-group__options {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

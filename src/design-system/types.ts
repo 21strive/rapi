@@ -198,6 +198,8 @@ export interface ChartReference {
   value: number
   label?: string
   kind?: 'target' | 'threshold' | 'average'
+  /** Which end of the line carries the label. Default `end`. */
+  align?: 'start' | 'end'
 }
 
 /** One row of a bullet chart (Stephen Few): a measure against a target and qualitative bands. */
@@ -210,6 +212,8 @@ export interface BulletRow {
   /** Optional comparison, e.g. last period, drawn as a thin bar inside the measure. */
   previous?: number
   sublabel?: string
+  /** For costs, latency, usage against a cap: meeting the target means staying under it. */
+  lowerIsBetter?: boolean
 }
 
 export interface CandlePoint {

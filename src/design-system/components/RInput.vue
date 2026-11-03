@@ -30,6 +30,10 @@ const props = withDefaults(
      * field, which follows the browser language and may show AM and PM.
      */
     clock?: '24h' | 'locale'
+    /** Geist Mono: codes, keys, slugs, amounts. */
+    mono?: boolean
+    /** Text alignment inside the field, e.g. center for one-time-code boxes. */
+    align?: 'left' | 'center' | 'right'
     id?: string
   }>(),
   { variant: 'outline', size: 'md', type: 'text', clock: '24h' },
@@ -112,7 +116,7 @@ defineExpose({ focus: () => input.value?.focus(), input })
     <label v-if="label" class="r-field__label" :for="inputId">{{ label }}</label>
     <div
       class="r-input"
-      :class="[`r-input--${variant}`, `r-input--${size}`, { 'is-invalid': isInvalid, 'is-disabled': disabled, 'is-readonly': readonly }]"
+      :class="[{ 'r-input--mono': mono }, align ? `r-input--align-${align}` : '', `r-input--${variant}`, `r-input--${size}`, { 'is-invalid': isInvalid, 'is-disabled': disabled, 'is-readonly': readonly }]"
     >
       <span v-if="$slots.leading" class="r-input__affix r-input__affix--leading"><slot name="leading" /></span>
       <input
@@ -371,5 +375,19 @@ defineExpose({ focus: () => input.value?.focus(), input })
 
 .r-input__control[type='search']::-webkit-search-cancel-button {
   display: none;
+}
+
+.r-input--mono .r-input__control {
+  font-family: var(--r-font-mono);
+  font-size: 0.94em;
+  letter-spacing: 0;
+}
+
+.r-input--align-center .r-input__control {
+  text-align: center;
+}
+
+.r-input--align-right .r-input__control {
+  text-align: right;
 }
 </style>

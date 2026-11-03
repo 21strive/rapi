@@ -42,8 +42,10 @@ const items = computed(() =>
     const pct = (v: number) => Math.min(100, Math.max(0, (v / max) * 100))
     const edges = row.ranges?.length ? row.ranges : [max]
     let start = 0
+    // Bands run poor → good; when lower is better the good band is the first one.
+    const tones = row.lowerIsBetter ? [...BAND_TONES].slice(0, edges.length).reverse() : BAND_TONES
     const bands = edges.map((edge, i) => {
-      const band = { left: pct(start), width: pct(edge) - pct(start), color: BAND_TONES[Math.min(i, BAND_TONES.length - 1)] }
+      const band = { left: pct(start), width: pct(edge) - pct(start), color: tones[Math.min(i, tones.length - 1)] }
       start = edge
       return band
     })
@@ -55,7 +57,7 @@ const items = computed(() =>
       target: row.target == null ? null : pct(row.target),
       previous: row.previous == null ? null : pct(row.previous),
       ticks: [0, max / 2, max],
-      met: row.target == null ? null : row.value >= row.target,
+      met: row.target == null ? null : row.lowerIsBetter ? row.value <= row.target : row.value >= row.target,
     }
   }),
 )

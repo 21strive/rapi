@@ -26,6 +26,8 @@ const props = withDefaults(
     manualSort?: boolean
     /** Names a row for its checkbox: "Select Travearth". */
     rowLabel?: (row: Row) => string
+    /** Extra classes per row, e.g. to mark the row whose drawer is open. */
+    rowClass?: (row: Row, index: number) => string | string[] | Record<string, boolean>
   }>(),
   { rowKey: 'id', density: 'comfortable', emptyText: 'Nothing to show yet.' },
 )
@@ -139,8 +141,11 @@ function toggleRow(row: Row) {
         <tr
           v-for="(row, index) in view"
           :key="keyOf(row)"
-          :class="{ 'is-selected': selectedSet.has(keyOf(row)) }"
+          :class="[{ 'is-selected': selectedSet.has(keyOf(row)) }, rowClass?.(row, index)]"
+          :tabindex="clickable ? 0 : undefined"
           @click="emit('row-click', row, index)"
+          @keydown.enter.self="emit('row-click', row, index)"
+          @keydown.space.self.prevent="emit('row-click', row, index)"
         >
           <td v-if="selectable" class="r-table__select" @click.stop>
             <RCheckbox
@@ -320,5 +325,11 @@ th.is-right .r-table__sort {
   font-size: var(--r-text-sm);
   text-align: center;
   white-space: normal;
+}
+
+/* Clickable rows are reachable with Tab and open with Enter or Space. */
+.r-table tbody tr[tabindex]:focus-visible {
+  outline: 2px solid var(--r-focus);
+  outline-offset: -2px;
 }
 </style>

@@ -23,6 +23,8 @@ const props = withDefaults(
   { rowHeight: 32, labelWidth: 160 },
 )
 
+const emit = defineEmits<{ select: [row: GanttRow, item: GanttItem] }>()
+
 const root = ref<HTMLElement | null>(null)
 const { width: measured } = useElementSize(root)
 const width = chartWidth(measured)
@@ -76,7 +78,7 @@ const flat = computed(() =>
       const next = row.items
         .filter((o) => o !== item && o.start > item.start)
         .reduce((m, o) => Math.min(m, g.x(o.start) - (o.milestone ? 6 : 0)), Infinity)
-      const room = end + textW - 6 < next
+      const room = end + textW - 6 < next && end + textW - 6 < g.right
       return { row, item, r, x: x0, y: y + 7, w, h: props.rowHeight - 14, tone, text, fits, room, cy: y + props.rowHeight / 2 }
     }),
   ),
@@ -93,6 +95,16 @@ const focus = useChartFocus(
       : `${f.row.label}: ${f.text || 'item'} from ${ft(f.item.start)} to ${ft(f.item.end)}`
   },
 )
+
+function onKeydown(event: KeyboardEvent) {
+  if ((event.key === 'Enter' || event.key === ' ') && focus.active.value !== null) {
+    event.preventDefault()
+    const f = flat.value[focus.active.value]
+    emit('select', f.row, f.item)
+    return
+  }
+  focus.onKeydown(event)
+}
 
 const tip = computed(() => {
   const i = focus.active.value
@@ -114,7 +126,7 @@ const tip = computed(() => {
     class="r-chart r-gantt"
     tabindex="0"
     :aria-describedby="`${uid}-hint`"
-    @keydown="focus.onKeydown"
+    @keydown="onKeydown"
     @blur="focus.onBlur"
   >
     <div class="r-chart__plot">
@@ -126,7 +138,17 @@ const tip = computed(() => {
           <line v-for="t in tickValues" :key="`g${t}`" :x1="crisp(geometry.x(t))" :x2="crisp(geometry.x(t))" :y1="AXIS_H" :y2="geometry.height" />
         </g>
         <g class="r-chart__axis">
-          <text v-for="t in tickValues" :key="`t${t}`" :x="geometry.x(t)" :y="AXIS_H - 10" text-anchor="middle">{{ ft(t) }}</text>
+          <!-- A tick label under the NOW tag steps aside. -->
+          <text
+            v-for="t in tickValues"
+            v-show="nowX == null || Math.abs(geometry.x(t) - nowX) > 34"
+            :key="`t${t}`"
+            :x="geometry.x(t)"
+            :y="AXIS_H - 10"
+            text-anchor="middle"
+          >
+            {{ ft(t) }}
+          </text>
         </g>
         <line class="r-chart__baseline" :x1="0" :x2="geometry.right" :y1="crisp(AXIS_H)" :y2="crisp(AXIS_H)" />
 
@@ -143,6 +165,7 @@ const tip = computed(() => {
           :class="{ 'is-active': focus.active.value === i, 'is-dim': focus.active.value !== null && focus.active.value !== i }"
           @pointerenter="focus.onPointer(i)"
           @pointerleave="focus.onPointer(null)"
+          @click="emit('select', f.row, f.item)"
         >
           <template v-if="f.item.milestone">
             <rect class="r-gantt__milestone" :x="f.x - 5" :y="f.cy - 5" width="10" height="10" :transform="`rotate(45 ${f.x} ${f.cy})`" />
@@ -200,7 +223,7 @@ const tip = computed(() => {
         </tbody>
       </table>
     </div>
-    <span :id="`${uid}-hint`" hidden>Use the arrow keys to step through the items.</span>
+    <span :id="`${uid}-hint`" hidden>Use the arrow keys to step through the items; Enter opens one.</span>
     <span class="r-sr-only" aria-live="polite">{{ focus.announce.value }}</span>
   </figure>
 </template>

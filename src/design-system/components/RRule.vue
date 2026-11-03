@@ -55,7 +55,8 @@ defineSlots<{ default?(): unknown; meta?(): unknown }>()
 
 .r-rule__label {
   display: inline-flex;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   align-items: center;
   gap: 8px;
   max-width: 60%;
@@ -82,7 +83,10 @@ defineSlots<{ default?(): unknown; meta?(): unknown }>()
 
 .r-rule__meta {
   display: inline-flex;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   align-items: center;
   gap: 8px;
   color: var(--r-text-tertiary);
