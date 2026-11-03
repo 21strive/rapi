@@ -124,7 +124,7 @@ const timeline = computed<TimelineItem[]>(() => {
     <section v-for="section in sections" :key="section.index" class="s-onboarding-summary__section">
       <header class="s-onboarding-summary__head">
         <span class="r-index">{{ String(section.index + 1).padStart(2, '0') }}</span>
-        <h4 class="r-eyebrow s-onboarding-summary__title">{{ section.title }}</h4>
+        <h3 class="r-eyebrow s-onboarding-summary__title">{{ section.title }}</h3>
         <RStatus size="sm" :tone="statusOf(section.index).tone" :label="statusOf(section.index).label" />
       </header>
       <RSpecList :items="section.items" dense />

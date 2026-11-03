@@ -444,7 +444,7 @@ const kbdProps = [
           </RCard>
           <RCard index="04" eyebrow="Payments" title="Payment templates">
             <RStat :value="486.32" prefix="$" :decimals="2" muted-decimals size="md" />
-            <RCard variant="muted" padding="sm" title="Mandatory payments" subtitle="Essential dues" title-as="h4">
+            <RCard variant="muted" padding="sm" title="Mandatory payments" subtitle="Essential dues" title-as="h3">
               <template #actions>
                 <RIconButton label="Open mandatory payments" size="sm"><ArrowUpRight /></RIconButton>
               </template>
