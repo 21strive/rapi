@@ -3,10 +3,13 @@ import { computed } from 'vue'
 import { ArrowUpRight } from 'lucide-vue-next'
 
 const originals = [
-  { path: '/examples/sales', title: 'Sales overview', summary: 'The first Rapi example, restyled: KPIs, a sales dot matrix, categories on a tick ring, transactions and orders by hour.' },
-  { path: '/examples/projects', title: 'Projects', summary: 'A filterable projects list with a filter popover, bulk actions, row menus and pagination.' },
-  { path: '/examples/schedule', title: 'Weekly schedule', summary: 'A week calendar with a mini month, calendar list, context menu and an event dialog.' },
+  { path: '/examples/sales', image: 'example-sales', title: 'Sales overview', summary: 'The first Rapi example, restyled: KPIs, a sales dot matrix, categories on a tick ring, transactions and orders by hour.' },
+  { path: '/examples/projects', image: 'example-projects', title: 'Projects', summary: 'A filterable projects list with a filter popover, bulk actions, row menus and pagination.' },
+  { path: '/examples/schedule', image: 'example-schedule', title: 'Weekly schedule', summary: 'A week calendar with a mini month, calendar list, context menu and an event dialog.' },
 ]
+
+// Screenshots taken at 1440 × 900 in each screen's own theme (public/samples/*.jpg).
+const imageOf = (name: string) => `samples/${name}.jpg`
 import DocPage from '../components/DocPage.vue'
 import { sampleGroups, samples } from '../samples/registry'
 
@@ -29,6 +32,7 @@ const groups = computed(() =>
       </header>
       <div class="samples-grid r-grid-ruled">
         <RouterLink v-for="s in g.items" :key="s.id" :to="`/samples/${s.id}`" class="samples-card">
+          <img class="samples-card__shot" :src="imageOf(s.id)" alt="" width="720" height="450" loading="lazy" decoding="async" />
           <span class="samples-card__top">
             <span class="r-index">{{ s.index }}</span>
             <span class="samples-card__theme r-label">{{ s.theme }}</span>
@@ -48,6 +52,7 @@ const groups = computed(() =>
       </header>
       <div class="samples-grid r-grid-ruled">
         <RouterLink v-for="(o, i) in originals" :key="o.path" :to="o.path" class="samples-card">
+          <img class="samples-card__shot" :src="imageOf(o.image)" alt="" width="720" height="450" loading="lazy" decoding="async" />
           <span class="samples-card__top">
             <span class="r-index">E{{ i + 1 }}</span>
             <span class="samples-card__theme r-label">restyled</span>
@@ -87,7 +92,7 @@ const groups = computed(() =>
   flex-direction: column;
   gap: 8px;
   min-height: 176px;
-  padding: 16px 18px 20px;
+  padding: 0 18px 20px;
   color: inherit;
   text-decoration: none;
   transition: background-color var(--r-duration-fast) var(--r-ease-out);
@@ -97,11 +102,24 @@ const groups = computed(() =>
   background: var(--r-bg-muted);
 }
 
+.samples-card__shot {
+  display: block;
+  width: calc(100% + 36px);
+  max-width: none;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  margin: 0 -18px 14px;
+  border-bottom: 1px solid var(--r-border);
+  background: var(--r-bg-muted);
+  object-fit: cover;
+  object-position: top left;
+}
+
 .samples-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 6px;
 }
 
 .samples-card__title {
@@ -119,8 +137,12 @@ const groups = computed(() =>
 
 .samples-card__arrow {
   position: absolute;
-  top: 16px;
-  right: 46px;
+  top: 12px;
+  right: 12px;
+  padding: 4px;
+  box-sizing: content-box;
+  background: var(--r-bg-surface);
+  border: 1px solid var(--r-border);
   color: var(--r-text-tertiary);
   opacity: 0;
   transition: opacity var(--r-duration-fast) var(--r-ease-out);
