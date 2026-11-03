@@ -16,6 +16,8 @@ const props = withDefaults(
     sweep?: boolean
     size?: number
     selected?: string
+    /** Ring labels, e.g. to show elevation on a sky plot: (v) => `${90 - v}°`. */
+    formatRing?: (value: number) => string
     /** A ring to watch, in scope units: drawn dashed in the critical colour with its range. */
     alertRing?: number
     alertLabel?: string
@@ -48,7 +50,7 @@ const ringList = computed(() =>
     const r = (R * (i + 1)) / props.rings
     const v = (props.range * (i + 1)) / props.rings
     const at = polar(45, r)
-    return { r, label: `${Math.round(v)}`, lx: at.x + 3, ly: at.y - 3 }
+    return { r, label: props.formatRing ? props.formatRing(v) : `${Math.round(v)}`, lx: at.x + 3, ly: at.y - 3 }
   }),
 )
 

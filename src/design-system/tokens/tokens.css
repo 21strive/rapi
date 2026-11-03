@@ -287,6 +287,9 @@
   --r-danger-border: var(--r-red-200);
   --r-on-danger: #ffffff;
 
+  /* Registration marks follow the page's ink, not a coloured card's re-pointed text. */
+  --r-marks-color: var(--r-text);
+
   /* Focus · a crisp 2px cobalt line, never a soft halo */
   --r-focus: var(--r-cobalt-700);
   --r-focus-ring: 0 0 0 1px var(--r-bg-surface), 0 0 0 3px var(--r-focus);
@@ -434,7 +437,8 @@
   --r-danger-border: color-mix(in srgb, var(--r-red-500) 40%, transparent);
 
   --r-focus: var(--r-cobalt-400);
-  /* Re-declared so a dark island resolves its own surface and focus colours. */
+  /* Re-declared so a dark island resolves its own surface, focus and mark colours. */
+  --r-marks-color: var(--r-text);
   --r-focus-ring: 0 0 0 1px var(--r-bg-surface), 0 0 0 3px var(--r-focus);
   --r-chart-surface: var(--r-bg-surface);
 

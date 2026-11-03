@@ -337,7 +337,7 @@ a {
   inset: -1px;
   pointer-events: none;
   --m: 9px;
-  --c: var(--r-text);
+  --c: var(--r-marks-color, var(--r-text));
   background:
     linear-gradient(var(--c), var(--c)) left top / var(--m) 1px,
     linear-gradient(var(--c), var(--c)) left top / 1px var(--m),

@@ -23,6 +23,8 @@ const props = withDefaults(
     /** Kept for 0.1 compatibility; cells are square-cornered. */
     radius?: number
     legend?: boolean
+    /** Print each value inside its cell (matrices, migration tables). Needs cells wide enough. */
+    showValues?: boolean
     format?: (value: number) => string
     label: string
   }>(),
@@ -56,11 +58,15 @@ const geometry = computed(() => {
   return { cellW, height, colEvery }
 })
 
-// Stepped scale: n classes spread over --r-seq-1…8; --r-seq-0 is reserved for zero.
-const stepCount = computed(() => Math.min(8, Math.max(3, props.steps)))
-const stepTokens = computed(() =>
-  Array.from({ length: stepCount.value }, (_, i) => `var(--r-seq-${1 + Math.round((i * 7) / (stepCount.value - 1))})`),
+// Stepped scale: n classes spread over the cobalt steps; --r-seq-0 is reserved for zero.
+// Step 5 (cobalt-500) is skipped: neither black nor white text reaches 4.5:1 on it, and cells
+// can carry values. Light steps take ink text, dark steps take inverse text, in both themes.
+const SEQ_STEPS = [1, 2, 3, 4, 6, 7, 8]
+const stepCount = computed(() => Math.min(7, Math.max(3, props.steps)))
+const stepIndexes = computed(() =>
+  Array.from({ length: stepCount.value }, (_, i) => SEQ_STEPS[Math.round((i * (SEQ_STEPS.length - 1)) / (stepCount.value - 1))]),
 )
+const stepTokens = computed(() => stepIndexes.value.map((k) => `var(--r-seq-${k})`))
 function bucket(value: number) {
   const t = hi.value === lo.value ? 1 : (value - lo.value) / (hi.value - lo.value)
   return Math.min(stepCount.value - 1, Math.max(0, Math.floor(t * stepCount.value)))
@@ -73,6 +79,15 @@ function mix(value: number) {
   if (value === 0 && lo.value >= 0) return 'var(--r-seq-0)'
   return stepTokens.value[bucket(value)]
 }
+function textOn(value: number) {
+  if (props.color) {
+    const t = hi.value === lo.value ? 1 : (value - lo.value) / (hi.value - lo.value)
+    return t >= 0.55 ? 'var(--r-text-inverse)' : 'var(--r-text)'
+  }
+  if (value === 0 && lo.value >= 0) return 'var(--r-text-tertiary)'
+  return stepIndexes.value[bucket(value)] >= 6 ? 'var(--r-text-inverse)' : 'var(--r-text)'
+}
+
 const legendBins = computed(() =>
   props.color
     ? [0, 0.25, 0.5, 0.75, 1].map((t) => mix(lo.value + t * (hi.value - lo.value)))
@@ -90,6 +105,7 @@ const cells = computed(() =>
         x: M.value.left + c * (geometry.value.cellW + props.gap),
         y: M.value.top + r * (props.cellHeight + props.gap),
         fill: mix(value),
+        ink: textOn(value),
       }
     }),
   ),
@@ -187,6 +203,19 @@ const announce = computed(() => (keyboard.value && tooltip.value ? `${tooltip.va
         :style="{ fill: cell.fill }"
         @pointerenter="((keyboard = false), (active = { r: cell.r, c: cell.c }))"
       />
+      <g v-if="showValues" class="r-heatmap__values" aria-hidden="true">
+        <text
+          v-for="cell in cells"
+          :key="`v${cell.r}-${cell.c}`"
+          :x="cell.x + geometry.cellW / 2"
+          :y="cell.y + cellHeight / 2"
+          dy="0.34em"
+          text-anchor="middle"
+          :style="{ fill: cell.ink }"
+        >
+          {{ fmt(cell.value) }}
+        </text>
+      </g>
     </svg>
 
     <ChartTooltip
@@ -260,5 +289,13 @@ const announce = computed(() => (keyboard.value && tooltip.value ? `${tooltip.va
 .r-heatmap__swatch {
   width: 18px;
   height: 8px;
+}
+
+.r-heatmap__values text {
+  font-family: var(--r-font-mono);
+  font-size: 10px;
+  font-weight: var(--r-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 </style>

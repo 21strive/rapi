@@ -14,6 +14,8 @@ const props = withDefaults(
     label: string
     height?: number
     format?: (value: number) => string
+    /** Y-axis ticks; defaults to compact numbers. */
+    axisFormat?: (value: number) => string
   }>(),
   { height: 280 },
 )
@@ -140,7 +142,7 @@ const legend = [
           <line v-for="t in yTicks" :key="t.v" :x1="geometry.left" :x2="geometry.right" :y1="crisp(t.y)" :y2="crisp(t.y)" />
         </g>
         <g class="r-chart__axis">
-          <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ formatCompact(t.v) }}</text>
+          <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ axisFormat ? axisFormat(t.v) : formatCompact(t.v) }}</text>
           <template v-for="(r, i) in rects" :key="`x${i}`">
             <text v-if="i % xEvery === 0" :x="r.cx" :y="height - 6" text-anchor="middle">{{ r.label }}</text>
           </template>

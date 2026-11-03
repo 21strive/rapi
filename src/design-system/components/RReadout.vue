@@ -263,7 +263,6 @@ const cells = (value: string) => Array.from(value, (ch) => ({ ch, digit: /\d/.te
   font-size: var(--r-text-2xs);
   line-height: 16px;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 .r-readout--sm .r-readout__sub {

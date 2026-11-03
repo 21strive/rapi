@@ -150,8 +150,8 @@ const legendItems = computed(() =>
         </g>
         <g class="r-chart__axis">
           <text class="r-chart__unit" :x="geometry.left" :y="geometry.top - 10">{{ yLabel }}</text>
-          <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ formatCompact(t.v) }}</text>
-          <text v-for="t in xTicks" :key="`x${t.v}`" :x="t.x" :y="geometry.bottom + 16" text-anchor="middle">{{ formatCompact(t.v) }}</text>
+          <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ formatY ? formatY(t.v) : formatCompact(t.v) }}</text>
+          <text v-for="t in xTicks" :key="`x${t.v}`" :x="t.x" :y="geometry.bottom + 16" text-anchor="middle">{{ formatX ? formatX(t.v) : formatCompact(t.v) }}</text>
           <text class="r-chart__unit" :x="geometry.right" :y="height - 2" text-anchor="end">{{ xLabel }}</text>
         </g>
         <line class="r-chart__baseline" :x1="geometry.left" :x2="geometry.right" :y1="crisp(geometry.bottom)" :y2="crisp(geometry.bottom)" />

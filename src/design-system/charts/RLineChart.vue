@@ -180,7 +180,9 @@ const yTicks = computed(() => domain.value.ticks.map((v) => ({ v, y: geometry.va
 
 const xTicks = computed(() => {
   const n = props.labels.length
-  const every = Math.max(1, Math.ceil(64 / (geometry.value.plotW / Math.max(1, n - 1))))
+  // Thin by the widest label (Geist Mono 10px ≈ 6.2px a character) plus breathing room.
+  const labelW = Math.max(4, ...props.labels.map((l) => l.length)) * 6.2 + 16
+  const every = Math.max(1, Math.ceil(labelW / (geometry.value.plotW / Math.max(1, n - 1))))
   return props.labels
     .map((text, i) => ({ text, x: geometry.value.x(i), i, anchor: i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle' }))
     .filter((t) => t.i % every === 0 || t.i === n - 1)

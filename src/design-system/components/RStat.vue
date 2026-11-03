@@ -19,6 +19,8 @@ const props = withDefaults(
     /** Mutes the fraction: $25,912.43 with ".43" quieter. */
     mutedDecimals?: boolean
     trend?: number
+    /** Unit after the trend figure. Default "%"; "pp" for percentage points. */
+    trendSuffix?: string
     trendLabel?: string
     invertTrend?: boolean
     /** Number at 24, 40 or 56px. */
@@ -118,7 +120,7 @@ const spoken = computed(() => {
       <span v-if="unit" class="r-stat__unit" aria-hidden="true">{{ unit }}</span>
     </div>
     <div v-if="trend !== undefined || trendLabel || $slots.footer" class="r-stat__footer">
-      <RTrend v-if="trend !== undefined" :value="trend" :invert="invertTrend" />
+      <RTrend v-if="trend !== undefined" :value="trend" :invert="invertTrend" :suffix="trendSuffix ?? '%'" />
       <span v-if="trendLabel" class="r-stat__trend-label">{{ trendLabel }}</span>
       <slot name="footer" />
     </div>

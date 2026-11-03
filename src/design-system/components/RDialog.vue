@@ -56,6 +56,8 @@ useFocusTrap(panel, open, {
   isTop: layer.isTop,
   initialFocus: () =>
     (props.initialFocus ? panel.value?.querySelector<HTMLElement>(props.initialFocus) : null) ??
+    // A drawer is read first, so it opens on its close button; a centred dialog on its first field.
+    (props.side === 'right' ? panel.value?.querySelector<HTMLElement>('.r-dialog__close') : null) ??
     (body.value ? getFocusable(body.value)[0] : null) ??
     panel.value,
 })

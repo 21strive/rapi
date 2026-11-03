@@ -38,6 +38,8 @@ const emit = defineEmits<{ 'row-click': [row: Row, index: number] }>()
 
 defineSlots<{
   empty?(): unknown
+  /** Rows for a <tfoot>, e.g. totals. Render <tr> elements; use the same column count. */
+  footer?(): unknown
   [name: `cell-${string}`]: (props: { row: Row; value: any; index: number }) => unknown
   [name: `header-${string}`]: (props: { column: TableColumn }) => unknown
 }>()
@@ -173,6 +175,9 @@ function toggleRow(row: Row) {
           </td>
         </tr>
       </tbody>
+      <tfoot v-if="$slots.footer" class="r-table__foot">
+        <slot name="footer" />
+      </tfoot>
     </table>
   </div>
 </template>
@@ -331,5 +336,21 @@ th.is-right .r-table__sort {
 .r-table tbody tr[tabindex]:focus-visible {
   outline: 2px solid var(--r-focus);
   outline-offset: -2px;
+}
+
+/* Totals: a 2px ink rule above, figures in mono semibold. */
+.r-table__foot td,
+.r-table__foot th {
+  padding: 8px 12px;
+  border-top: 2px solid var(--r-ink);
+  font-weight: var(--r-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.r-table__foot .is-numeric,
+.r-table__foot .is-right {
+  font-family: var(--r-font-mono);
+  text-align: right;
 }
 </style>

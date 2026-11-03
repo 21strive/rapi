@@ -145,7 +145,7 @@ const tip = computed(() => {
             :key="`t${t}`"
             :x="geometry.x(t)"
             :y="AXIS_H - 10"
-            text-anchor="middle"
+            :text-anchor="t <= domain[0] ? 'start' : t >= domain[1] ? 'end' : 'middle'"
           >
             {{ ft(t) }}
           </text>

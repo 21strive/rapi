@@ -221,7 +221,6 @@ const hasKicker = computed(() => !!(props.index || props.eyebrow))
   font-weight: var(--r-weight-medium);
   line-height: 1.4;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -257,9 +256,14 @@ const hasKicker = computed(() => !!(props.index || props.eyebrow))
   z-index: -1;
 }
 
-/* Registration marks draw above the logogram. */
+/* Registration marks draw above the logogram. On coloured cards they sit 4px outside the corners,
+   like crop marks, so they read against the page instead of the panel. */
 .r-card.r-marks::before {
   z-index: 1;
+}
+
+.r-card.r-marks:is(.r-card--brand, .r-card--ink, .r-card--signal)::before {
+  inset: -5px;
 }
 
 .r-card--muted {
