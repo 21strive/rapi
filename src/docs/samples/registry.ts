@@ -257,12 +257,12 @@ export const samples: Sample[] = [
   },
   {
     id: 'issues',
-    ownsModK: true,
     index: '25',
     title: "Issue tracker",
     group: 'Developer platform',
     summary: "Issues grouped by status with priority marks and keyboard hints, and one issue open with its activity.",
     theme: 'light',
+    ownsModK: true,
     load: () => import('./issues/Issues.vue'),
   },
   {
