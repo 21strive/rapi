@@ -7,8 +7,8 @@ export const kpis = {
     value: 9421642,
     segments: [
       { label: 'Profit', value: 5120000, color: 'var(--r-chart-1)' },
-      { label: 'Total earning', value: 2380000, color: 'var(--r-chart-1-soft)' },
-      { label: 'Total target', value: 1921642, color: 'color-mix(in srgb, var(--r-chart-1) 12%, var(--r-chart-track))' },
+      { label: 'Total earning', value: 2380000, color: 'var(--r-chart-7)' },
+      { label: 'Total target', value: 1921642, color: 'var(--r-chart-context)' },
     ],
   },
 }
@@ -99,6 +99,24 @@ export const transactions: Transaction[] = [
     date: '2026-06-13',
     amount: 15,
     status: 'Failed',
+  },
+  {
+    id: 'INV-2045',
+    customer: 'Ayu Kartika',
+    email: 'ayu.kartika@outlook.com',
+    product: 'Batik scarf, indigo',
+    date: '2026-06-13',
+    amount: 42,
+    status: 'Paid',
+  },
+  {
+    id: 'INV-2044',
+    customer: 'Tan Wei Ming',
+    email: 'weiming@tanandco.sg',
+    product: 'Leather card holder',
+    date: '2026-06-12',
+    amount: 36,
+    status: 'Pending',
   },
 ]
 

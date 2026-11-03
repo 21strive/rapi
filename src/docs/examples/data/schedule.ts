@@ -110,29 +110,23 @@ export function occursOn(event: ScheduleEvent, date: Date, base: Date): boolean 
   return event.recurring ? mod(offset, 7) === mod(event.day, 7) : offset === event.day
 }
 
-/* ── Formatting ───────────────────────────────────────────────────────────── */
+/* ── Formatting · 24-hour clock, like every Rapi screen ─────────────────────── */
 
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+/** "08:30" */
 export function formatTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  const suffix = hours >= 12 ? 'PM' : 'AM'
-  const h12 = hours % 12 === 0 ? 12 : hours % 12
-  return `${h12}:${String(mins).padStart(2, '0')} ${suffix}`
+  return `${pad2(Math.floor(minutes / 60))}:${pad2(minutes % 60)}`
 }
 
+/** "08:00", for the hour rail. */
 export function formatHour(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const suffix = hours >= 12 ? 'PM' : 'AM'
-  const h12 = hours % 12 === 0 ? 12 : hours % 12
-  return `${h12} ${suffix}`
+  return `${pad2(Math.floor(minutes / 60))}:00`
 }
 
-/** "8:00 – 9:30 AM", or "11:00 AM – 2:00 PM" when it crosses noon. */
+/** "08:00 – 09:30" */
 export function formatRange(start: number, end: number): string {
-  const a = formatTime(start)
-  const b = formatTime(end)
-  const sameHalf = (start < 720) === (end < 720)
-  return sameHalf ? `${a.replace(/ [AP]M$/, '')} – ${b}` : `${a} – ${b}`
+  return `${formatTime(start)} – ${formatTime(end)}`
 }
 
 export function toTimeInput(minutes: number): string {
@@ -144,12 +138,24 @@ export function fromTimeInput(value: string): number | null {
   return match ? Number(match[1]) * 60 + Number(match[2]) : null
 }
 
+/** The viewer's zone as an offset from UTC: "UTC", "UTC+7", "UTC−3:30". */
 export const timezoneLabel = (() => {
   const offset = -new Date().getTimezoneOffset()
-  const sign = offset >= 0 ? '+' : '−'
+  if (offset === 0) return 'UTC'
+  const sign = offset > 0 ? '+' : '−'
   const hours = Math.floor(Math.abs(offset) / 60)
   const minutes = Math.abs(offset) % 60
-  return `GMT${sign}${hours}${minutes ? `:${String(minutes).padStart(2, '0')}` : ''}`
+  return `UTC${sign}${hours}${minutes ? `:${pad2(minutes)}` : ''}`
 })()
 
-export const identityNames = ['Blue', 'Violet', 'Pink', 'Rose', 'Orange', 'Amber', 'Green', 'Teal']
+/** ISO 8601 week number of the week that contains `date`. */
+export function isoWeek(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const day = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - day)
+  const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1)
+  return Math.ceil(((d.getTime() - yearStart) / 86_400_000 + 1) / 7)
+}
+
+/** Names of the eight identity colours, in token order (--r-identity-1 … 8). */
+export const identityNames = ['Cobalt', 'Orange', 'Teal', 'Amber', 'Magenta', 'Green', 'Grey', 'Red']

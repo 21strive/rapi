@@ -14,8 +14,10 @@ const props = withDefaults(
     values?: number[]
     /** Several series, stacked in each column with a 2px surface gap between segments. */
     series?: ChartSeries[]
-    /** Top of the scale. Defaults to 100 when every value fits (percentages), else a tidy maximum. */
+    /** Top of the scale. Defaults to a tidy maximum, or 100 with `percent`. */
     max?: number
+    /** Values are percentages: the scale tops out at 100 and labels get a % sign. */
+    percent?: boolean
     /** A short tick per column (or one for all) marking the goal. */
     targets?: number[] | number
     /** The column drawn in full colour; the others turn context grey (emphasis). */
@@ -49,20 +51,19 @@ const multi = computed(() => (props.series?.length ?? 0) > 1)
 const totals = computed(() =>
   props.labels.map((_, i) => stacks.value.reduce((sum, s) => sum + Math.max(0, s.values[i] ?? 0), 0)),
 )
-const allFit = computed(() => totals.value.every((t) => t <= 100) && !props.series?.length)
-
 const fmt = (v: number) =>
-  props.format ? props.format(v) : allFit.value && props.max == null ? `${formatNumber(v, { maximumFractionDigits: 1 })}%` : formatNumber(v)
-const axisFmt = (v: number) =>
-  props.axisFormat ? props.axisFormat(v) : allFit.value && props.max == null ? `${v}%` : formatCompact(v)
+  props.format ? props.format(v) : props.percent ? `${formatNumber(v, { maximumFractionDigits: 1 })}%` : formatNumber(v)
+const axisFmt = (v: number) => (props.axisFormat ? props.axisFormat(v) : props.percent ? `${v}%` : formatCompact(v))
 
 const targetAt = (i: number) => (Array.isArray(props.targets) ? props.targets[i] : props.targets)
 
 const domain = computed(() => {
   const refs = (props.references ?? []).map((r) => r.value)
   const targets = props.labels.map((_, i) => targetAt(i) ?? 0)
-  const hi = props.max ?? (allFit.value ? 100 : Math.max(1, ...totals.value, ...targets, ...refs))
-  return props.max != null || allFit.value ? { min: 0, max: hi, ticks: niceDomain(0, hi, 4).ticks.filter((t) => t <= hi) } : niceDomain(0, hi, 4)
+  const hi = props.max ?? (props.percent ? 100 : Math.max(1, ...totals.value, ...targets, ...refs))
+  return props.max != null || props.percent
+    ? { min: 0, max: hi, ticks: niceDomain(0, hi, 4).ticks.filter((t) => t <= hi) }
+    : niceDomain(0, hi, 4)
 })
 
 const values = computed(() => props.showValues ?? props.labels.length <= 12)

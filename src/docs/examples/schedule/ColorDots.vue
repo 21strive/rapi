@@ -40,38 +40,37 @@ function onKeydown(event: KeyboardEvent) {
 .pk-dots {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
+/* Square swatches; the chosen one gets a 2px ring in its own ink. */
 .pk-dots__dot {
   position: relative;
   width: 24px;
   height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
   background: none;
   cursor: pointer;
 }
 
 .pk-dots__dot::before {
   position: absolute;
-  inset: 3px;
-  border-radius: 50%;
+  inset: 5px;
   background: var(--dot-bg);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dot-fg) 28%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dot-fg) 35%, transparent);
   content: '';
-  transition: inset var(--r-duration-base) var(--r-ease-spring);
+  transition: inset var(--r-duration-fast) var(--r-ease-out);
 }
 
 .pk-dots__dot:hover::before {
-  inset: 2px;
+  inset: 4px;
 }
 
 .pk-dots__dot[aria-checked='true']::before {
-  inset: 4px;
+  inset: 5px;
   box-shadow:
     0 0 0 2px var(--r-bg-raised),
-    0 0 0 3.5px var(--dot-fg);
+    0 0 0 4px var(--dot-fg);
 }
 </style>

@@ -6,14 +6,13 @@ import {
   Bell,
   Calendar,
   ChevronDown,
+  Compass,
   Copy,
   Download,
-  LayoutDashboard,
   MoreHorizontal,
   RotateCcw,
   Search,
   Settings,
-  Sparkles,
 } from 'lucide-vue-next'
 import {
   RAvatar,
@@ -32,7 +31,10 @@ import {
   RSegmented,
   RSparkline,
   RStat,
+  RStatus,
+  RSupergraphic,
   RTable,
+  RTabs,
   RTour,
   RTrend,
   formatCompact,
@@ -44,6 +46,8 @@ import {
   type TourStep,
 } from '@/design-system'
 import TourArt from './parts/TourArt.vue'
+import ExampleStrip from './parts/ExampleStrip.vue'
+import AppMark from './parts/AppMark.vue'
 import {
   categories,
   heatmapDays,
@@ -184,12 +188,13 @@ const lastYear = (values: number[]) => values.map((v, i) => Math.round((v * (0.7
 const chartSeries = computed(() => {
   const sales = year.value === 'this' ? summarySales : lastYear(summarySales)
   const insight = year.value === 'this' ? summaryInsight : lastYear(summaryInsight)
+  // Identity colours stay with their series when the other one is hidden.
   const all = [
-    { name: 'Sales', values: sales },
-    { name: 'Insight', values: insight, color: 'var(--r-chart-1-soft)' },
+    { name: 'Sales', values: sales, color: 'var(--r-chart-1)' },
+    { name: 'Insight', values: insight, color: 'var(--r-chart-2)' },
   ]
   if (mode.value === 'sales') return [all[0]]
-  if (mode.value === 'insight') return [{ ...all[1], color: 'var(--r-chart-1)' }]
+  if (mode.value === 'insight') return [all[1]]
   return all
 })
 
@@ -295,7 +300,7 @@ const steps: TourStep[] = [
   {
     target: '#sales-kpis',
     title: 'Your headline numbers',
-    body: 'Revenue, insight and balance for the dates you picked. The blue card is the one to watch.',
+    body: 'Revenue, insight and balance for the dates you picked. The cobalt panel is the one to watch.',
     placement: 'bottom',
     mediaTone: 'brand',
   },
@@ -304,21 +309,21 @@ const steps: TourStep[] = [
     title: 'Sales over time',
     body: 'Each column is half a month. Hover a column, or focus the chart and use the arrow keys, to read the numbers.',
     placement: 'bottom',
-    mediaTone: 'violet',
+    mediaTone: 'brand',
   },
   {
     target: '#sales-category',
     title: 'Where sales come from',
     body: 'Hover a part of the arc and its share shows up in the middle.',
     placement: 'left',
-    mediaTone: 'sky',
+    mediaTone: 'brand',
   },
   {
     target: '#sales-transactions',
     title: 'Recent transactions',
     body: 'The latest orders and how they were paid. Click a column header to sort.',
     placement: 'top',
-    mediaTone: 'success',
+    mediaTone: 'brand',
   },
 ]
 
@@ -341,41 +346,48 @@ function startTour() {
 
 <template>
   <div class="sales">
-    <div class="sales__inner">
-      <header class="sales__topbar">
-        <a class="sales__brand" href="#/examples/sales" aria-label="Arus, sales overview">
-          <svg class="sales__logo" viewBox="0 0 32 32" aria-hidden="true">
-            <rect width="32" height="32" rx="10" />
-            <path d="M9 20.5c2.6-6.4 5.5-9.5 8.2-9.5 3.2 0 2.3 8.6 5.8 9.6" />
-          </svg>
-          <span>Arus</span>
-        </a>
-        <div class="sales__nav">
-          <RSegmented v-model="section" :options="sections" variant="pill" label="Sections" class="sales__pills" />
-        </div>
-        <div class="sales__icons">
-          <RIconButton label="Search">
-            <Search />
-          </RIconButton>
-          <RIconButton label="Notifications, 3 unread" dot>
-            <Bell />
-          </RIconButton>
-          <RAvatar name="Nadia Putri" size="lg" status="online" />
-        </div>
-      </header>
+    <ExampleStrip>
+      <span>Arus</span>
+      <span class="ex-strip__sep">/</span>
+      <span>Commerce</span>
+      <span class="ex-strip__sep ex-strip__wide">/</span>
+      <span class="ex-strip__wide">Sales overview</span>
+      <template #end>
+        <span class="ex-strip__wide">{{ formatDay(range.from) }} – {{ formatDay(range.to) }}</span>
+        <RStatus tone="success" size="sm" label="Synced 14:02 WIB" />
+      </template>
+    </ExampleStrip>
 
-      <main class="sales__page" aria-labelledby="sales-title">
+    <header class="sales__bar">
+      <a class="sales__brand" href="#/examples/sales" aria-label="Arus, sales overview">
+        <AppMark glyph="arus" />
+        <span>Arus</span>
+      </a>
+      <RTabs v-model="section" :items="sections" label="Sections" class="sales__tabs" />
+      <div class="sales__icons">
+        <RIconButton label="Search" variant="ghost">
+          <Search />
+        </RIconButton>
+        <RIconButton label="Notifications, 3 unread" variant="ghost" dot>
+          <Bell />
+        </RIconButton>
+        <RAvatar name="Nadia Putri" size="md" status="online" />
+      </div>
+    </header>
+
+    <main class="sales__page" aria-labelledby="sales-title">
       <div class="sales__head">
-        <div>
+        <div class="sales__heading">
+          <p class="sales__eyebrow"><span class="r-index" aria-hidden="true">01</span> Commerce · Jakarta store</p>
           <h1 id="sales-title" class="sales__title">Sales overview</h1>
           <p class="sales__subtitle">How the shop did between {{ formatDay(range.from) }} and {{ formatDay(range.to) }}.</p>
         </div>
         <div class="sales__head-actions">
-          <RButton variant="soft" tone="brand" shape="pill" @click="startTour">
-            <template #leading><Sparkles /></template>
+          <RButton variant="outline" @click="startTour">
+            <template #leading><Compass /></template>
             Take the tour
           </RButton>
-          <RButton variant="outline" shape="pill" @click="exportData">
+          <RButton @click="exportData">
             <template #leading><Download /></template>
             Export data
           </RButton>
@@ -391,13 +403,14 @@ function startTour() {
       </div>
 
       <div class="sales__subrow">
-        <div class="sales__nav sales__nav--sub">
-          <RSegmented v-model="view" :options="views" variant="pill" size="sm" label="View" class="sales__pills" />
+        <div class="sales__views">
+          <RSegmented v-model="view" :options="views" size="sm" label="View" />
         </div>
         <div class="sales__dates">
+          <span class="sales__dates-label" aria-hidden="true">Range</span>
           <RPopover v-model:open="rangeOpen" placement="bottom-end" label="Date range" width="320px">
             <template #trigger>
-              <RIconButton label="Change date range" @click="draftRange = { ...range }">
+              <RIconButton label="Change date range" size="sm" @click="draftRange = { ...range }">
                 <Calendar />
               </RIconButton>
             </template>
@@ -414,11 +427,12 @@ function startTour() {
               </div>
             </form>
           </RPopover>
-          <RChip @click="openRange">{{ formatDay(range.from) }}</RChip>
-          <RChip @click="openRange">{{ formatDay(range.to) }}</RChip>
+          <RChip size="sm" @click="openRange">{{ formatDay(range.from) }}</RChip>
+          <span class="sales__dates-arrow" aria-hidden="true">→</span>
+          <RChip size="sm" @click="openRange">{{ formatDay(range.to) }}</RChip>
           <RPopover v-model:open="rangeMenuOpen" kind="menu" placement="bottom-end">
             <template #trigger>
-              <RIconButton label="More date options">
+              <RIconButton label="More date options" size="sm" variant="ghost">
                 <MoreHorizontal />
               </RIconButton>
             </template>
@@ -428,23 +442,30 @@ function startTour() {
       </div>
 
       <RCard v-if="unbuilt" class="sales__unbuilt" padding="lg">
-        <LayoutDashboard class="sales__unbuilt-icon" />
-        <h2 class="sales__card-title">{{ unbuilt }} is not part of this example</h2>
-        <p class="sales__unbuilt-text">Overview with the Summary view is fully built. Everything else is here to show the navigation.</p>
-        <div>
-          <RButton @click="backToOverview">
-            Back to overview
-            <template #trailing><ArrowRight /></template>
-          </RButton>
+        <RSupergraphic variant="construction" anchor="bottom-right" />
+        <div class="sales__unbuilt-body">
+          <p class="r-eyebrow">Not in this example</p>
+          <h2 class="sales__unbuilt-title">{{ unbuilt }} is not built</h2>
+          <p class="sales__unbuilt-text">
+            Overview with the Summary view is fully built. Everything else is here to show the navigation.
+          </p>
+          <div>
+            <RButton @click="backToOverview">
+              Back to overview
+              <template #trailing><ArrowRight /></template>
+            </RButton>
+          </div>
         </div>
       </RCard>
 
-      <template v-else>
-        <section id="sales-kpis" class="sales__kpis" aria-label="Key numbers">
-          <RCard variant="brand">
-            <template #header><h2 class="sales__card-title">Overall revenue</h2></template>
+      <div v-else class="sales__board">
+        <section id="sales-kpis" class="sales__grid sales__grid--kpis" aria-label="Key numbers">
+          <RCard variant="brand" class="sales__kpi">
+            <template #header>
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">02</span>Overall revenue</h2>
+            </template>
             <template #actions>
-              <RIconButton label="Open revenue report" variant="soft">
+              <RIconButton label="Open revenue report" variant="soft" size="sm">
                 <ArrowUpRight />
               </RIconButton>
             </template>
@@ -460,25 +481,32 @@ function startTour() {
             />
           </RCard>
 
-          <RCard class="sales__insight">
-            <div class="sales__insight-wave" aria-hidden="true">
-              <RSparkline :values="insightWave" color="var(--r-danger)" :height="96" :stroke-width="1.5" />
-            </div>
-            <template #header><h2 class="sales__card-title">Total insight</h2></template>
+          <RCard class="sales__kpi">
+            <template #header>
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">03</span>Total insight</h2>
+            </template>
             <template #actions>
-              <RIconButton label="Open insight report">
+              <RIconButton label="Open insight report" size="sm">
                 <ArrowUpRight />
               </RIconButton>
             </template>
-            <RStat :value="kpis.insight.value" size="xl" :trend="kpis.insight.trend" trend-label="than last month" animate />
+            <div class="sales__kpi-body">
+              <RStat :value="kpis.insight.value" size="xl" :trend="kpis.insight.trend" trend-label="than last month" animate />
+              <div class="sales__kpi-spark">
+                <span class="sales__meta">Last 15 weeks</span>
+                <RSparkline :values="insightWave" color="var(--r-chart-2)" :height="36" label="Insight, last 15 weeks" />
+              </div>
+            </div>
           </RCard>
 
-          <RCard class="sales__balance">
-            <template #header><h2 class="sales__card-title">Finance balance</h2></template>
+          <RCard class="sales__kpi sales__balance">
+            <template #header>
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">04</span>Finance balance</h2>
+            </template>
             <template #actions>
               <RPopover v-model:open="balanceMenuOpen" kind="menu" placement="bottom-end">
                 <template #trigger>
-                  <RIconButton label="Finance balance options">
+                  <RIconButton label="Finance balance options" size="sm">
                     <MoreHorizontal />
                   </RIconButton>
                 </template>
@@ -488,8 +516,7 @@ function startTour() {
             <RStat :value="balanceText" size="lg" />
             <RMeter
               :segments="kpis.balance.segments"
-              gradient
-              :height="40"
+              :height="24"
               legend
               :format="(v) => formatCurrency(v)"
               label="Balance split: profit 54%, total earning 25%, total target 21%"
@@ -497,18 +524,19 @@ function startTour() {
           </RCard>
         </section>
 
-        <section class="sales__main">
+        <!-- Reading order: the wide column top to bottom, then the narrow one. -->
+        <section class="sales__grid sales__grid--main" aria-label="Sales and orders">
           <RCard id="sales-summary" class="sales__summary">
             <template #header>
-              <h2 class="sales__card-title">Sales summary</h2>
-              <p class="sales__card-sub">
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">05</span>Sales summary</h2>
+              <p class="sales__panel-sub">
                 {{ formatCompact(chartTotal) }} in {{ yearLabel.toLowerCase() }}, counted twice a month
               </p>
             </template>
             <template #actions>
               <RPopover v-model:open="yearOpen" kind="menu" placement="bottom-end">
                 <template #trigger>
-                  <RButton variant="outline" size="sm" shape="pill">
+                  <RButton variant="outline" size="sm">
                     {{ yearLabel }}
                     <template #trailing><ChevronDown /></template>
                   </RButton>
@@ -517,7 +545,7 @@ function startTour() {
               </RPopover>
               <RPopover v-model:open="modeOpen" kind="menu" placement="bottom-end">
                 <template #trigger>
-                  <RButton variant="outline" size="sm" shape="pill" class="sales__hide-sm">
+                  <RButton variant="outline" size="sm" class="sales__hide-sm">
                     {{ modeLabel }}
                     <template #trailing><ChevronDown /></template>
                   </RButton>
@@ -535,7 +563,7 @@ function startTour() {
             </template>
             <ul class="sales__legend" aria-hidden="true">
               <li v-for="s in chartSeries" :key="s.name">
-                <span class="sales__legend-dot" :style="{ background: s.color ?? 'var(--r-chart-1)' }" />
+                <span class="sales__swatch" :style="{ background: s.color }" />
                 {{ s.name }}
               </li>
               <li v-if="copied" class="sales__copied">Link copied</li>
@@ -550,31 +578,13 @@ function startTour() {
             />
           </RCard>
 
-          <RCard id="sales-category" class="sales__category">
-            <template #header><h2 class="sales__card-title">Sales category</h2></template>
-            <template #actions>
-              <RIconButton label="Open category report">
-                <ArrowUpRight />
-              </RIconButton>
-            </template>
-            <RRadialGauge :segments="categories" caption="Product sales" label="Product sales by category" />
-            <template #footer>
-              <p class="sales__note">
-                <RTrend :value="12.2" />
-                <span>You sold 2,921 items compared to last month</span>
-              </p>
-            </template>
-          </RCard>
-        </section>
-
-        <section class="sales__bottom">
           <RCard id="sales-transactions" class="sales__transactions" padding="none">
             <template #header>
-              <h2 class="sales__card-title">Recent transactions</h2>
-              <p class="sales__card-sub">The last 48 hours</p>
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">07</span>Recent transactions</h2>
+              <p class="sales__panel-sub">The last 48 hours</p>
             </template>
             <template #actions>
-              <RButton variant="outline" size="sm" shape="pill">
+              <RButton variant="ghost" size="sm">
                 View all
                 <template #trailing><ArrowRight /></template>
               </RButton>
@@ -582,7 +592,7 @@ function startTour() {
             <RTable v-model:sort="sort" :columns="columns" :rows="transactions" row-key="id" caption="Recent transactions">
               <template #cell-customer="{ row }">
                 <span class="sales__customer">
-                  <RAvatar :name="row.customer" size="md" decorative />
+                  <RAvatar :name="row.customer" size="sm" decorative />
                   <span>
                     <span class="sales__customer-name">{{ row.customer }}</span>
                     <span class="sales__customer-email">{{ row.email }}</span>
@@ -590,7 +600,7 @@ function startTour() {
                 </span>
               </template>
               <template #cell-date="{ value }">
-                <span class="sales__muted">{{ formatDay(value, false) }}</span>
+                <span class="sales__date">{{ formatDay(value, false) }}</span>
               </template>
               <template #cell-amount="{ value }">{{ money(value) }}</template>
               <template #cell-status="{ value }">
@@ -599,7 +609,29 @@ function startTour() {
             </RTable>
           </RCard>
 
-          <RCard class="sales__orders" title="Orders by hour" subtitle="Last four weeks, all channels" title-as="h2">
+          <RCard id="sales-category" class="sales__category">
+            <template #header>
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">06</span>Sales category</h2>
+            </template>
+            <template #actions>
+              <RIconButton label="Open category report" size="sm">
+                <ArrowUpRight />
+              </RIconButton>
+            </template>
+            <RRadialGauge :segments="categories" caption="Product sales" label="Product sales by category" />
+            <template #footer>
+              <p class="sales__note">
+                <RTrend :value="12.2" />
+                <span>2,921 more items sold than last month</span>
+              </p>
+            </template>
+          </RCard>
+
+          <RCard class="sales__orders">
+            <template #header>
+              <h2 class="sales__panel-title"><span class="r-index" aria-hidden="true">08</span>Orders by hour</h2>
+              <p class="sales__panel-sub">Last four weeks, all channels</p>
+            </template>
             <RHeatmap
               :rows="heatmapHours"
               :cols="heatmapDays"
@@ -619,9 +651,8 @@ function startTour() {
             </dl>
           </RCard>
         </section>
-      </template>
-      </main>
-    </div>
+      </div>
+    </main>
 
     <RTour v-model:open="tourOpen" v-model:step="tourStep" :steps="steps">
       <template #media="{ index }">
@@ -634,27 +665,20 @@ function startTour() {
 <style>
 .sales {
   min-height: 100dvh;
-  padding: 24px 32px 112px;
+  padding-bottom: 112px;
   background: var(--r-bg-canvas);
+  color: var(--r-text);
 }
 
-.sales__inner,
-.sales__page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.sales__inner {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* Top bar */
-.sales__topbar {
+/* ── Header bar: brand, sections as tabs on the bar's bottom rule, account ───── */
+.sales__bar {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 32px;
+  height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
 }
 
 .sales__brand {
@@ -663,72 +687,75 @@ function startTour() {
   align-items: center;
   gap: 10px;
   color: var(--r-text);
-  font-size: var(--r-text-xl);
+  font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
   letter-spacing: var(--r-tracking-tight);
   text-decoration: none;
 }
 
-.sales__logo {
-  width: 32px;
-  height: 32px;
-}
-.sales__logo rect {
-  fill: var(--r-ink);
-}
-.sales__logo path {
-  fill: none;
-  stroke: var(--r-on-ink);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-}
-
-.sales__nav {
-  display: flex;
+/* The tab list's own bottom rule lands on the bar's rule. */
+.sales__tabs {
   flex: 1;
-  justify-content: center;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.sales__nav::-webkit-scrollbar {
-  display: none;
-}
-.sales__nav--sub {
-  flex: 1 1 320px;
-  justify-content: flex-start;
-}
-.sales__pills.r-segmented--pill {
-  flex-wrap: nowrap;
-  padding: 3px;
+  align-self: flex-end;
+  margin-bottom: -1px;
 }
 
 .sales__icons {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+}
+.sales__icons .r-avatar {
+  margin-left: 8px;
 }
 
-/* Heading */
+/* ── Page ───────────────────────────────────────────────────────────────── */
+.sales__page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+}
+
 .sales__head {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 16px 24px;
+}
+
+.sales__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sales__eyebrow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .sales__title {
-  font-size: clamp(30px, 4.2vw, 46px);
+  font-size: clamp(32px, 4.2vw, 48px);
   font-weight: var(--r-weight-semibold);
-  line-height: 1.04;
-  letter-spacing: var(--r-tracking-tighter);
+  line-height: 1;
+  letter-spacing: var(--r-tracking-display);
 }
 
 .sales__subtitle {
-  margin-top: 8px;
-  color: var(--r-text-tertiary);
+  max-width: 56ch;
+  color: var(--r-text-secondary);
 }
 
 .sales__head-actions,
@@ -744,7 +771,37 @@ function startTour() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 12px 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--r-border);
+}
+
+.sales__views {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sales__views::-webkit-scrollbar {
+  display: none;
+}
+
+.sales__dates-label,
+.sales__meta {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+.sales__dates-label {
+  margin-right: 4px;
+}
+.sales__dates-arrow {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
 }
 
 .sales__range {
@@ -753,7 +810,11 @@ function startTour() {
   gap: 14px;
 }
 .sales__range-title {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 .sales__range-fields {
   display: grid;
@@ -770,72 +831,99 @@ function startTour() {
   gap: 8px;
 }
 
-/* Cards */
-.sales__card-title {
-  font-size: var(--r-text-xl);
-  font-weight: var(--r-weight-semibold);
-  line-height: 1.3;
-  letter-spacing: var(--r-tracking-snug);
+/* ── The board: panels butt against each other on 1px rules ─────────────── */
+.sales__board {
+  display: flex;
+  flex-direction: column;
 }
 
-.sales__card-sub {
-  margin-top: 2px;
+/* Every cell is pulled 1px up and left, so neighbouring borders overlap into one rule. */
+.sales__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  padding: 1px 0 0 1px;
+}
+.sales__grid + .sales__grid {
+  margin-top: -1px;
+}
+.sales__grid > .r-card {
+  margin: -1px 0 0 -1px;
+}
+
+.sales__kpi {
+  grid-column: span 2;
+  justify-content: space-between;
+  min-height: 200px;
+}
+.sales__summary {
+  grid-area: 1 / 1 / span 1 / span 4;
+}
+.sales__transactions {
+  grid-area: 2 / 1 / span 1 / span 4;
+}
+.sales__category {
+  grid-area: 1 / 5 / span 1 / span 2;
+}
+.sales__orders {
+  grid-area: 2 / 5 / span 1 / span 2;
+}
+
+.sales__panel-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+
+.sales__panel-sub {
+  margin-top: 6px;
   color: var(--r-text-tertiary);
   font-size: var(--r-text-sm);
 }
 
-.sales__kpis {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.sales__kpi-body {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
-.sales__kpis .r-card {
-  justify-content: space-between;
-  min-height: 210px;
-}
-
-.sales__insight {
-  overflow: hidden;
-}
-.sales__insight-wave {
-  position: absolute;
-  z-index: -1;
-  right: 0;
-  bottom: 22px;
-  left: 56%;
-  opacity: 0.3;
-  pointer-events: none;
+.sales__kpi-spark {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--r-border-subtle);
 }
 
 .sales__balance .r-stat {
   margin-top: -4px;
 }
 
-.sales__main,
-.sales__bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 16px;
-}
-
 .sales__legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 18px;
+  gap: 6px 20px;
   margin-top: -4px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 .sales__legend li {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
-.sales__legend-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+.sales__swatch {
+  width: 8px;
+  height: 8px;
 }
 .sales__copied {
   margin-left: auto;
@@ -853,15 +941,12 @@ function startTour() {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 8px 10px;
   width: 100%;
-  padding: 8px 14px 8px 8px;
-  border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-full);
+  padding-top: 14px;
+  border-top: 1px solid var(--r-border-subtle);
   color: var(--r-text-secondary);
   font-size: var(--r-text-sm);
-  text-align: center;
 }
 
 .sales__transactions {
@@ -871,20 +956,29 @@ function startTour() {
 .sales__peaks {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
   margin: auto 0 0;
+  border-top: 1px solid var(--r-border);
 }
 .sales__peaks > div {
-  padding: 12px 14px;
-  border-radius: var(--r-radius-lg);
-  background: var(--r-bg-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0 0;
+}
+.sales__peaks > div + div {
+  padding-left: 16px;
+  border-left: 1px solid var(--r-border);
 }
 .sales__peaks dt {
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 .sales__peaks dd {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: var(--r-text-sm);
   font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
@@ -893,7 +987,7 @@ function startTour() {
 .sales__customer {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .sales__customer > span:last-child {
   display: flex;
@@ -903,75 +997,97 @@ function startTour() {
 .sales__customer-name {
   font-weight: var(--r-weight-medium);
 }
-.sales__customer-email,
-.sales__muted {
+.sales__customer-email {
   color: var(--r-text-tertiary);
   font-size: var(--r-text-sm);
 }
-
-.sales__unbuilt {
-  align-items: flex-start;
-  max-width: 560px;
+.sales__date {
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
 }
-.sales__unbuilt-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--r-brand);
+
+/* ── Views that are not built ───────────────────────────────────────────── */
+.sales__unbuilt {
+  min-height: 320px;
+  overflow: hidden;
+}
+.sales__unbuilt-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 520px;
+}
+.sales__unbuilt-title {
+  font-size: var(--r-text-2xl);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.2;
+  letter-spacing: var(--r-tracking-tight);
 }
 .sales__unbuilt-text {
+  margin-bottom: 8px;
   color: var(--r-text-secondary);
   line-height: 1.6;
 }
 
+/* ── Narrower screens ───────────────────────────────────────────────────── */
 @media (max-width: 1180px) {
-  .sales__kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .sales__kpi,
+  .sales__category,
+  .sales__orders {
+    grid-area: auto / auto / auto / span 3;
   }
-  .sales__balance {
-    grid-column: span 2;
-  }
-  .sales__main,
-  .sales__bottom {
-    grid-template-columns: minmax(0, 1fr);
+  .sales__balance,
+  .sales__summary,
+  .sales__transactions {
+    grid-area: auto / auto / auto / span 6;
   }
 }
 
 @media (max-width: 860px) {
-  .sales__topbar {
+  .sales__bar {
     flex-wrap: wrap;
-    gap: 16px;
-  }
-  .sales__topbar > .sales__nav {
-    order: 3;
-    flex-basis: 100%;
-    justify-content: flex-start;
+    gap: 0 16px;
+    height: auto;
+    padding-top: 10px;
   }
   .sales__icons {
     margin-left: auto;
   }
+  .sales__tabs {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 6px;
+  }
 }
 
 @media (max-width: 680px) {
-  .sales {
-    padding: 16px 16px 112px;
+  .sales__bar {
+    padding-right: 16px;
+    padding-left: 16px;
   }
-  .sales__inner {
+  .sales__page {
     gap: 20px;
+    padding: 24px 16px 0;
   }
-  .sales__kpis {
-    grid-template-columns: minmax(0, 1fr);
+  .sales__kpi,
+  .sales__category,
+  .sales__orders {
+    grid-area: auto / auto / auto / span 6;
   }
-  .sales__balance {
-    grid-column: auto;
-  }
-  .sales__kpis .r-card {
+  .sales__kpi {
     min-height: 0;
   }
   .sales__hide-sm {
     display: none;
   }
-  .sales__card-title {
-    font-size: var(--r-text-lg);
+  .sales__dates-label {
+    display: none;
   }
 }
 </style>

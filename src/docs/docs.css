@@ -1,4 +1,6 @@
-/* Docs site styles. The library itself never depends on anything in here. */
+/* Docs site styles. The library itself never depends on anything in here.
+ * The docs follow the language they describe: square, ruled, Geist for reading, Geist Mono in
+ * capitals for labels, a running index on every section. */
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 .doc-page {
@@ -13,7 +15,7 @@
 
 @media (min-width: 1280px) {
   .doc-page.has-toc {
-    grid-template-columns: minmax(0, 1fr) 200px;
+    grid-template-columns: minmax(0, 1fr) 184px;
   }
 }
 
@@ -25,21 +27,55 @@
 
 .doc-page__content {
   min-width: 0;
+  counter-reset: doc-section;
 }
 
+/* The spec header: eyebrow over a Big Header, the lead under it, an optional aside on the right. */
 .doc-page__header {
-  max-width: 760px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px 40px;
   margin-bottom: 56px;
 }
 
+.doc-page__header.has-aside {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+  align-items: end;
+}
+
+@media (max-width: 900px) {
+  .doc-page__header.has-aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.doc-page__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
 .doc-page__eyebrow {
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--r-text);
   font-family: var(--r-font-mono);
   font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-semibold);
   letter-spacing: var(--r-tracking-caps);
+  line-height: 1.4;
   text-transform: uppercase;
+}
+
+/* A short cobalt tick before the eyebrow, the one brand mark on the page header. */
+.doc-page__eyebrow::before {
+  flex: none;
+  width: 12px;
+  height: 2px;
+  background: var(--r-brand);
+  content: '';
 }
 
 .doc-page__title {
@@ -47,14 +83,19 @@
   font-weight: var(--r-weight-semibold);
   line-height: 1;
   letter-spacing: var(--r-tracking-display);
+  overflow-wrap: anywhere;
 }
 
 .doc-page__lead {
-  margin-top: 20px;
   max-width: 62ch;
   color: var(--r-text-secondary);
   font-size: var(--r-text-lg);
   line-height: var(--r-leading-normal);
+  text-wrap: pretty;
+}
+
+.doc-page__aside {
+  min-width: 0;
 }
 
 /* ── Table of contents ────────────────────────────────────────────────────── */
@@ -63,7 +104,6 @@
   top: 96px;
   display: none;
   flex-direction: column;
-  gap: 2px;
   align-self: start;
   max-height: calc(100dvh - 120px);
   overflow-y: auto;
@@ -76,7 +116,8 @@
 }
 
 .doc-toc__title {
-  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--r-border);
   color: var(--r-text);
   font-family: var(--r-font-mono);
   font-size: var(--r-text-3xs);
@@ -86,23 +127,38 @@
 }
 
 .doc-toc__link {
-  padding: 5px 0 5px 12px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: baseline;
+  padding: 6px 0 6px 10px;
   border-left: 1px solid var(--r-border);
   color: var(--r-text-tertiary);
   font-size: var(--r-text-sm);
+  line-height: 1.35;
   text-decoration: none;
   transition:
     color var(--r-duration-fast) var(--r-ease-out),
     border-color var(--r-duration-fast) var(--r-ease-out);
 }
+.doc-toc__link:first-of-type {
+  margin-top: 8px;
+}
 .doc-toc__link:hover {
   color: var(--r-text);
 }
 .doc-toc__link.is-active {
-  border-left: 2px solid var(--r-ink);
-  padding-left: 11px;
+  padding-left: 9px;
+  border-left: 2px solid var(--r-brand);
   color: var(--r-text);
   font-weight: var(--r-weight-medium);
+}
+
+.doc-toc__index {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Sections ─────────────────────────────────────────────────────────────── */
@@ -111,26 +167,45 @@
 }
 
 .doc-section + .doc-section {
-  margin-top: 72px;
+  margin-top: 80px;
 }
 
-/* Every top-level section opens on a hairline, like a page of the brand book. */
+/* Every top-level section opens on a hairline with its running number, like a brand book page. */
 .doc-section--2 {
-  padding-top: 24px;
-  border-top: 1px solid var(--r-border);
+  padding-top: 14px;
+  border-top: 1px solid var(--r-border-strong);
+  counter-increment: doc-section;
+}
+
+.doc-section__index {
+  display: block;
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.doc-section__index::before {
+  content: counter(doc-section, decimal-leading-zero);
 }
 
 /* A section that follows loose prose or a demo at the top of a page. */
 .doc-page__content > :not(.doc-page__header):not(.doc-section) + .doc-section {
-  margin-top: 56px;
+  margin-top: 64px;
 }
 
 .doc-section--3 {
-  margin-top: 40px;
+  margin-top: 48px;
 }
 
 .doc-section > * + * {
   margin-top: 20px;
+}
+
+.doc-section--2 > .doc-section__title {
+  margin-top: 14px;
 }
 
 .doc-section__title {
@@ -152,6 +227,7 @@
 .doc-section__anchor::after {
   margin-left: 10px;
   color: var(--r-text-disabled);
+  font-family: var(--r-font-mono);
   font-weight: var(--r-weight-regular);
   content: '#';
   opacity: 0;
@@ -168,16 +244,23 @@
   color: var(--r-text-secondary);
   font-size: var(--r-text-md);
   line-height: var(--r-leading-relaxed);
+  text-wrap: pretty;
 }
 
 .doc-section__description {
   margin-top: 10px !important;
 }
 
+.doc-p strong {
+  color: var(--r-text);
+  font-weight: var(--r-weight-semibold);
+}
+
 .doc-h4 {
-  margin-top: 32px !important;
+  margin-top: 36px !important;
   font-size: var(--r-text-md);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-snug);
 }
 
 /* Inline code in prose. */
@@ -196,10 +279,10 @@
   flex-direction: column;
   gap: 8px;
   max-width: 68ch;
-  padding-left: 20px;
+  padding-left: 18px;
   color: var(--r-text-secondary);
   line-height: var(--r-leading-relaxed);
-  list-style: disc;
+  list-style: square;
 }
 .doc-list li::marker {
   color: var(--r-text-disabled);
@@ -209,7 +292,7 @@
   color: var(--r-brand-text);
   font-weight: var(--r-weight-medium);
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-underline-offset: 3px;
 }
 .doc-link:hover {
@@ -249,6 +332,54 @@
   text-transform: uppercase;
 }
 
+/* A ruled spec table for foundations pages: mono caps head, hairline rows. */
+.doc-spec {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid var(--r-border);
+  font-size: var(--r-text-sm);
+}
+.doc-spec th {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--r-border);
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.doc-spec td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--r-border-subtle);
+  color: var(--r-text-secondary);
+  line-height: 1.5;
+  vertical-align: top;
+}
+.doc-spec td:first-child {
+  color: var(--r-text);
+}
+.doc-spec code {
+  color: var(--r-text);
+  font-family: var(--r-font-mono);
+  font-size: 12px;
+}
+.doc-spec .is-num {
+  font-family: var(--r-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Wide tables scroll inside their own box on small screens. */
+.doc-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* ── Demo stage ───────────────────────────────────────────────────────────── */
 /* :where() keeps the reset at zero specificity, so section spacing (> * + *) still applies. */
 :where(.doc-demo) {
@@ -271,7 +402,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 10px;
+  gap: 4px 12px;
 }
 
 .doc-demo__title {
@@ -304,7 +435,11 @@
     linear-gradient(90deg, color-mix(in srgb, var(--r-border) 70%, transparent) 1px, transparent 1px),
     linear-gradient(color-mix(in srgb, var(--r-border-subtle) 80%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--r-border-subtle) 80%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px, 64px 64px, 16px 16px, 16px 16px;
+  background-size:
+    64px 64px,
+    64px 64px,
+    16px 16px,
+    16px 16px;
   background-position: -1px -1px;
 }
 
@@ -322,7 +457,7 @@
 @media (max-width: 640px) {
   .doc-demo__stage--md,
   .doc-demo__stage--lg {
-    padding: 18px;
+    padding: 16px;
   }
 }
 
@@ -349,31 +484,39 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 36px;
-  padding: 0 6px 0 14px;
+  height: 32px;
+  padding: 0 4px 0 12px;
   border-bottom: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
 }
 
 .doc-code__title {
+  overflow: hidden;
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.doc-code__copy {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
   color: var(--r-text-tertiary);
   font-family: var(--r-font-mono);
   font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-semibold);
   letter-spacing: var(--r-tracking-caps);
   text-transform: uppercase;
-}
-
-.doc-code__copy {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 8px;
-  border: 0;
-  background: none;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
   cursor: pointer;
 }
 .doc-code__copy:hover {
@@ -381,13 +524,13 @@
   color: var(--r-text);
 }
 .doc-code__copy svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .doc-code__pre {
   margin: 0;
-  padding: 16px 18px;
+  padding: 14px 16px;
   overflow-x: auto;
   color: var(--r-text);
   font-family: var(--r-font-mono);
@@ -399,6 +542,7 @@
   outline-offset: -2px;
 }
 
+/* Restrained colour: ink, greys and one cobalt. Orange stays the signal, even in code. */
 .tok-tag {
   color: var(--r-brand-text);
 }
@@ -406,17 +550,16 @@
   color: var(--r-text-secondary);
 }
 .tok-str {
-  color: var(--r-success-text);
+  color: var(--r-text-secondary);
 }
 .tok-com {
   color: var(--r-text-tertiary);
-  font-style: italic;
 }
 .tok-key {
-  color: var(--r-signal-text);
+  color: var(--r-brand-text);
 }
 .tok-num {
-  color: var(--r-brand-text);
+  color: var(--r-text);
 }
 .tok-fn {
   color: var(--r-text);
@@ -470,15 +613,34 @@
 .doc-dodont {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: 16px;
+  border-top: 1px solid var(--r-border);
+  border-left: 1px solid var(--r-border);
 }
 
 .doc-dodont__card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--r-border);
+  min-width: 0;
+  border-right: 1px solid var(--r-border);
+  border-bottom: 1px solid var(--r-border);
   background: var(--r-bg-surface);
+}
+
+/* A 2px rule on top in the verdict's colour; the word carries the meaning too. */
+.doc-dodont__card::before {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  left: -1px;
+  height: 2px;
+  content: '';
+}
+.is-do::before {
+  background: var(--r-success);
+}
+.is-dont::before {
+  background: var(--r-danger);
 }
 
 .doc-dodont__example {
@@ -487,14 +649,14 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 120px;
+  min-height: 128px;
   padding: 24px;
   border-bottom: 1px solid var(--r-border);
   background: var(--r-bg-canvas);
 }
 
 .doc-dodont__text {
-  padding: 16px 18px 18px;
+  padding: 14px 16px 18px;
   color: var(--r-text-secondary);
   font-size: var(--r-text-sm);
   line-height: 1.55;
@@ -504,24 +666,21 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 6px;
-  font-size: var(--r-text-sm);
+  margin-bottom: 8px;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 .doc-dodont__label svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.5;
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.25;
 }
 .is-do .doc-dodont__label {
   color: var(--r-success-text);
 }
 .is-dont .doc-dodont__label {
   color: var(--r-danger-text);
-}
-.is-do {
-  border-top: 2px solid var(--r-success);
-}
-.is-dont {
-  border-top: 2px solid var(--r-danger);
 }

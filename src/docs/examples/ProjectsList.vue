@@ -5,7 +5,6 @@ import {
   Building2,
   Calendar,
   ChevronDown,
-  ChevronRight,
   CircleDot,
   Copy,
   Download,
@@ -30,6 +29,7 @@ import {
   RAvatar,
   RAvatarGroup,
   RBadge,
+  RBreadcrumb,
   RButton,
   RCard,
   RChip,
@@ -57,6 +57,7 @@ import {
   type Tone,
 } from '@/design-system'
 import ProjectsSidebar from './parts/ProjectsSidebar.vue'
+import ExampleStrip from './parts/ExampleStrip.vue'
 import { PROJECT_TYPES, STATUS_LABEL, TAGS, projects as seed, type Project, type ProjectStatus } from './data/projects'
 
 const TODAY = '2026-11-02'
@@ -234,7 +235,7 @@ const rangeText = computed(() => {
   if (!total) return 'No projects'
   const start = (page.value - 1) * pageSize.value + 1
   const end = Math.min(page.value * pageSize.value, total)
-  return `Showing ${start}–${end} of ${total}`
+  return `${start}–${end} of ${total}`
 })
 
 watch([query, applied, pageSize], () => (page.value = 1), { deep: true })
@@ -255,9 +256,10 @@ const columns: TableColumn[] = [
   { key: 'actions', label: 'Actions', width: '56px', align: 'right' },
 ]
 
-const statusTone: Record<ProjectStatus, Tone> = { pending: 'warning', progress: 'sky', done: 'success' }
+const statusTone: Record<ProjectStatus, Tone> = { pending: 'warning', progress: 'brand', done: 'success' }
 const tagColor = (name: string) => TAGS.find((t) => t.name === name)?.color ?? 'var(--r-text-tertiary)'
 const isOverdue = (p: Project) => p.status !== 'done' && p.due < TODAY
+const overdueCount = computed(() => rows.value.filter(isOverdue).length)
 
 /* ── Row menu ───────────────────────────────────────────────────────────── */
 const menuFor = ref<number | null>(null)
@@ -395,6 +397,8 @@ function saveProject() {
   editOpen.value = false
 }
 
+const crumbs = [{ label: 'Project', href: '#/examples/projects' }, { label: 'Project list' }]
+
 /* ── Account menu and the narrow-screen drawer ──────────────────────────── */
 const accountOpen = ref(false)
 const accountMenu: MenuItem[] = [
@@ -419,45 +423,74 @@ watch(drawerOpen, (open) => {
 
 <template>
   <div class="projects">
-    <aside class="projects__sidebar">
-      <ProjectsSidebar />
-    </aside>
+    <ExampleStrip class="projects__strip">
+      <span>Neraca</span>
+      <span class="ex-strip__sep">/</span>
+      <span>Project</span>
+      <span class="ex-strip__sep ex-strip__wide">/</span>
+      <span class="ex-strip__wide">Project list</span>
+      <template #end>
+        <span class="ex-strip__wide">{{ rows.length }} projects</span>
+        <span class="ex-strip__sep ex-strip__wide">/</span>
+        <span class="ex-strip__wide projects__strip-overdue">{{ overdueCount }} overdue</span>
+        <span class="ex-strip__sep ex-strip__wide">/</span>
+        <span>2 Nov 2026 · 09:41 WIB</span>
+      </template>
+    </ExampleStrip>
 
-    <div class="projects__main">
-      <header class="projects__topbar">
-        <RIconButton class="projects__menu-button" label="Open navigation" variant="ghost" @click="drawerOpen = true">
-          <Menu />
-        </RIconButton>
-        <nav class="projects__crumbs" aria-label="Breadcrumb">
-          <span>Project</span>
-          <ChevronRight aria-hidden="true" />
-          <span aria-current="page">Project list</span>
-        </nav>
-        <div class="projects__topbar-actions">
-          <RIconButton label="Notifications, 2 unread" dot>
-            <Bell />
+    <div class="projects__frame">
+      <aside class="projects__sidebar">
+        <ProjectsSidebar />
+      </aside>
+
+      <div class="projects__main">
+        <header class="projects__topbar">
+          <RIconButton class="projects__menu-button" label="Open navigation" variant="ghost" @click="drawerOpen = true">
+            <Menu />
           </RIconButton>
-          <RPopover v-model:open="accountOpen" kind="menu" placement="bottom-end">
-            <template #trigger>
-              <RButton variant="outline" shape="pill" class="projects__account" aria-label="Account menu for Kim Ji-soo">
-                <template #leading><RAvatar name="Kim Ji-soo" size="sm" decorative /></template>
-                <span class="projects__account-name">Kim Ji-soo</span>
-                <template #trailing><ChevronDown /></template>
-              </RButton>
-            </template>
-            <RMenu :items="accountMenu" label="Account" @close="accountOpen = false" />
-          </RPopover>
-        </div>
-      </header>
+          <RBreadcrumb :items="crumbs" class="projects__crumbs" />
+          <div class="projects__topbar-actions">
+            <RIconButton label="Notifications, 2 unread" variant="ghost" dot>
+              <Bell />
+            </RIconButton>
+            <RPopover v-model:open="accountOpen" kind="menu" placement="bottom-end">
+              <template #trigger>
+                <RButton variant="ghost" class="projects__account" aria-label="Account menu for Kim Ji-soo">
+                  <template #leading><RAvatar name="Kim Ji-soo" size="xs" decorative /></template>
+                  <span class="projects__account-name">Kim Ji-soo</span>
+                  <template #trailing><ChevronDown /></template>
+                </RButton>
+              </template>
+              <RMenu :items="accountMenu" label="Account" @close="accountOpen = false" />
+            </RPopover>
+          </div>
+        </header>
 
-      <main class="projects__content">
-        <RCard padding="none" class="projects__card">
-          <div class="projects__toolbar">
+        <main class="projects__content">
+          <div class="projects__head">
             <div class="projects__heading">
-              <h1 class="projects__title">List project</h1>
-              <RBadge dot>{{ filtered.length }} {{ filtered.length === 1 ? 'project' : 'projects' }}</RBadge>
+              <p class="projects__eyebrow"><span class="r-index" aria-hidden="true">02</span> Project · Studio work</p>
+              <div class="projects__title-row">
+                <h1 class="projects__title">Project list</h1>
+                <RBadge>{{ filtered.length }} {{ filtered.length === 1 ? 'project' : 'projects' }}</RBadge>
+              </div>
             </div>
-            <div class="projects__tools">
+            <div class="projects__head-actions">
+              <RIconButton label="Import projects" class="projects__secondary">
+                <Upload />
+              </RIconButton>
+              <RIconButton label="Export all projects to CSV" class="projects__secondary" @click="download('projects.csv', sorted)">
+                <Download />
+              </RIconButton>
+              <RButton tone="brand" class="projects__add" @click="openCreate">
+                <template #leading><Plus /></template>
+                Add project
+              </RButton>
+            </div>
+          </div>
+
+          <RCard padding="none" class="projects__card">
+            <div class="projects__toolbar">
               <RInput
                 ref="search"
                 v-model="query"
@@ -470,15 +503,33 @@ watch(drawerOpen, (open) => {
                 <template #leading><Search /></template>
                 <template #trailing><RKbd :keys="['mod', 'K']" size="sm" /></template>
               </RInput>
-              <RIconButton label="Import projects" shape="square" class="projects__secondary">
-                <Upload />
-              </RIconButton>
-              <RIconButton label="Export all projects to CSV" shape="square" class="projects__secondary" @click="download('projects.csv', sorted)">
-                <Download />
-              </RIconButton>
+
+              <div class="projects__chips" role="group" aria-label="Active filters">
+                <RChip
+                  v-for="chip in chips"
+                  :key="chip.id"
+                  variant="solid"
+                  caret
+                  removable
+                  size="sm"
+                  :remove-label="`Remove filter: ${chip.label}`"
+                  @click="filterOpen = true"
+                  @remove="chip.clear()"
+                >
+                  <template #leading><component :is="chip.icon" /></template>
+                  {{ chip.label }}
+                </RChip>
+                <RChip variant="dashed" size="sm" @click="filterOpen = true">
+                  <template #leading><Plus /></template>
+                  {{ chips.length ? 'Add filter' : 'Add a filter' }}
+                </RChip>
+                <button v-if="chips.length" type="button" class="projects__clear-all" @click="resetFilters">Clear all</button>
+              </div>
+
+              <div class="projects__filter">
               <RPopover v-model:open="filterOpen" placement="bottom-end" label="Filter projects" width="360px" padding="none">
                 <template #trigger>
-                  <RButton variant="outline" :class="{ 'projects__filter--on': activeCount }">
+                  <RButton variant="outline" class="projects__filter-button" :class="{ 'is-on': activeCount }">
                     <template #leading><SlidersHorizontal /></template>
                     Filter
                     <template v-if="activeCount" #trailing>
@@ -490,7 +541,7 @@ watch(drawerOpen, (open) => {
                 <form class="pf" @submit.prevent="applyFilters">
                   <div class="pf__head">
                     <h2 class="pf__title">Filter</h2>
-                    <RIconButton label="Close filter" variant="ghost" size="sm" shape="square" @click="filterOpen = false">
+                    <RIconButton label="Close filter" variant="ghost" size="sm" @click="filterOpen = false">
                       <X />
                     </RIconButton>
                   </div>
@@ -498,7 +549,7 @@ watch(drawerOpen, (open) => {
                   <div class="pf__body">
                     <div class="pf__group" role="group" :aria-labelledby="ids.date">
                       <div class="pf__group-head">
-                        <span :id="ids.date" class="pf__label">Due date</span>
+                        <span :id="ids.date" class="pf__label"><span class="r-index" aria-hidden="true">01</span> Due date</span>
                         <button type="button" class="pf__clear" :disabled="!draft.from && !draft.to" @click="(draft.from = ''), (draft.to = '')">
                           Clear
                         </button>
@@ -512,7 +563,7 @@ watch(drawerOpen, (open) => {
 
                     <div class="pf__group" role="group" :aria-labelledby="ids.type">
                       <div class="pf__group-head">
-                        <span :id="ids.type" class="pf__label">Client type</span>
+                        <span :id="ids.type" class="pf__label"><span class="r-index" aria-hidden="true">02</span> Client type</span>
                         <button type="button" class="pf__clear" :disabled="!draft.type" @click="draft.type = null">Clear</button>
                       </div>
                       <RSelect v-model="draft.type" :options="typeOptions" placeholder="Any type" size="sm" :aria-labelledby="ids.type" />
@@ -520,7 +571,7 @@ watch(drawerOpen, (open) => {
 
                     <div class="pf__group" role="group" :aria-labelledby="ids.status">
                       <div class="pf__group-head">
-                        <span :id="ids.status" class="pf__label">Status</span>
+                        <span :id="ids.status" class="pf__label"><span class="r-index" aria-hidden="true">03</span> Status</span>
                         <button type="button" class="pf__clear" :disabled="!draft.status" @click="draft.status = null">Clear</button>
                       </div>
                       <RSelect
@@ -532,14 +583,14 @@ watch(drawerOpen, (open) => {
                         @update:model-value="(v) => (draft.status = (v as ProjectStatus | null) ?? null)"
                       >
                         <template #leading="{ option }">
-                          <span class="pf__dot" :class="option ? `is-${option.value}` : ''" aria-hidden="true" />
+                          <span class="pf__lamp" :class="option ? `is-${option.value}` : ''" aria-hidden="true" />
                         </template>
                       </RSelect>
                     </div>
 
                     <div class="pf__group" role="group" :aria-labelledby="ids.tags">
                       <div class="pf__group-head">
-                        <span :id="ids.tags" class="pf__label">Tags</span>
+                        <span :id="ids.tags" class="pf__label"><span class="r-index" aria-hidden="true">04</span> Tags</span>
                         <button type="button" class="pf__clear" :disabled="!draft.tags.length" @click="draft.tags = []">Clear</button>
                       </div>
                       <RSegmented
@@ -584,112 +635,87 @@ watch(drawerOpen, (open) => {
                   </div>
                 </form>
               </RPopover>
-              <RButton class="projects__add" @click="openCreate">
-                <template #leading><Plus /></template>
-                Add project
-              </RButton>
+              </div>
             </div>
-          </div>
 
-          <div class="projects__chips" role="group" aria-label="Active filters">
-            <RChip
-              v-for="chip in chips"
-              :key="chip.id"
-              variant="solid"
-              tone="violet"
-              caret
-              removable
-              size="sm"
-              :remove-label="`Remove filter: ${chip.label}`"
-              @click="filterOpen = true"
-              @remove="chip.clear()"
+            <RTable
+              v-model:selected="selected"
+              v-model:sort="sort"
+              class="projects__table"
+              :columns="columns"
+              :rows="pageRows"
+              row-key="id"
+              selectable
+              manual-sort
+              :row-label="(row) => row.name"
+              caption="Projects"
             >
-              <template #leading><component :is="chip.icon" /></template>
-              {{ chip.label }}
-            </RChip>
-            <RChip variant="dashed" size="sm" @click="filterOpen = true">
-              <template #leading><Plus /></template>
-              {{ chips.length ? 'Add filter' : 'Add a filter' }}
-            </RChip>
-            <button v-if="chips.length" type="button" class="projects__clear-all" @click="resetFilters">Clear all</button>
-          </div>
-
-          <RTable
-            v-model:selected="selected"
-            v-model:sort="sort"
-            class="projects__table"
-            :columns="columns"
-            :rows="pageRows"
-            row-key="id"
-            selectable
-            manual-sort
-            :row-label="(row) => row.name"
-            caption="Projects"
-          >
-            <template #header-actions>
-              <span class="r-sr-only">Actions</span>
-            </template>
-            <template #cell-name="{ row }">
-              <span class="pl__project">
-                <span class="pl__name">{{ row.name }}</span>
-                <span class="pl__client">{{ row.client }}</span>
-              </span>
-            </template>
-            <template #cell-type="{ row }">
-              <span class="pl__project">
-                <span>{{ row.type }}</span>
-                <span class="pl__tags">
-                  <span v-for="t in row.tags" :key="t" class="pl__tag">
-                    <span class="pl__tag-dot" :style="{ background: tagColor(t) }" aria-hidden="true" />
-                    {{ t }}
+              <template #header-actions>
+                <span class="r-sr-only">Actions</span>
+              </template>
+              <template #cell-name="{ row }">
+                <span class="pl__project">
+                  <span class="pl__name">{{ row.name }}</span>
+                  <span class="pl__client">{{ row.client }}</span>
+                </span>
+              </template>
+              <template #cell-type="{ row }">
+                <span class="pl__project">
+                  <span>{{ row.type }}</span>
+                  <span class="pl__tags">
+                    <span v-for="t in row.tags" :key="t" class="pl__tag">
+                      <span class="pl__tag-square" :style="{ background: tagColor(t) }" aria-hidden="true" />
+                      {{ t }}
+                    </span>
                   </span>
                 </span>
-              </span>
-            </template>
-            <template #cell-team="{ row }">
-              <RAvatarGroup :names="row.team" :max="3" size="sm" />
-            </template>
-            <template #cell-due="{ row }">
-              <span :class="isOverdue(row as Project) ? 'pl__overdue' : 'pl__muted'">
-                {{ formatDay(row.due) }}
-                <span v-if="isOverdue(row as Project)" class="pl__overdue-note">Overdue</span>
-              </span>
-            </template>
-            <template #cell-budget="{ value }">{{ formatCurrency(value) }}</template>
-            <template #cell-status="{ row }">
-              <RBadge :tone="statusTone[(row as Project).status]" dot>{{ STATUS_LABEL[(row as Project).status] }}</RBadge>
-            </template>
-            <template #cell-actions="{ row }">
-              <RPopover
-                :open="menuFor === row.id"
-                kind="menu"
-                placement="bottom-end"
-                @update:open="(open) => (menuFor = open ? row.id : null)"
-              >
-                <template #trigger>
-                  <RIconButton :label="`Actions for ${row.name}`" variant="ghost" size="sm">
-                    <EllipsisVertical />
-                  </RIconButton>
-                </template>
-                <RMenu :items="rowMenu(row as Project)" :label="`Actions for ${row.name}`" @close="menuFor = null" />
-              </RPopover>
-            </template>
-            <template #empty>
-              <div class="pl__empty">
-                <p class="pl__empty-title">No projects match.</p>
-                <p class="pl__empty-text">Try a different search, or loosen the filters.</p>
-                <RButton variant="outline" size="sm" @click="clearEverything">Clear search and filters</RButton>
-              </div>
-            </template>
-          </RTable>
+              </template>
+              <template #cell-team="{ row }">
+                <RAvatarGroup :names="row.team" :max="3" size="sm" />
+              </template>
+              <template #cell-due="{ row }">
+                <span class="pl__due" :class="{ 'is-overdue': isOverdue(row as Project) }">
+                  {{ formatDay(row.due) }}
+                  <span v-if="isOverdue(row as Project)" class="pl__overdue-note">Overdue</span>
+                </span>
+              </template>
+              <template #cell-budget="{ value }">{{ formatCurrency(value) }}</template>
+              <template #cell-status="{ row }">
+                <RBadge :tone="statusTone[(row as Project).status]" dot>{{ STATUS_LABEL[(row as Project).status] }}</RBadge>
+              </template>
+              <template #cell-actions="{ row }">
+                <RPopover
+                  :open="menuFor === row.id"
+                  kind="menu"
+                  placement="bottom-end"
+                  @update:open="(open) => (menuFor = open ? row.id : null)"
+                >
+                  <template #trigger>
+                    <RIconButton :label="`Actions for ${row.name}`" variant="ghost" size="sm">
+                      <EllipsisVertical />
+                    </RIconButton>
+                  </template>
+                  <RMenu :items="rowMenu(row as Project)" :label="`Actions for ${row.name}`" @close="menuFor = null" />
+                </RPopover>
+              </template>
+              <template #empty>
+                <div class="pl__empty">
+                  <p class="r-eyebrow">No match</p>
+                  <p class="pl__empty-title">No projects match.</p>
+                  <p class="pl__empty-text">Try a different search, or loosen the filters.</p>
+                  <RButton variant="outline" size="sm" @click="clearEverything">Clear search and filters</RButton>
+                </div>
+              </template>
+            </RTable>
 
-          <div class="projects__footer">
-            <span class="projects__range">{{ rangeText }}</span>
-            <RPagination v-model="page" :page-count="pageCount" />
-            <RSelect v-model="pageSize" :options="pageSizes" size="sm" aria-label="Rows per page" class="projects__page-size" />
-          </div>
-        </RCard>
-      </main>
+            <div class="projects__footer">
+              <span class="projects__range">{{ rangeText }}</span>
+              <RPagination v-model="page" :page-count="pageCount" />
+              <RSelect v-model="pageSize" :options="pageSizes" size="sm" aria-label="Rows per page" class="projects__page-size" />
+            </div>
+          </RCard>
+        </main>
+      </div>
     </div>
 
     <Transition name="pl-bar">
@@ -743,7 +769,7 @@ watch(drawerOpen, (open) => {
       </form>
       <template #footer="{ close }">
         <RButton variant="outline" @click="close">Cancel</RButton>
-        <RButton type="submit" form="project-form">{{ editingId === null ? 'Add project' : 'Save changes' }}</RButton>
+        <RButton type="submit" form="project-form" tone="brand">{{ editingId === null ? 'Add project' : 'Save changes' }}</RButton>
       </template>
     </RDialog>
 
@@ -765,19 +791,37 @@ watch(drawerOpen, (open) => {
 <style>
 .projects {
   display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   background: var(--r-bg-canvas);
+  color: var(--r-text);
+}
+
+.projects__strip {
+  position: sticky;
+  z-index: calc(var(--r-z-sticky) + 1);
+  top: 0;
+}
+
+.projects__strip-overdue {
+  color: var(--r-danger-text);
+}
+
+.projects__frame {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .projects__sidebar {
   position: sticky;
-  top: 0;
+  top: 32px;
   flex-shrink: 0;
-  width: 264px;
-  height: 100dvh;
-  padding: 20px 16px 24px;
+  width: 248px;
+  height: calc(100dvh - 32px);
+  padding: 16px 12px 20px;
   overflow-y: auto;
-  border-right: 1px solid var(--r-border-subtle);
+  border-right: 1px solid var(--r-border);
   background: var(--r-bg-surface);
 }
 
@@ -791,54 +835,83 @@ watch(drawerOpen, (open) => {
 .projects__topbar {
   position: sticky;
   z-index: var(--r-z-sticky);
-  top: 0;
+  top: 32px;
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 72px;
-  padding: 0 32px;
-  border-bottom: 1px solid var(--r-border-subtle);
-  background: color-mix(in srgb, var(--r-bg-surface) 88%, transparent);
-  backdrop-filter: blur(10px);
+  height: 48px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
 }
 
 .projects__menu-button {
   display: none;
 }
 
-.projects__crumbs {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
-}
-.projects__crumbs svg {
-  width: 14px;
-  height: 14px;
-}
-.projects__crumbs [aria-current] {
-  color: var(--r-text);
-  font-weight: var(--r-weight-medium);
-}
-
 .projects__topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   margin-left: auto;
 }
 
-.projects__account.r-button {
-  padding-left: 5px;
-}
-
 .projects__content {
+  display: flex;
   flex: 1;
-  padding: 28px 32px 128px;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px 24px 128px;
 }
 
+/* ── Page head: eyebrow, title and count, the one primary action ─────────── */
+.projects__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+
+.projects__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.projects__eyebrow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+
+.projects__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.projects__title {
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.05;
+  letter-spacing: var(--r-tracking-display);
+}
+
+.projects__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── The table panel ─────────────────────────────────────────────────────── */
 .projects__card {
   gap: 0;
   overflow: hidden;
@@ -848,62 +921,27 @@ watch(drawerOpen, (open) => {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px 20px;
-  padding: 20px 20px 16px;
-}
-
-.projects__heading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.projects__title {
-  font-size: var(--r-text-xl);
-  font-weight: var(--r-weight-semibold);
-  letter-spacing: var(--r-tracking-snug);
-}
-
-.projects__tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
+  gap: 10px 12px;
+  padding: 12px 16px;
 }
 
 .projects__search {
-  width: 280px;
-}
-
-.projects__filter-count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--r-radius-full);
-  background: var(--r-brand);
-  color: var(--r-on-brand);
-  font-size: var(--r-text-2xs);
-  font-weight: var(--r-weight-semibold);
-}
-.projects__filter--on.r-button {
-  border-color: var(--r-brand);
+  flex: 0 1 320px;
+  min-width: 220px;
 }
 
 .projects__chips {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 0 20px 16px;
+  gap: 6px;
+  min-width: 0;
 }
 
 .projects__clear-all {
   padding: 4px 6px;
   border: 0;
-  border-radius: var(--r-radius-xs);
   background: none;
   color: var(--r-brand-text);
   font-size: var(--r-text-sm);
@@ -912,10 +950,32 @@ watch(drawerOpen, (open) => {
 }
 .projects__clear-all:hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.projects__filter {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.projects__filter-button.is-on {
+  border-color: var(--r-brand);
+}
+.projects__filter-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--r-brand);
+  color: var(--r-on-brand);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
 
 .projects__table {
-  border-top: 1px solid var(--r-border-subtle);
+  border-top: 1px solid var(--r-border);
 }
 
 .projects__footer {
@@ -924,32 +984,36 @@ watch(drawerOpen, (open) => {
   align-items: center;
   justify-content: space-between;
   gap: 12px 16px;
-  padding: 14px 20px;
-  border-top: 1px solid var(--r-border-subtle);
+  padding: 10px 16px;
+  border-top: 1px solid var(--r-border);
 }
 
 .projects__range {
+  min-width: 112px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .projects__page-size {
   width: 112px;
 }
 
-/* Table cells */
+/* ── Table cells ─────────────────────────────────────────────────────────── */
 .pl__project {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   line-height: 1.3;
 }
 .pl__name {
   font-weight: var(--r-weight-medium);
 }
-.pl__client,
-.pl__muted {
+.pl__client {
   color: var(--r-text-tertiary);
   font-size: var(--r-text-sm);
 }
@@ -962,21 +1026,33 @@ watch(drawerOpen, (open) => {
   align-items: center;
   gap: 5px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.pl__tag-dot {
+.pl__tag-square {
   width: 6px;
   height: 6px;
-  border-radius: 2px;
 }
-.pl__overdue {
+.pl__due {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.pl__due.is-overdue {
   color: var(--r-danger-text);
-  font-size: var(--r-text-sm);
 }
 .pl__overdue-note {
-  display: block;
-  font-size: var(--r-text-2xs);
+  font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pl__empty {
@@ -988,6 +1064,7 @@ watch(drawerOpen, (open) => {
   text-align: center;
 }
 .pl__empty-title {
+  margin-top: 4px;
   font-weight: var(--r-weight-semibold);
 }
 .pl__empty-text {
@@ -996,7 +1073,7 @@ watch(drawerOpen, (open) => {
   font-size: var(--r-text-sm);
 }
 
-/* Filter popover */
+/* ── Filter popover ─────────────────────────────────────────────────────── */
 .pf {
   display: flex;
   flex-direction: column;
@@ -1007,20 +1084,22 @@ watch(drawerOpen, (open) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 12px 12px 18px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid var(--r-border);
 }
 
 .pf__title {
-  font-size: var(--r-text-md);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pf__body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 16px 18px;
+  padding: 0 16px;
   overflow-y: auto;
 }
 
@@ -1028,6 +1107,10 @@ watch(drawerOpen, (open) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 14px 0 16px;
+}
+.pf__group + .pf__group {
+  border-top: 1px solid var(--r-border-subtle);
 }
 
 .pf__group-head {
@@ -1037,15 +1120,20 @@ watch(drawerOpen, (open) => {
 }
 
 .pf__label {
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-sm);
-  font-weight: var(--r-weight-medium);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--r-text);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pf__clear {
   padding: 2px 4px;
   border: 0;
-  border-radius: var(--r-radius-xs);
   background: none;
   color: var(--r-brand-text);
   font-size: var(--r-text-sm);
@@ -1062,38 +1150,36 @@ watch(drawerOpen, (open) => {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-.pf__dates .r-field__label {
-  font-size: var(--r-text-xs);
-}
 
 .pf__error {
   color: var(--r-danger-text);
   font-size: var(--r-text-xs);
 }
 
-.pf__dot {
+/* A status lamp: a circle means a state. */
+.pf__lamp {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--r-border-strong);
+  box-shadow: inset 0 0 0 1px var(--r-border-strong);
 }
-.pf__dot.is-pending {
-  background: var(--r-warning);
+.pf__lamp.is-pending {
+  background: var(--r-status-warning);
   box-shadow: none;
 }
-.pf__dot.is-progress {
-  background: var(--r-sky);
+.pf__lamp.is-progress {
+  background: var(--r-brand);
   box-shadow: none;
 }
-.pf__dot.is-done {
-  background: var(--r-success);
+.pf__lamp.is-done {
+  background: var(--r-status-good);
   box-shadow: none;
 }
 
 .pf__tags {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  border-top: 1px solid var(--r-border-subtle);
 }
 
 .pf__tag {
@@ -1101,10 +1187,10 @@ watch(drawerOpen, (open) => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 38px;
-  padding: 4px 10px 4px 6px;
+  min-height: 36px;
+  padding: 4px 8px 4px 4px;
   border: 0;
-  border-radius: var(--r-radius-md);
+  border-bottom: 1px solid var(--r-border-subtle);
   background: none;
   color: var(--r-text);
   cursor: pointer;
@@ -1113,30 +1199,29 @@ watch(drawerOpen, (open) => {
   background: var(--r-bg-hover);
 }
 .pf__tag.is-on {
-  background: var(--r-violet-soft);
+  background: var(--r-bg-selected);
+  box-shadow: inset 2px 0 0 var(--r-brand);
 }
 
 .pf__tag-chip {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  height: 26px;
-  padding: 0 9px;
+  gap: 8px;
+  height: 24px;
+  padding: 0 8px;
   border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-sm);
   background: var(--r-bg-surface);
   font-size: var(--r-text-sm);
 }
 .pf__tag-square {
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
 }
 .pf__tag-check {
   width: 16px;
   height: 16px;
-  color: var(--r-violet-text);
-  stroke-width: 2.5;
+  color: var(--r-brand-text);
+  stroke-width: 2;
 }
 
 .pf__none,
@@ -1145,18 +1230,18 @@ watch(drawerOpen, (open) => {
   font-size: var(--r-text-xs);
 }
 .pf__none {
-  padding: 8px 6px;
+  padding: 8px 4px;
 }
 
 .pf__foot {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  padding: 14px 18px;
-  border-top: 1px solid var(--r-border-subtle);
+  padding: 12px 16px;
+  border-top: 1px solid var(--r-border);
 }
 
-/* Bulk action bar and notices */
+/* ── Bulk action bar and notices: a square dark island ──────────────────── */
 .pl-bar {
   position: fixed;
   z-index: var(--r-z-toast);
@@ -1166,12 +1251,11 @@ watch(drawerOpen, (open) => {
   align-items: center;
   gap: 4px;
   max-width: calc(100vw - 24px);
-  padding: 6px 6px 6px 16px;
+  padding: 4px 4px 4px 14px;
   overflow-x: auto;
-  border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-full);
+  border: 1px solid var(--r-border-strong);
   background: var(--r-bg-raised);
-  box-shadow: var(--r-shadow-xl);
+  box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
   font-size: var(--r-text-sm);
   white-space: nowrap;
@@ -1179,14 +1263,18 @@ watch(drawerOpen, (open) => {
 }
 
 .pl-bar--notice {
-  gap: 10px;
-  padding-right: 8px;
+  gap: 12px;
+  padding-right: 4px;
 }
 
 .pl-bar__count {
   padding-right: 6px;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pl-bar__divider {
@@ -1205,10 +1293,10 @@ watch(drawerOpen, (open) => {
 .pl-bar-enter-from,
 .pl-bar-leave-to {
   opacity: 0;
-  transform: translate(-50%, 12px);
+  transform: translate(-50%, 8px);
 }
 
-/* Edit dialog */
+/* ── Edit dialog ─────────────────────────────────────────────────────────── */
 .pl-form {
   display: flex;
   flex-direction: column;
@@ -1220,7 +1308,7 @@ watch(drawerOpen, (open) => {
   gap: 12px;
 }
 
-/* Drawer */
+/* ── Drawer ──────────────────────────────────────────────────────────────── */
 .pl-drawer {
   position: fixed;
   z-index: var(--r-z-modal);
@@ -1229,17 +1317,18 @@ watch(drawerOpen, (open) => {
 }
 .pl-drawer__panel {
   position: relative;
-  width: min(296px, 86vw);
+  width: min(288px, 86vw);
   height: 100%;
-  padding: 20px 14px 24px;
+  padding: 16px 12px 20px;
   overflow-y: auto;
+  border-right: 1px solid var(--r-border-strong);
   background: var(--r-bg-raised);
   box-shadow: var(--r-shadow-xl);
 }
 .pl-drawer__close {
   position: absolute;
-  top: 18px;
-  right: 12px;
+  top: 14px;
+  right: 10px;
 }
 .pl-drawer-enter-active,
 .pl-drawer-leave-active {
@@ -1266,23 +1355,19 @@ watch(drawerOpen, (open) => {
     display: inline-grid;
   }
   .projects__topbar {
-    padding: 0 16px 0 10px;
+    padding: 0 16px 0 8px;
   }
 }
 
 @media (max-width: 760px) {
   .projects__content {
-    padding: 16px 12px 128px;
-  }
-  .projects__tools {
-    width: 100%;
+    padding: 20px 12px 128px;
   }
   .projects__search {
     flex: 1 1 100%;
-    width: auto;
   }
-  .projects__add {
-    margin-left: auto;
+  .projects__toolbar {
+    padding: 12px;
   }
   .projects__account-name {
     display: none;

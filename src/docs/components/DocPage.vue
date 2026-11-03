@@ -75,17 +75,20 @@ function go(id: string) {
 <template>
   <div class="doc-page" :class="{ 'has-toc': sections.length > 1 }">
     <article class="doc-page__content">
-      <header class="doc-page__header">
-        <p v-if="eyebrow" class="doc-page__eyebrow">{{ eyebrow }}</p>
-        <h1 class="doc-page__title">{{ title }}</h1>
-        <p v-if="lead || $slots.lead" class="doc-page__lead"><slot name="lead">{{ lead }}</slot></p>
+      <header class="doc-page__header" :class="{ 'has-aside': !!$slots.aside }">
+        <div class="doc-page__heading">
+          <p v-if="eyebrow" class="doc-page__eyebrow">{{ eyebrow }}</p>
+          <h1 class="doc-page__title">{{ title }}</h1>
+          <p v-if="lead || $slots.lead" class="doc-page__lead"><slot name="lead">{{ lead }}</slot></p>
+        </div>
+        <div v-if="$slots.aside" class="doc-page__aside"><slot name="aside" /></div>
       </header>
       <slot />
     </article>
     <nav v-if="sections.length > 1" class="doc-toc" aria-label="On this page">
       <p class="doc-toc__title">On this page</p>
       <a
-        v-for="s in sections"
+        v-for="(s, i) in sections"
         :key="s.id"
         :href="`#${s.id}`"
         class="doc-toc__link"
@@ -93,7 +96,8 @@ function go(id: string) {
         :aria-current="activeId === s.id ? 'location' : undefined"
         @click.prevent="go(s.id)"
       >
-        {{ s.title }}
+        <span class="doc-toc__index" aria-hidden="true">{{ String(i + 1).padStart(2, '0') }}</span>
+        <span>{{ s.title }}</span>
       </a>
     </nav>
   </div>

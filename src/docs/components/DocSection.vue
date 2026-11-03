@@ -32,6 +32,8 @@ function go() {
 
 <template>
   <section :id="id" class="doc-section" :class="`doc-section--${level}`" :aria-labelledby="`${id}-title`">
+    <!-- The running number comes from a CSS counter, so it always matches the order on the page. -->
+    <span v-if="level === 2" class="doc-section__index" aria-hidden="true" />
     <component :is="level === 3 ? 'h3' : 'h2'" :id="`${id}-title`" class="doc-section__title">
       <a :href="`#${id}`" class="doc-section__anchor" @click.prevent="go">{{ title }}</a>
     </component>

@@ -4,13 +4,15 @@ import { describe, readableOn, useTokenColors } from './color'
 
 const props = withDefaults(
   defineProps<{
-    /** Steps in order, e.g. [{ token: '--r-blue-500', label: '500' }]. */
+    /** Steps in order, e.g. [{ token: '--r-cobalt-500', label: '500' }]. */
     steps: { token: string; label: string }[]
     /** Small caption above the ramp. */
     title?: string
     note?: string
     /** Mark one step, e.g. the one components use most. */
     highlight?: string
+    /** Name specific steps in mono caps, e.g. { '--r-cobalt-700': 'Primary' }. */
+    marks?: Record<string, string>
     size?: 'md' | 'sm'
     /** Steps per row. Defaults to all of them on one row. */
     columns?: number
@@ -33,11 +35,14 @@ const { colors } = useTokenColors(root, () => props.steps.map((s) => s.token))
         v-for="step in steps"
         :key="step.token"
         class="doc-ramp__step"
-        :class="{ 'is-highlight': highlight === step.token }"
+        :class="{ 'is-highlight': highlight === step.token, 'is-marked': !!marks?.[step.token] }"
         :style="{ background: `var(${step.token})`, color: readableOn(colors[step.token]) }"
         :title="step.token"
       >
-        <span class="doc-ramp__label">{{ step.label }}</span>
+        <span class="doc-ramp__top">
+          <span class="doc-ramp__label">{{ step.label }}</span>
+          <span v-if="marks?.[step.token]" class="doc-ramp__mark">{{ marks[step.token] }}</span>
+        </span>
         <span class="doc-ramp__hex">{{ describe(colors[step.token]) }}</span>
       </li>
     </ol>
@@ -57,12 +62,15 @@ const { colors } = useTokenColors(root, () => props.steps.map((s) => s.token))
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 10px;
+  gap: 4px 12px;
 }
 
 .doc-ramp__title {
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .doc-ramp__note {
@@ -70,12 +78,11 @@ const { colors } = useTokenColors(root, () => props.steps.map((s) => s.token))
   font-size: var(--r-text-sm);
 }
 
+/* Steps butt against each other; a hairline around the strip keeps white steps visible. */
 .doc-ramp__steps {
   display: grid;
   grid-template-columns: repeat(var(--doc-ramp-columns), minmax(0, 1fr));
-  overflow: hidden;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
+  border: 1px solid var(--r-border);
 }
 
 .doc-ramp__step {
@@ -83,10 +90,40 @@ const { colors } = useTokenColors(root, () => props.steps.map((s) => s.token))
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
+  gap: 20px;
   min-width: 0;
-  min-height: 84px;
-  padding: 10px;
+  min-height: 88px;
+  padding: 8px;
+}
+
+.doc-ramp__top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.doc-ramp__label {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+/* A named step ("PRIMARY") is ruled off on top, like the brand book palette slide. */
+.doc-ramp__step.is-marked {
+  box-shadow: inset 0 3px 0 currentColor;
+}
+
+.doc-ramp__mark {
+  overflow: hidden;
+  font-family: var(--r-font-mono);
+  font-size: 9.5px;
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .doc-ramp__step.is-highlight::after {
@@ -95,14 +132,8 @@ const { colors } = useTokenColors(root, () => props.steps.map((s) => s.token))
   right: 8px;
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background: currentColor;
   content: '';
-}
-
-.doc-ramp__label {
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-semibold);
 }
 
 .doc-ramp__hex {
@@ -116,22 +147,21 @@ const { colors } = useTokenColors(root, () => props.steps.map((s) => s.token))
 
 @container (max-width: 620px) {
   .doc-ramp--md .doc-ramp__steps {
-    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
   }
 }
 
 /* The small ramp is a plain strip: colour only, tokens in the tooltip. */
 .doc-ramp--sm .doc-ramp__steps {
   display: flex;
-  height: 36px;
-  border-radius: var(--r-radius-md);
+  height: 32px;
 }
 .doc-ramp--sm .doc-ramp__step {
   flex: 1;
   min-height: 0;
   padding: 0;
 }
-.doc-ramp--sm .doc-ramp__label,
+.doc-ramp--sm .doc-ramp__top,
 .doc-ramp--sm .doc-ramp__hex,
 .doc-ramp--sm .doc-ramp__step.is-highlight::after {
   display: none;

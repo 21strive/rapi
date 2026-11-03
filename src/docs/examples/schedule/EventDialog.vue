@@ -51,7 +51,7 @@ const dayOptions = computed(() => {
   const offset = Math.round((props.week.getTime() - props.base.getTime()) / 86_400_000)
   return Array.from({ length: 7 }, (_, i) => {
     const date = addDays(props.week, i)
-    return { label: date.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' }), value: offset + i }
+    return { label: date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }), value: offset + i }
   })
 })
 
@@ -139,7 +139,7 @@ function remove() {
         Delete
       </RButton>
       <RButton variant="outline" @click="open = false">Cancel</RButton>
-      <RButton @click="save">{{ isNew ? 'Add event' : 'Save changes' }}</RButton>
+      <RButton tone="brand" @click="save">{{ isNew ? 'Add event' : 'Save changes' }}</RButton>
     </template>
   </RDialog>
 </template>
@@ -167,7 +167,6 @@ function remove() {
 .pk-form__swatch {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
 }
 
 .pk-form__guests {

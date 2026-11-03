@@ -1,8 +1,68 @@
 <script setup lang="ts">
 import { ExternalLink } from 'lucide-vue-next'
-import { RTable, type TableColumn } from '@/design-system'
 import DocPage from '../components/DocPage.vue'
 import DocSection from '../components/DocSection.vue'
+
+interface Source {
+  name: string
+  meta: string
+  text: string
+  href?: string
+  host?: string
+}
+
+const sources: Source[] = [
+  {
+    name: '21 Strive brand book',
+    meta: 'March 2025 · internal',
+    text: 'The starting point. Cobalt, periwinkle and black; Geist for headers and text with Geist Mono capitals for small headers; spec pages ruled into columns under a running header; the logogram blown up as a supergraphic. The palette, the three type styles, the strip and the Brand page come straight from it.',
+  },
+  {
+    name: 'IBM Carbon',
+    meta: 'Design system',
+    href: 'https://carbondesignsystem.com',
+    host: 'carbondesignsystem.com',
+    text: 'Square corners, a dense grid and productive type for people who live in a tool all day. Rapi took the nerve to drop corner radius altogether, the crisp 2px focus line, and the habit of being consistent to the point of boring.',
+  },
+  {
+    name: 'Linear',
+    meta: 'Product',
+    href: 'https://linear.app',
+    host: 'linear.app',
+    text: 'Restraint and the keyboard. Linear shows how far a product can go with greys, one accent and careful type, and how much faster it feels when every action has a key. The command palette, the shortcut hints in menus and the dark islands follow its lead.',
+  },
+  {
+    name: "Cloudflare's dashboard",
+    meta: 'Product · behind a login',
+    text: 'Tables and traffic charts that do real work: dense rows, plain statuses, one time range that applies to the whole page. The developer platform samples, from DNS records to the firewall, are held to that standard.',
+  },
+  {
+    name: 'VoidZero',
+    meta: 'Website',
+    href: 'https://voidzero.dev',
+    host: 'voidzero.dev',
+    text: 'Ruled grids and mono labels on a quiet page: sections that butt against each other on 1px rules, small mono captions, code that looks like a terminal. The ruled grid utility and the eyebrow over every panel came from here.',
+  },
+  {
+    name: 'SpaceX webcasts and telemetry',
+    meta: 'Broadcast graphics',
+    href: 'https://www.spacex.com/launches/',
+    host: 'spacex.com',
+    text: 'Readouts that are read at a glance under pressure: a T-minus clock, mono figures with their units, a strip of stage events, a few lit indicators on black. The readout, the timeline, the steps and the two-step blink are built for screens like that.',
+  },
+  {
+    name: 'Teenage Engineering',
+    meta: 'Instruments',
+    href: 'https://teenage.engineering',
+    host: 'teenage.engineering',
+    text: 'The twist. Knobs, dot-matrix digits and a single orange on a grey machine. The knob, the Geist Pixel readouts, the stepped easing and International Orange as the only loud colour nod to them, at most once per screen.',
+  },
+  {
+    name: 'The dataviz method',
+    meta: 'Method',
+    text: 'A way to build charts that does not depend on any one design system: pick the form from the question, give every colour one job, check the categorical palette with a script for colour-blind and normal vision, and make every chart readable without colour or hover. The chart tokens and the validation figures on the Colour page come from it.',
+  },
+]
 
 interface Shot {
   nn: string
@@ -37,193 +97,226 @@ const shots: Shot[] = [
   { nn: '23', title: 'Dashboard', designer: 'Pixsellz', url: 'https://dribbble.com/shots/24671652-Dashboard' },
   { nn: '24', title: 'Add Tags — Filter System', designer: 'Kevin Dukkon', url: 'https://dribbble.com/shots/21712963-Add-Tags-Filter-System' },
 ]
-
-const columns: TableColumn[] = [
-  { key: 'nn', label: '#', width: '56px', sortable: true },
-  { key: 'title', label: 'Shot', sortable: true },
-  { key: 'designer', label: 'Designer', sortable: true },
-  { key: 'url', label: 'Link', align: 'right', width: '120px' },
-]
-
-const closer = [
-  { nn: '01', name: 'Syncrowave', what: 'The dot-matrix sales chart, the radial-tick gauge and the ink pill navigation.' },
-  { nn: '06', name: 'Banking components', what: 'The loud flame and blue cards, hatched columns with a target tick, and round arrow buttons.' },
-  { nn: '08', name: 'Makaryo', what: 'The attendance heatmap, the tick meter for job levels, and a calm data table.' },
-  { nn: '10', name: 'Chart cards', what: 'Min–max range bars with an average pill, and stacked horizontal bars.' },
-  { nn: '12', name: 'Integrations search', what: 'A search field that teaches its keys, and a two-pane result layout.' },
-  { nn: '15', name: 'Onboarding tooltip', what: 'The coachmark: title, close, body, a coloured illustration well, 1 of 4, Skip and Continue.' },
-  { nn: '17', name: 'Command menu', what: 'The dark palette, nested pages like Remind me, and the footer of key hints.' },
-  { nn: '18', name: 'Event editing', what: 'The week grid with pastel events and a context menu with colour dots and a submenu.' },
-  { nn: '19', name: 'Finanzen filter', what: 'The filter popover: dates, selects, keyword search, Reset and Apply.' },
-  { nn: '24', name: 'Add tags filter', what: 'Solid filter chips, include and exclude, and a tag list you can search.' },
-]
-
-const urlOf = (nn: string) => shots.find((s) => s.nn === nn)?.url
 </script>
 
 <template>
   <DocPage eyebrow="Credits" title="References">
     <template #lead>
-      Rapi started from a Dribbble collection called <em>Clean Minimalistic</em>: 24 shots by 19 designers and studios.
-      Their work is the reason this system looks the way it does. Go and look at the originals; they are better than
-      any summary of them.
+      What Rapi looked at, and what it took from each. The work of these teams is the reason it looks the way it does,
+      so go and look at the originals; they are better than any summary of them.
     </template>
 
-    <DocSection id="method" title="How we used them">
-      <p class="doc-p">
-        We studied the shots and measured them. How much of each screen is accent colour, which greys sit behind the
-        cards, how big the numbers are and how tightly they are tracked, the radius of a card against the radius of the
-        control inside it, how focus, selection and the current page are shown. Those measurements became the tokens,
-        and the patterns that came up in shot after shot became the rules on the Introduction page.
-      </p>
-      <p class="doc-p">
-        Nothing was copied. No images, icons, illustrations or layouts from the shots are used here, and every component
-        and chart was built from scratch from the measurements. The example screens borrow the kind of screen, a sales
-        dashboard, a project list, a weekly calendar, not the screen itself. Product names, people and numbers in the
-        examples are made up.
-      </p>
-    </DocSection>
-
     <DocSection
-      id="shots"
-      title="The shots"
-      description="In the order they appear in the collection. Links open Dribbble in a new tab."
+      id="sources"
+      title="Sources"
+      description="The 21 Strive brand book sets the identity. The rest set the bar for screens that serious people use all day."
     >
-      <div class="doc-references">
-        <RTable :columns="columns" :rows="shots" row-key="nn" caption="Reference shots and their designers">
-          <template #cell-nn="{ value }">
-            <span class="doc-references__nn">{{ value }}</span>
-          </template>
-          <template #cell-title="{ value }">
-            <span class="doc-references__title">{{ value }}</span>
-          </template>
-          <template #cell-designer="{ value }">
-            <span class="doc-references__designer">{{ value }}</span>
-          </template>
-          <template #cell-url="{ row }">
-            <a class="doc-references__link" :href="row.url" target="_blank" rel="noopener">
-              Dribbble
-              <ExternalLink />
-              <span class="r-sr-only">: {{ row.title }} by {{ row.designer }} (opens in a new tab)</span>
+      <ol class="refs">
+        <li v-for="(s, i) in sources" :key="s.name" class="ref">
+          <span class="ref__index r-index">{{ String(i + 1).padStart(2, '0') }}</span>
+          <div class="ref__head">
+            <span class="ref__name">{{ s.name }}</span>
+            <span class="ref__meta">{{ s.meta }}</span>
+            <a v-if="s.href" class="ref__link" :href="s.href" target="_blank" rel="noopener">
+              {{ s.host }}
+              <ExternalLink aria-hidden="true" />
+              <span class="r-sr-only">(opens in a new tab)</span>
             </a>
-          </template>
-        </RTable>
-      </div>
+          </div>
+          <p class="ref__text">{{ s.text }}</p>
+        </li>
+      </ol>
     </DocSection>
 
     <DocSection
-      id="closer-look"
-      title="Worth a closer look"
-      description="If you only open a few, open these. Each one taught us something specific."
+      id="dribbble"
+      title="Where 0.1 came from"
+      description="Rapi 0.1 started from a Dribbble collection called Clean Minimalistic: 24 shots by 19 designers and studios."
     >
-      <div class="doc-closer">
-        <a
-          v-for="item in closer"
-          :key="item.nn"
-          class="doc-closer__item"
-          :href="urlOf(item.nn)"
-          target="_blank"
-          rel="noopener"
-        >
-          <span class="doc-closer__nn">{{ item.nn }}</span>
-          <span class="doc-closer__name">{{ item.name }} <ExternalLink /></span>
-          <span class="doc-closer__what">{{ item.what }}</span>
-          <span class="r-sr-only">(opens in a new tab)</span>
-        </a>
+      <p class="doc-p">
+        Measuring those shots set the first tokens: quiet canvases, big tabular numbers, ink for emphasis, a keyboard for
+        everything. Most of that survived into 0.2 in a stricter form; the soft corners and wide shadows did not. Nothing
+        was copied. No images, icons or layouts from the shots are used anywhere, and the people, companies and numbers
+        in the examples are made up.
+      </p>
+      <div class="shots">
+        <div class="shots__head" aria-hidden="true">
+          <span>#</span>
+          <span>Shot</span>
+          <span>Designer</span>
+          <span />
+        </div>
+        <ol aria-label="Reference shots and their designers">
+        <li v-for="shot in shots" :key="shot.nn" class="shot">
+          <span class="shot__nn">{{ shot.nn }}</span>
+          <span class="shot__title">{{ shot.title }}</span>
+          <span class="shot__designer">{{ shot.designer }}</span>
+          <a class="shot__link" :href="shot.url" target="_blank" rel="noopener">
+            Dribbble
+            <ExternalLink aria-hidden="true" />
+            <span class="r-sr-only">: {{ shot.title }} by {{ shot.designer }} (opens in a new tab)</span>
+          </a>
+        </li>
+        </ol>
       </div>
     </DocSection>
   </DocPage>
 </template>
 
 <style>
-.doc-references {
-  overflow: hidden;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
-  background: var(--r-bg-surface);
+/* ── Sources ─────────────────────────────────────────────────────────────── */
+.refs {
+  border-top: 1px solid var(--r-border-strong);
 }
 
-.doc-references__nn {
+.ref {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 240px) minmax(0, 1fr);
+  gap: 8px 24px;
+  padding: 18px 0 20px;
+  border-bottom: 1px solid var(--r-border);
+}
+
+.ref__index {
+  padding-top: 3px;
+}
+
+.ref__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ref__name {
+  font-size: var(--r-text-lg);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: var(--r-tracking-snug);
+}
+
+.ref__meta {
   color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+
+.ref__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--r-brand-text);
+  font-size: var(--r-text-sm);
+  font-weight: var(--r-weight-medium);
+  text-decoration: none;
+}
+.ref__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ref__link svg {
+  width: 13px;
+  height: 13px;
+}
+
+.ref__text {
+  max-width: 64ch;
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-md);
+  line-height: var(--r-leading-relaxed);
+  text-wrap: pretty;
+}
+
+@media (max-width: 760px) {
+  .ref {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+  .ref__text {
+    grid-column: 2;
+  }
+}
+
+/* ── Dribbble shots ──────────────────────────────────────────────────────── */
+.shots {
+  border-top: 1px solid var(--r-border-strong);
+}
+
+.shots__head,
+.shot {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1.5fr) minmax(0, 1fr) 96px;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--r-border-subtle);
+}
+
+.shots__head {
+  border-bottom-color: var(--r-border);
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+
+.shot__nn {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-variant-numeric: tabular-nums;
 }
 
-.doc-references__title {
-  display: block;
-  min-width: 220px;
+.shot__title {
+  font-size: var(--r-text-sm);
   font-weight: var(--r-weight-medium);
-  white-space: normal;
 }
 
-.doc-references__designer {
+.shot__designer {
   color: var(--r-text-secondary);
+  font-size: var(--r-text-sm);
 }
 
-.doc-references__link {
+.shot__link {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
   color: var(--r-brand-text);
   font-size: var(--r-text-sm);
   font-weight: var(--r-weight-medium);
   text-decoration: none;
 }
-.doc-references__link:hover {
+.shot__link:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.doc-references__link svg {
-  width: 14px;
-  height: 14px;
+.shot__link svg {
+  width: 13px;
+  height: 13px;
 }
 
-.doc-closer {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
-  gap: 12px;
-}
-
-.doc-closer__item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 18px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
-  background: var(--r-bg-surface);
-  color: inherit;
-  text-decoration: none;
-  transition:
-    border-color var(--r-duration-fast) var(--r-ease-out),
-    box-shadow var(--r-duration-fast) var(--r-ease-out);
-}
-.doc-closer__item:hover {
-  border-color: var(--r-border);
-  box-shadow: var(--r-shadow-md);
-}
-
-.doc-closer__nn {
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
-}
-
-.doc-closer__name {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: var(--r-weight-semibold);
-}
-.doc-closer__name svg {
-  width: 14px;
-  height: 14px;
-  color: var(--r-text-tertiary);
-}
-
-.doc-closer__what {
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-sm);
-  line-height: 1.55;
+@media (max-width: 760px) {
+  .shots__head {
+    display: none;
+  }
+  .shot {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+  .shot__designer {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .shot__link {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
 }
 </style>

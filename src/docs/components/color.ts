@@ -68,7 +68,7 @@ export function toHex(c: RGBA): string {
   return `#${hex2(c.r)}${hex2(c.g)}${hex2(c.b)}`.toUpperCase()
 }
 
-/** "#3F66F6" or "#3F66F6 · 16%" for translucent colours. */
+/** "#1B3AAB" or "#4970EB · 16%" for translucent colours. */
 export function describe(c: RGBA | null | undefined): string {
   if (!c) return '—'
   return c.a < 0.999 ? `${toHex(c)} · ${Math.round(c.a * 100)}%` : toHex(c)
@@ -106,21 +106,21 @@ export function grade(ratio: number): string {
   return 'Low'
 }
 
-/** Dark or light text, whichever reads better on `c`. */
+/** White or the 21 Strive black, whichever reads better on `c`. */
 export function readableOn(c: RGBA | null | undefined): string {
   if (!c) return 'inherit'
   const white = contrast({ r: 255, g: 255, b: 255, a: 1 }, c)
-  const ink = contrast({ r: 21, g: 24, b: 30, a: 1 }, c)
+  const ink = contrast({ r: 21, g: 21, b: 21, a: 1 }, c)
   if (white >= ink && white >= 4.5) return '#fff'
-  if (ink >= 4.5) return '#15181e'
-  // Mid-tones where neither passes (flame-600): pure black still does.
+  if (ink >= 4.5) return '#151515'
+  // Mid-tones where neither passes: pure black still does.
   const black = contrast({ r: 0, g: 0, b: 0, a: 1 }, c)
   return black > white ? '#000' : '#fff'
 }
 
 /**
  * Resolves a list of tokens in the context of `root` and re-reads them whenever the theme or the
- * theme changes. Returns a map from token to colour.
+ * token list changes. Returns a map from token to colour.
  */
 export function useTokenColors(root: Ref<HTMLElement | null>, tokens: () => string[]) {
   const colors = ref<Record<string, RGBA | null>>({})

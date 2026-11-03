@@ -172,7 +172,7 @@ const xTicks = computed(() => {
   const n = props.labels.length
   const every = Math.max(1, Math.ceil(64 / (geometry.value.plotW / Math.max(1, n - 1))))
   return props.labels
-    .map((text, i) => ({ text, x: geometry.value.x(i), i }))
+    .map((text, i) => ({ text, x: geometry.value.x(i), i, anchor: i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle' }))
     .filter((t) => t.i % every === 0 || t.i === n - 1)
     .filter((t, k, all) => !(t.i === n - 1 && k > 0 && t.i - all[k - 1].i < every))
 })
@@ -303,7 +303,7 @@ const marker = computed(() => {
           <line class="r-chart__baseline" :x1="geometry.left" :x2="geometry.right" :y1="crisp(geometry.bottom)" :y2="crisp(geometry.bottom)" />
           <template v-for="t in xTicks" :key="`x${t.i}`">
             <line class="r-chart__tick" :x1="crisp(t.x)" :x2="crisp(t.x)" :y1="geometry.bottom" :y2="geometry.bottom + 4" />
-            <text :x="t.x" :y="height - 6" text-anchor="middle">{{ t.text }}</text>
+            <text :x="t.x" :y="height - 6" :text-anchor="t.anchor">{{ t.text }}</text>
           </template>
         </g>
 
@@ -322,11 +322,7 @@ const marker = computed(() => {
           <path v-if="l.forecast" class="r-line-chart__line is-dashed" :d="l.forecast" :style="{ stroke: l.color }" />
         </template>
 
-        <g v-if="nowLine" class="r-chart__now">
-          <line :x1="crisp(nowLine.x)" :x2="crisp(nowLine.x)" :y1="geometry.top - 12" :y2="geometry.bottom" />
-          <rect :x="nowLine.x - 15" :y="geometry.top - 24" width="30" height="12" />
-          <text :x="nowLine.x" :y="geometry.top - 15" text-anchor="middle">NOW</text>
-        </g>
+
 
         <g v-if="marker" class="r-line-chart__marker">
           <line :x1="crisp(marker.x)" :x2="crisp(marker.x)" :y1="marker.y" :y2="marker.bottom" class="r-chart__tick" />
@@ -343,6 +339,12 @@ const marker = computed(() => {
             <circle :cx="e.x" :cy="e.y" r="3" class="r-chart__point" :style="{ fill: e.color }" />
             <text class="r-chart__value" :x="e.x + 12" :y="e.ty" dy="0.34em">{{ e.text }}</text>
           </template>
+        </g>
+
+        <g v-if="nowLine" class="r-chart__now">
+          <line :x1="crisp(nowLine.x)" :x2="crisp(nowLine.x)" :y1="geometry.top - 12" :y2="geometry.bottom" />
+          <rect :x="nowLine.x - 15" :y="geometry.top - 24" width="30" height="12" />
+          <text :x="nowLine.x" :y="geometry.top - 15" text-anchor="middle">NOW</text>
         </g>
 
         <g v-if="cursor" class="r-line-chart__cursor">

@@ -51,7 +51,8 @@ export const navGroups: DocGroup[] = [
         icon: Palette,
         sections: [
           { id: 'neutrals', title: 'Neutrals' },
-          { id: 'brand', title: 'Brand' },
+          { id: 'brand', title: 'Cobalt' },
+          { id: 'signal', title: 'Signal' },
           { id: 'status', title: 'Status' },
           { id: 'data', title: 'Data' },
           { id: 'identity', title: 'Identity colours' },
@@ -63,7 +64,7 @@ export const navGroups: DocGroup[] = [
         path: '/foundations/typography',
         icon: Type,
         sections: [
-          { id: 'typeface', title: 'Typeface' },
+          { id: 'typeface', title: 'Typefaces' },
           { id: 'scale', title: 'Type scale' },
           { id: 'numbers', title: 'Numbers' },
         ],

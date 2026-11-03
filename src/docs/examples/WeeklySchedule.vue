@@ -45,6 +45,8 @@ import {
   type Point,
 } from '@/design-system'
 import MiniMonth from './schedule/MiniMonth.vue'
+import ExampleStrip from './parts/ExampleStrip.vue'
+import AppMark from './parts/AppMark.vue'
 import ColorDots from './schedule/ColorDots.vue'
 import EventDialog from './schedule/EventDialog.vue'
 import {
@@ -56,6 +58,7 @@ import {
   formatHour,
   formatRange,
   formatTime,
+  isoWeek,
   occursOn,
   sameDay,
   seedEvents,
@@ -110,6 +113,12 @@ const heading = computed(() => {
   const short = (x: Date) => x.toLocaleDateString('en-US', { month: 'short' })
   return { month: `${short(first)} – ${short(last)}`, year: String(last.getFullYear()) }
 })
+
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+/** "Tue 3 Nov 2026" */
+const stripDay = (d: Date) => `${WEEKDAYS_SHORT[d.getDay()]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`
+const weekNumber = computed(() => isoWeek(week.value))
 
 function step(direction: 1 | -1) {
   const s = selected.value
@@ -365,7 +374,8 @@ const menuItems = computed<MenuItem[]>(() => {
   const e = menu.value.event
   if (!e) return []
   const nextWeekStart = addDays(startOfWeek(menu.value.date), 7)
-  const range = `${nextWeekStart.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} – ${addDays(nextWeekStart, 6).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
+  const short = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  const range = `${short(nextWeekStart)} – ${short(addDays(nextWeekStart, 6))}`
   return [
     { id: 'flexible', label: e.flexible ? 'Make fixed' : 'Make flexible', icon: WandSparkles },
     {
@@ -555,245 +565,258 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 <template>
   <div class="pk" :class="{ 'is-narrow': isNarrow }">
-    <!-- Sidebar: static on wide screens, a drawer on narrow ones. -->
-    <div v-if="drawerActive" class="pk-backdrop" aria-hidden="true" @click="drawerOpen = false" />
-    <aside
-      ref="side"
-      class="pk-side"
-      :class="{ 'is-open': drawerActive }"
-      :role="drawerActive ? 'dialog' : undefined"
-      :aria-modal="drawerActive ? 'true' : undefined"
-      aria-label="Calendars"
-    >
-      <div class="pk-side__brand">
-        <span class="pk-logo" aria-hidden="true">
-          <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="10" /><path d="M9 12h14M9 12v10.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V12M9 12V9.5A1.5 1.5 0 0 1 10.5 8h11A1.5 1.5 0 0 1 23 9.5V12M13 6v4M19 6v4M13 17h2M17 17h2M13 20.5h2" /></svg>
-        </span>
-        <span class="pk-side__name">Pekan</span>
-        <RIconButton v-if="drawerActive" class="pk-side__close" label="Close calendars" variant="ghost" size="sm" @click="drawerOpen = false">
-          <X />
-        </RIconButton>
-      </div>
+    <ExampleStrip>
+      <span>Pekan</span>
+      <span class="ex-strip__sep">/</span>
+      <span>Calendar</span>
+      <span class="ex-strip__sep">/</span>
+      <span>Week {{ weekNumber }}</span>
+      <template #end>
+        <span class="ex-strip__wide">{{ stripDay(now) }}</span>
+        <span class="ex-strip__sep ex-strip__wide">/</span>
+        <span class="pk-strip__clock">{{ formatTime(nowMinutes) }} {{ timezoneLabel }}</span>
+      </template>
+    </ExampleStrip>
 
-      <div class="pk-side__section">
-        <MiniMonth v-model="selected" :busy="busy" :week-mode="view === 'week'" />
-      </div>
-
-      <div class="pk-side__section pk-side__section--tight">
-        <RInput v-model="query" placeholder="Find an event or a person" aria-label="Find an event or a person" clearable>
-          <template #leading><Search /></template>
-        </RInput>
-      </div>
-
-      <div class="pk-side__section pk-side__section--tight">
-        <p class="pk-side__label" id="pk-calendars-label">My calendars</p>
-        <ul class="pk-calendars" aria-labelledby="pk-calendars-label">
-          <li v-for="c in calendars" :key="c.id">
-            <RCheckbox v-model="visibleCalendars" :value="c.id" :color="`var(--r-identity-${c.color}-text)`" :label="c.name" />
-          </li>
-        </ul>
-        <RPopover v-model:open="accountOpen" kind="menu" placement="bottom-start">
-          <template #trigger>
-            <RButton variant="ghost" tone="brand" size="sm" class="pk-add-account">
-              <template #leading><Plus /></template>
-              Add calendar account
-            </RButton>
-          </template>
-          <RMenu :items="accountItems" label="Add calendar account" @select="onAccountSelect" @close="accountOpen = false" />
-        </RPopover>
-      </div>
-
-      <div v-if="nextUp" class="pk-next">
-        <p class="pk-next__label">Next up</p>
-        <p class="pk-next__title">{{ nextUp.event.title }}</p>
-        <p class="pk-next__when">
-          {{ nextUp.when }}
-          <template v-if="nextUp.event.location">
-            · <MapPin class="pk-next__pin" /> {{ nextUp.event.location }}
-          </template>
-        </p>
-        <div class="pk-next__foot">
-          <RAvatarGroup :names="nextUp.event.guests" :max="4" size="sm" />
-          <RButton v-if="nextUp.event.video" size="sm" tone="brand" @click="notify('This is a demo, so there is no call to join')">
-            <template #leading><Video /></template>
-            Join
-          </RButton>
-        </div>
-      </div>
-
-      <div class="pk-profile">
-        <RAvatar name="Anastasia Wijaya" size="lg" status="online" />
-        <div class="pk-profile__text">
-          <span class="pk-profile__name">Anastasia Wijaya</span>
-          <span class="pk-profile__mail">anastasia@pekan.app</span>
-        </div>
-        <RIconButton label="Sign out" variant="ghost" size="sm" @click="notify('Signed out. Not really, this is a demo.')">
-          <LogOut />
-        </RIconButton>
-      </div>
-    </aside>
-
-    <main class="pk-main" aria-label="Schedule">
-      <header class="pk-top">
-        <div class="pk-top__left">
-          <RIconButton v-if="isNarrow" label="Show calendars" variant="ghost" @click="drawerOpen = true">
-            <PanelLeft />
+    <div class="pk-frame">
+      <!-- Sidebar: static on wide screens, a drawer on narrow ones. -->
+      <div v-if="drawerActive" class="pk-backdrop" aria-hidden="true" @click="drawerOpen = false" />
+      <aside
+        ref="side"
+        class="pk-side"
+        :class="{ 'is-open': drawerActive }"
+        :role="drawerActive ? 'dialog' : undefined"
+        :aria-modal="drawerActive ? 'true' : undefined"
+        aria-label="Calendars"
+      >
+        <div class="pk-side__brand">
+          <AppMark glyph="pekan" />
+          <span class="pk-side__name">Pekan</span>
+          <RIconButton v-if="drawerActive" class="pk-side__close" label="Close calendars" variant="ghost" size="sm" @click="drawerOpen = false">
+            <X />
           </RIconButton>
-          <h1 class="pk-title">
-            <span>{{ heading.month }}</span>{{ ' ' }}<span class="pk-title__year">{{ heading.year }}</span>
-          </h1>
-          <div class="pk-top__steps">
-            <RIconButton :label="`Previous ${view === 'day' ? 'day' : view}`" variant="ghost" size="sm" @click="step(-1)">
-              <ChevronLeft />
-            </RIconButton>
-            <RIconButton :label="`Next ${view === 'day' ? 'day' : view}`" variant="ghost" size="sm" @click="step(1)">
-              <ChevronRight />
-            </RIconButton>
-          </div>
-          <RTooltip content="Go to today" :shortcut="['T']" :describe="false">
-            <RButton variant="outline" size="sm" @click="goToday">Today</RButton>
-          </RTooltip>
         </div>
 
-        <RSegmented v-model="view" class="pk-top__views" :options="viewOptions" label="View" />
+        <div class="pk-side__section">
+          <MiniMonth v-model="selected" :busy="busy" :week-mode="view === 'week'" />
+        </div>
 
-        <div class="pk-top__right">
-          <RPopover v-model:open="moreOpen" kind="menu" placement="bottom-end">
+        <div class="pk-side__section pk-side__section--tight">
+          <RInput v-model="query" placeholder="Find an event or a person" aria-label="Find an event or a person" clearable>
+            <template #leading><Search /></template>
+          </RInput>
+        </div>
+
+        <div class="pk-side__section pk-side__section--tight">
+          <p id="pk-calendars-label" class="pk-side__label"><span class="r-index" aria-hidden="true">01</span> My calendars</p>
+          <ul class="pk-calendars" aria-labelledby="pk-calendars-label">
+            <li v-for="c in calendars" :key="c.id">
+              <RCheckbox v-model="visibleCalendars" :value="c.id" :color="`var(--r-identity-${c.color}-text)`" :label="c.name" />
+            </li>
+          </ul>
+          <RPopover v-model:open="accountOpen" kind="menu" placement="bottom-start">
             <template #trigger>
-              <RIconButton label="More options" variant="ghost"><Ellipsis /></RIconButton>
+              <RButton variant="ghost" tone="brand" size="sm" class="pk-add-account">
+                <template #leading><Plus /></template>
+                Add calendar account
+              </RButton>
             </template>
-            <RMenu :items="moreItems" label="More options" @select="onMoreSelect" @close="moreOpen = false" />
+            <RMenu :items="accountItems" label="Add calendar account" @select="onAccountSelect" @close="accountOpen = false" />
           </RPopover>
-          <RTooltip content="New event" :shortcut="['N']" :describe="false">
-            <RButton class="pk-new" @click="create(view === 'day' ? selected : today)">
-              <template #leading><Plus /></template>
-              <span class="pk-new__label">New event</span>
+        </div>
+
+        <div v-if="nextUp" class="pk-next">
+          <p class="pk-next__label"><span class="r-index" aria-hidden="true">02</span> Next up</p>
+          <p class="pk-next__title">{{ nextUp.event.title }}</p>
+          <p class="pk-next__when">
+            <span>{{ nextUp.when }}</span>
+            <template v-if="nextUp.event.location">
+              <span class="pk-next__place"><MapPin class="pk-next__pin" aria-hidden="true" />{{ nextUp.event.location }}</span>
+            </template>
+          </p>
+          <div class="pk-next__foot">
+            <RAvatarGroup :names="nextUp.event.guests" :max="4" size="sm" />
+            <RButton v-if="nextUp.event.video" size="sm" variant="outline" @click="notify('This is a demo, so there is no call to join')">
+              <template #leading><Video /></template>
+              Join
             </RButton>
-          </RTooltip>
-        </div>
-      </header>
-
-      <!-- Day and week -->
-      <div v-if="view !== 'month'" ref="scroller" class="pk-cal">
-        <div
-          class="pk-cal__inner"
-          :style="{ gridTemplateColumns: `64px repeat(${columns.length}, minmax(${view === 'day' ? 240 : 116}px, 1fr))` }"
-        >
-          <div class="pk-cal__corner">
-            <span class="pk-cal__tz">{{ timezoneLabel }}</span>
           </div>
-          <button
-            v-for="col in columns"
-            :key="`h${col.date.getTime()}`"
-            type="button"
-            class="pk-cal__dayhead"
-            :class="{ 'is-today': col.isToday, 'is-selected': view === 'day' }"
-            :aria-label="`${longDay(col.date)}${col.isToday ? ', today' : ''}. Open day view`"
-            :aria-current="col.isToday ? 'date' : undefined"
-            @click="openDay(col.date)"
-          >
-            <span class="pk-cal__daynum">{{ col.date.getDate() }}</span>
-            <span class="pk-cal__dayname">{{ view === 'day' ? col.date.toLocaleDateString('en-US', { weekday: 'long' }) : dayName(col.date) }}</span>
-          </button>
+        </div>
 
-          <div class="pk-cal__times" :style="{ height: `${gridHeight}px` }" aria-hidden="true">
-            <span v-for="hr in hours" :key="hr" class="pk-cal__time" :style="{ top: `${((hr - DAY_START) / 60) * HOUR}px` }">
-              {{ formatHour(hr) }}
-            </span>
-            <span v-if="nowVisible && columns.some((c) => c.isToday)" class="pk-cal__now-pill" :style="{ top: `${nowTop}px` }">
-              {{ formatTime(nowMinutes) }}
-            </span>
+        <div class="pk-profile">
+          <RAvatar name="Anastasia Wijaya" size="md" status="online" />
+          <div class="pk-profile__text">
+            <span class="pk-profile__name">Anastasia Wijaya</span>
+            <span class="pk-profile__mail">anastasia@pekan.app</span>
+          </div>
+          <RIconButton label="Sign out" variant="ghost" size="sm" @click="notify('Signed out. Not really, this is a demo.')">
+            <LogOut />
+          </RIconButton>
+        </div>
+      </aside>
+
+      <main class="pk-main" aria-label="Schedule">
+        <header class="pk-top">
+          <div class="pk-top__left">
+            <RIconButton v-if="isNarrow" label="Show calendars" variant="ghost" @click="drawerOpen = true">
+              <PanelLeft />
+            </RIconButton>
+            <h1 class="pk-title">
+              <span>{{ heading.month }}</span>{{ ' ' }}<span class="pk-title__year">{{ heading.year }}</span>
+            </h1>
+            <div class="pk-top__steps">
+              <RIconButton :label="`Previous ${view === 'day' ? 'day' : view}`" variant="ghost" size="sm" @click="step(-1)">
+                <ChevronLeft />
+              </RIconButton>
+              <RIconButton :label="`Next ${view === 'day' ? 'day' : view}`" variant="ghost" size="sm" @click="step(1)">
+                <ChevronRight />
+              </RIconButton>
+            </div>
+            <RTooltip content="Go to today" :shortcut="['T']" :describe="false">
+              <RButton variant="outline" size="sm" @click="goToday">Today</RButton>
+            </RTooltip>
           </div>
 
-          <section
-            v-for="col in columns"
-            :key="`c${col.date.getTime()}`"
-            class="pk-cal__col"
-            :class="{ 'is-today': col.isToday }"
-            :style="{ height: `${gridHeight}px` }"
-            :aria-label="longDay(col.date)"
-            @click="onColumnClick($event, col.date)"
-          >
-            <button
-              v-for="b in col.blocks"
-              :key="b.event.id"
-              type="button"
-              class="pk-event"
-              :class="{
-                'is-short': durationOf(b.event) < 50,
-                'is-flexible': b.event.flexible,
-                'is-dim': !matches(b.event),
-                'is-match': !!needle && matches(b.event),
-                'is-stacked': b.lane > 0,
-              }"
-              :style="blockStyle(b)"
-              :aria-label="eventLabel(b.event, col.date)"
-              aria-haspopup="menu"
-              @click="edit(b.event, col.date)"
-              @contextmenu="onContextMenu($event, b.event, col.date)"
-              @keydown="onEventKeydown($event, b.event, col.date)"
-            >
-              <span class="pk-event__title">
-                <component :is="iconOf(b.event)" class="pk-event__icon" />
-                <span class="pk-event__text">{{ b.event.title }}</span>
-              </span>
-              <span class="pk-event__time">{{ formatRange(b.event.start, b.event.end) }}</span>
-              <span v-if="durationOf(b.event) >= 75 && b.event.guests.length > 1" class="pk-event__foot">
-                <RAvatarGroup :names="b.event.guests" :max="3" size="sm" />
-                <Video v-if="b.event.video" class="pk-event__video" />
-              </span>
-            </button>
-            <div v-if="col.isToday && nowVisible" class="pk-cal__now" :style="{ top: `${nowTop}px` }" aria-hidden="true" />
-          </section>
-        </div>
-      </div>
+          <RSegmented v-model="view" class="pk-top__views" :options="viewOptions" size="sm" label="View" />
 
-      <!-- Month -->
-      <div v-else class="pk-month">
-        <div class="pk-month__grid">
-          <div v-for="d in weekdayHeads" :key="d" class="pk-month__head" aria-hidden="true">{{ d }}</div>
+          <div class="pk-top__right">
+            <RPopover v-model:open="moreOpen" kind="menu" placement="bottom-end">
+              <template #trigger>
+                <RIconButton label="More options" variant="ghost"><Ellipsis /></RIconButton>
+              </template>
+              <RMenu :items="moreItems" label="More options" @select="onMoreSelect" @close="moreOpen = false" />
+            </RPopover>
+            <RTooltip content="New event" :shortcut="['N']" :describe="false">
+              <RButton class="pk-new" tone="brand" @click="create(view === 'day' ? selected : today)">
+                <template #leading><Plus /></template>
+                <span class="pk-new__label">New event</span>
+              </RButton>
+            </RTooltip>
+          </div>
+        </header>
+
+        <!-- Day and week -->
+        <div v-if="view !== 'month'" ref="scroller" class="pk-cal">
           <div
-            v-for="cell in monthCells"
-            :key="cell.date.getTime()"
-            class="pk-month__cell"
-            :class="{ 'is-outside': cell.outside, 'is-today': cell.isToday }"
+            class="pk-cal__inner"
+            :style="{ gridTemplateColumns: `64px repeat(${columns.length}, minmax(${view === 'day' ? 240 : 116}px, 1fr))` }"
           >
+            <div class="pk-cal__corner">
+              <span class="pk-cal__tz">{{ timezoneLabel }}</span>
+            </div>
             <button
+              v-for="col in columns"
+              :key="`h${col.date.getTime()}`"
               type="button"
-              class="pk-month__date"
-              :aria-label="`${longDay(cell.date)}, ${cell.list.length} ${cell.list.length === 1 ? 'event' : 'events'}`"
-              :aria-current="cell.isToday ? 'date' : undefined"
-              @click="openDay(cell.date)"
+              class="pk-cal__dayhead"
+              :class="{ 'is-today': col.isToday }"
+              :aria-label="`${longDay(col.date)}${col.isToday ? ', today' : ''}. Open day view`"
+              :aria-current="col.isToday ? 'date' : undefined"
+              @click="openDay(col.date)"
             >
-              {{ cell.date.getDate() }}
+              <span class="pk-cal__dayname">{{ view === 'day' ? col.date.toLocaleDateString('en-US', { weekday: 'long' }) : dayName(col.date) }}</span>
+              <span class="pk-cal__daynum">{{ col.date.getDate() }}</span>
             </button>
-            <button
-              v-for="e in cell.list.slice(0, 3)"
-              :key="e.id"
-              type="button"
-              class="pk-month__event"
-              :class="{ 'is-dim': !matches(e) }"
-              :style="{ '--ev-bg': `var(--r-identity-${colorOf(e)})`, '--ev-fg': `var(--r-identity-${colorOf(e)}-text)` }"
-              :aria-label="eventLabel(e, cell.date)"
-              @click="edit(e, cell.date)"
-              @contextmenu="onContextMenu($event, e, cell.date)"
-              @keydown="onEventKeydown($event, e, cell.date)"
+
+            <div class="pk-cal__times" :style="{ height: `${gridHeight}px` }" aria-hidden="true">
+              <span v-for="hr in hours" :key="hr" class="pk-cal__time" :style="{ top: `${((hr - DAY_START) / 60) * HOUR}px` }">
+                {{ formatHour(hr) }}
+              </span>
+              <span v-if="nowVisible && columns.some((c) => c.isToday)" class="pk-cal__now-tag" :style="{ top: `${nowTop}px` }">
+                {{ formatTime(nowMinutes) }}
+              </span>
+            </div>
+
+            <section
+              v-for="col in columns"
+              :key="`c${col.date.getTime()}`"
+              class="pk-cal__col"
+              :class="{ 'is-today': col.isToday }"
+              :style="{ height: `${gridHeight}px` }"
+              :aria-label="longDay(col.date)"
+              @click="onColumnClick($event, col.date)"
             >
-              <span class="pk-month__event-time">{{ formatTime(e.start).replace(':00', '') }}</span>
-              {{ e.title }}
-            </button>
-            <button v-if="cell.list.length > 3" type="button" class="pk-month__more" @click="openDay(cell.date)">
-              {{ cell.list.length - 3 }} more
-            </button>
+              <button
+                v-for="b in col.blocks"
+                :key="b.event.id"
+                type="button"
+                class="pk-event"
+                :class="{
+                  'is-short': durationOf(b.event) < 50,
+                  'is-flexible': b.event.flexible,
+                  'is-dim': !matches(b.event),
+                  'is-match': !!needle && matches(b.event),
+                  'is-stacked': b.lane > 0,
+                }"
+                :style="blockStyle(b)"
+                :aria-label="eventLabel(b.event, col.date)"
+                aria-haspopup="menu"
+                @click="edit(b.event, col.date)"
+                @contextmenu="onContextMenu($event, b.event, col.date)"
+                @keydown="onEventKeydown($event, b.event, col.date)"
+              >
+                <span class="pk-event__title">
+                  <component :is="iconOf(b.event)" class="pk-event__icon" />
+                  <span class="pk-event__text">{{ b.event.title }}</span>
+                </span>
+                <span class="pk-event__time">{{ formatRange(b.event.start, b.event.end) }}</span>
+                <span v-if="durationOf(b.event) >= 75 && b.event.guests.length > 1" class="pk-event__foot">
+                  <RAvatarGroup :names="b.event.guests" :max="3" size="xs" />
+                  <Video v-if="b.event.video" class="pk-event__video" />
+                </span>
+              </button>
+              <div v-if="col.isToday && nowVisible" class="pk-cal__now" :style="{ top: `${nowTop}px` }" aria-hidden="true" />
+            </section>
           </div>
         </div>
-      </div>
 
-      <p class="r-sr-only">
-        Tip: press N for a new event and T for today. On an event, press Enter to edit it, the menu key or Shift F10
-        for more actions, <RKbd :keys="['mod', 'C']" /> to copy and <RKbd :keys="['mod', 'D']" /> to duplicate.
-      </p>
-    </main>
+        <!-- Month -->
+        <div v-else class="pk-month">
+          <div class="pk-month__grid">
+            <div v-for="d in weekdayHeads" :key="d" class="pk-month__head" aria-hidden="true">{{ d }}</div>
+            <div
+              v-for="cell in monthCells"
+              :key="cell.date.getTime()"
+              class="pk-month__cell"
+              :class="{ 'is-outside': cell.outside, 'is-today': cell.isToday }"
+            >
+              <button
+                type="button"
+                class="pk-month__date"
+                :aria-label="`${longDay(cell.date)}, ${cell.list.length} ${cell.list.length === 1 ? 'event' : 'events'}`"
+                :aria-current="cell.isToday ? 'date' : undefined"
+                @click="openDay(cell.date)"
+              >
+                {{ cell.date.getDate() }}
+              </button>
+              <button
+                v-for="e in cell.list.slice(0, 3)"
+                :key="e.id"
+                type="button"
+                class="pk-month__event"
+                :class="{ 'is-dim': !matches(e) }"
+                :style="{ '--ev-bg': `var(--r-identity-${colorOf(e)})`, '--ev-fg': `var(--r-identity-${colorOf(e)}-text)` }"
+                :aria-label="eventLabel(e, cell.date)"
+                @click="edit(e, cell.date)"
+                @contextmenu="onContextMenu($event, e, cell.date)"
+                @keydown="onEventKeydown($event, e, cell.date)"
+              >
+                <span class="pk-month__event-time">{{ formatTime(e.start) }}</span>
+                {{ e.title }}
+              </button>
+              <button v-if="cell.list.length > 3" type="button" class="pk-month__more" @click="openDay(cell.date)">
+                {{ cell.list.length - 3 }} more
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="r-sr-only">
+          Tip: press N for a new event and T for today. On an event, press Enter to edit it, the menu key or Shift F10
+          for more actions, <RKbd :keys="['mod', 'C']" /> to copy and <RKbd :keys="['mod', 'D']" /> to duplicate.
+        </p>
+      </main>
+    </div>
 
     <!-- Right-click menu -->
     <RPopover v-model:open="menu.open" :point="menu.point" kind="menu" placement="bottom-start" :offset="2">
@@ -837,23 +860,34 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 .pk {
   position: relative;
   display: flex;
+  flex-direction: column;
   height: 100dvh;
   overflow: hidden;
   background: var(--r-bg-surface);
   color: var(--r-text);
 }
 
+.pk-strip__clock {
+  color: var(--r-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-frame {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 /* ── Sidebar ──────────────────────────────────────────────────────────────── */
 .pk-side {
-  position: sticky;
-  top: 0;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 296px;
-  height: 100dvh;
+  width: 288px;
+  height: 100%;
   overflow-y: auto;
-  border-right: 1px solid var(--r-border-subtle);
+  border-right: 1px solid var(--r-border);
   background: var(--r-bg-canvas);
 }
 
@@ -865,29 +899,14 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 .pk-side__brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 72px;
+  gap: 10px;
+  height: 56px;
   padding: 0 20px;
-  border-bottom: 1px solid var(--r-border-subtle);
-}
-
-.pk-logo svg {
-  width: 32px;
-  height: 32px;
-}
-.pk-logo rect {
-  fill: var(--r-brand);
-}
-.pk-logo path {
-  fill: none;
-  stroke: var(--r-on-brand);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  border-bottom: 1px solid var(--r-border);
 }
 
 .pk-side__name {
-  font-size: var(--r-text-xl);
+  font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
   letter-spacing: var(--r-tracking-tight);
 }
@@ -898,31 +917,33 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 .pk-side__section {
   padding: 20px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  border-bottom: 1px solid var(--r-border);
 }
 .pk-side__section--tight {
   padding-top: 16px;
   padding-bottom: 16px;
 }
-.pk-side__section--tight + .pk-side__section--tight {
-  border-top: 0;
-}
 
-.pk-side__label {
+.pk-side__label,
+.pk-next__label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 10px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
-  font-weight: var(--r-weight-medium);
+  color: var(--r-text);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pk-calendars {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   margin: 0 -8px 8px;
 }
 .pk-calendars li {
-  border-radius: var(--r-radius-md);
   transition: background-color var(--r-duration-fast) var(--r-ease-out);
 }
 .pk-calendars li:hover {
@@ -930,11 +951,11 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 }
 .pk-calendars .r-checkbox {
   width: 100%;
-  padding: 9px 8px;
+  padding: 7px 8px;
 }
 
 .pk-add-account {
-  margin-left: -10px;
+  margin-left: -8px;
 }
 
 .pk-next {
@@ -942,28 +963,33 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   flex-direction: column;
   gap: 4px;
   margin: 16px 20px 0;
-  padding: 16px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
+  padding: 14px 16px 16px;
+  border: 1px solid var(--r-border);
+  border-left: 2px solid var(--r-brand);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 .pk-next__label {
-  color: var(--r-brand-text);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-semibold);
+  margin-bottom: 4px;
 }
 .pk-next__title {
   font-size: var(--r-text-md);
   font-weight: var(--r-weight-semibold);
+  line-height: 1.35;
 }
 .pk-next__when {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 4px 12px;
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.pk-next__place {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
 }
 .pk-next__pin {
   width: 13px;
@@ -981,7 +1007,8 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   align-items: center;
   gap: 12px;
   margin-top: auto;
-  padding: 20px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--r-border);
 }
 .pk-profile__text {
   display: flex;
@@ -996,7 +1023,8 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 .pk-profile__mail {
   overflow: hidden;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1007,7 +1035,7 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   flex: 1;
   flex-direction: column;
   min-width: 0;
-  height: 100dvh;
+  height: 100%;
 }
 
 .pk-top {
@@ -1015,9 +1043,9 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
-  height: 72px;
-  padding: 0 20px 0 24px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  height: 56px;
+  padding: 0 16px 0 24px;
+  border-bottom: 1px solid var(--r-border);
 }
 
 .pk-top__left,
@@ -1037,12 +1065,13 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   margin-right: 4px;
   font-size: var(--r-text-xl);
   font-weight: var(--r-weight-semibold);
-  letter-spacing: var(--r-tracking-snug);
+  letter-spacing: var(--r-tracking-tight);
   white-space: nowrap;
 }
 .pk-title__year {
   color: var(--r-text-tertiary);
-  font-weight: var(--r-weight-medium);
+  font-weight: var(--r-weight-regular);
+  font-variant-numeric: tabular-nums;
 }
 
 .pk-top__steps {
@@ -1069,58 +1098,66 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   position: sticky;
   z-index: 3;
   top: 0;
-  height: 84px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  height: 64px;
+  border-bottom: 1px solid var(--r-border);
   background: var(--r-bg-surface);
 }
 
 .pk-cal__corner {
   z-index: 4;
   left: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 10px 10px 0;
 }
 
 .pk-cal__tz {
-  padding: 6px 8px;
-  border-radius: var(--r-radius-sm);
-  background: var(--r-bg-muted);
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pk-cal__dayhead {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-end;
   gap: 2px;
-  padding: 0;
+  padding: 0 12px 8px;
   border: 0;
-  border-bottom: 1px solid var(--r-border-subtle);
+  border-bottom: 1px solid var(--r-border);
+  border-left: 1px solid var(--r-border-subtle);
   color: var(--r-text);
+  text-align: left;
   cursor: pointer;
 }
 .pk-cal__dayhead:hover .pk-cal__daynum {
   color: var(--r-brand-text);
 }
 .pk-cal__dayhead:focus-visible {
-  outline-offset: -4px;
-  border-radius: 12px;
+  outline-offset: -3px;
+}
+
+.pk-cal__dayname {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pk-cal__daynum {
   font-size: var(--r-text-2xl);
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: var(--r-tracking-tight);
   transition: color var(--r-duration-fast) var(--r-ease-out);
-}
-.pk-cal__dayname {
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
 }
 
 .pk-cal__dayhead.is-today {
@@ -1142,7 +1179,8 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   position: absolute;
   right: 10px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   transform: translateY(-50%);
@@ -1151,15 +1189,16 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   transform: none;
 }
 
-.pk-cal__now-pill {
+/* Now is signal orange: the current time is the one live thing on this screen. */
+.pk-cal__now-tag {
   position: absolute;
   z-index: 1;
   right: 4px;
-  padding: 3px 6px;
-  border-radius: var(--r-radius-xs);
-  background: var(--r-brand);
-  color: var(--r-on-brand);
-  font-size: 10.5px;
+  padding: 2px 4px;
+  background: var(--r-chart-now);
+  color: var(--r-on-signal);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -1176,7 +1215,7 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   );
 }
 .pk-cal__col.is-today {
-  background-color: color-mix(in srgb, var(--r-brand-soft) 45%, transparent);
+  background-color: color-mix(in srgb, var(--r-brand-soft) 60%, transparent);
 }
 
 .pk-cal__now {
@@ -1185,21 +1224,23 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   right: 0;
   left: 0;
   height: 2px;
-  background: var(--r-brand);
+  margin-top: -1px;
+  background: var(--r-chart-now);
   pointer-events: none;
 }
+/* A point on the line: a circle means a point. */
 .pk-cal__now::before {
   position: absolute;
-  top: -4px;
-  left: -5px;
-  width: 10px;
-  height: 10px;
+  top: -3px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--r-brand);
+  background: var(--r-chart-now);
   content: '';
 }
 
-/* ── Event blocks ─────────────────────────────────────────────────────────── */
+/* ── Event blocks: identity tint, a 2px rule on the leading edge ─────────── */
 .pk-event {
   --r-avatar-ring: var(--ev-bg);
   position: absolute;
@@ -1208,41 +1249,35 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  padding: 6px 8px;
+  padding: 5px 8px 6px 9px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--ev-fg) 14%, transparent);
-  border-radius: var(--r-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--ev-fg) 18%, transparent);
+  border-left: 2px solid var(--ev-fg);
   background: var(--ev-bg);
   color: var(--ev-fg);
   text-align: left;
   cursor: pointer;
   transition:
     box-shadow var(--r-duration-fast) var(--r-ease-out),
-    opacity var(--r-duration-base) var(--r-ease-out),
-    transform var(--r-duration-fast) var(--r-ease-out);
+    opacity var(--r-duration-base) var(--r-ease-out);
 }
 .pk-event:hover {
-  box-shadow: var(--r-shadow-md);
+  border-color: color-mix(in srgb, var(--ev-fg) 45%, transparent);
+  border-left-color: var(--ev-fg);
 }
 .pk-event:focus-visible {
   z-index: 5 !important;
   outline-offset: 1px;
 }
-.pk-event:active {
-  transform: scale(0.99);
-}
 
 .pk-event.is-stacked {
   box-shadow: 0 0 0 2px var(--r-bg-surface);
 }
-.pk-event.is-stacked:hover {
-  box-shadow:
-    0 0 0 2px var(--r-bg-surface),
-    var(--r-shadow-md);
-}
 
+/* Dashes mean something: a flexible event the scheduler may move. */
 .pk-event.is-flexible {
-  border: 1.5px dashed color-mix(in srgb, var(--ev-fg) 45%, transparent);
+  border-style: dashed;
+  border-left-style: solid;
 }
 .pk-event.is-dim {
   opacity: 0.32;
@@ -1263,18 +1298,18 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 .pk-event__icon {
   width: 13px;
   height: 13px;
-  opacity: 0.8;
 }
 .pk-event__text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Full colour (no opacity) keeps the time above 4.5:1 on every pastel; weight carries the hierarchy. */
+/* Full colour (no opacity) keeps the time above 4.5:1 on every tint. */
 .pk-event__time {
   overflow: hidden;
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-regular);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1286,9 +1321,8 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   margin-top: auto;
 }
 .pk-event__video {
-  width: 15px;
-  height: 15px;
-  opacity: 0.8;
+  width: 14px;
+  height: 14px;
 }
 
 .pk-event.is-short {
@@ -1322,19 +1356,22 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 }
 
 .pk-month__head {
-  padding: 12px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--r-border);
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
-  font-weight: var(--r-weight-medium);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .pk-month__cell {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-height: 118px;
-  padding: 8px;
+  padding: 6px;
   border-right: 1px solid var(--r-border-subtle);
   border-bottom: 1px solid var(--r-border-subtle);
 }
@@ -1349,12 +1386,11 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   display: inline-grid;
   place-items: center;
   align-self: flex-start;
-  min-width: 28px;
-  height: 28px;
+  min-width: 26px;
+  height: 26px;
   margin-bottom: 2px;
   padding: 0 6px;
   border: 0;
-  border-radius: var(--r-radius-full);
   background: none;
   color: var(--r-text);
   font-size: var(--r-text-sm);
@@ -1376,10 +1412,10 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 .pk-month__event {
   display: block;
   width: 100%;
-  padding: 3px 6px;
+  padding: 3px 6px 3px 5px;
   overflow: hidden;
   border: 0;
-  border-radius: 6px;
+  border-left: 2px solid var(--ev-fg);
   background: var(--ev-bg);
   color: var(--ev-fg);
   font-size: var(--r-text-xs);
@@ -1394,7 +1430,8 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 }
 .pk-month__event-time {
   margin-right: 4px;
-  font-weight: var(--r-weight-regular);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1402,11 +1439,13 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   align-self: flex-start;
   padding: 2px 6px;
   border: 0;
-  border-radius: 6px;
   background: none;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
   cursor: pointer;
 }
 .pk-month__more:hover {
@@ -1414,7 +1453,7 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   color: var(--r-text);
 }
 
-/* ── Toast ────────────────────────────────────────────────────────────────── */
+/* ── Toast: a square dark island ──────────────────────────────────────────── */
 .pk-toast-region {
   position: fixed;
   z-index: var(--r-z-toast);
@@ -1431,11 +1470,10 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   align-items: center;
   gap: 8px;
   max-width: calc(100vw - 24px);
-  padding: 6px 6px 6px 16px;
-  border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-full);
+  padding: 4px 4px 4px 14px;
+  border: 1px solid var(--r-border-strong);
   background: var(--r-bg-raised);
-  box-shadow: var(--r-shadow-xl);
+  box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
   font-size: var(--r-text-sm);
   pointer-events: auto;
@@ -1473,6 +1511,8 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   top: 0;
   left: 0;
   width: min(320px, 88vw);
+  height: 100dvh;
+  border-right-color: var(--r-border-strong);
   box-shadow: var(--r-shadow-xl);
   visibility: hidden;
   transform: translateX(-102%);
@@ -1491,7 +1531,7 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;
     height: auto;
-    padding: 12px 12px 12px 8px;
+    padding: 10px 12px 10px 8px;
     row-gap: 10px;
   }
   .pk-top__views {
@@ -1513,7 +1553,7 @@ const weekdayHeads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     display: none;
   }
   .pk-new {
-    width: 40px;
+    width: 32px;
     padding: 0 !important;
   }
   .pk-top__left {

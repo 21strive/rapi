@@ -65,14 +65,15 @@ const measured = computed(() =>
 .doc-token-rows {
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
 }
 
 .doc-token-row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
-  min-height: 52px;
+  min-height: 48px;
   padding: 8px 0;
   border-bottom: 1px solid var(--r-border-subtle);
 }
@@ -80,25 +81,26 @@ const measured = computed(() =>
   border-bottom: 0;
 }
 
+/* Square swatches with a hairline, so white on white still shows its edge. */
 .doc-token-row__sample {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-radius-sm);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-text) 10%, transparent);
+  width: 32px;
+  height: 32px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--r-text) 12%, transparent);
 }
 
 .doc-token-row__sample--text {
   display: grid;
   place-items: center;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-snug);
 }
 .doc-token-row__sample--text::before {
   content: 'Aa';
 }
 
 .doc-token-row__sample--border {
-  border: 1.5px solid;
+  border: 1px solid;
   box-shadow: none;
 }
 
@@ -112,7 +114,7 @@ const measured = computed(() =>
   overflow: hidden;
   color: var(--r-text);
   font-family: var(--r-font-mono);
-  font-size: 12.5px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -126,45 +128,54 @@ const measured = computed(() =>
 .doc-token-row__value {
   color: var(--r-text-secondary);
   font-family: var(--r-font-mono);
-  font-size: 11.5px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
 .doc-token-row__ratio {
-  min-width: 84px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 112px;
   color: var(--r-text);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-semibold);
+  font-family: var(--r-font-mono);
+  font-size: 11.5px;
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
-  text-align: right;
   white-space: nowrap;
 }
+
+/* The grade is a mono caps tag, square, coloured by whether the pair passes. */
 .doc-token-row__ratio small {
-  margin-left: 4px;
-  padding: 2px 5px;
-  border-radius: 5px;
+  padding: 1px 5px;
+  border: 1px solid var(--r-success-border);
   background: var(--r-success-soft);
   color: var(--r-success-text);
-  font-size: 10px;
+  font-size: 9.5px;
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .doc-token-row__ratio.is-aa-large small {
+  border-color: var(--r-warning-border);
   background: var(--r-warning-soft);
   color: var(--r-warning-text);
 }
 .doc-token-row__ratio.is-low small {
+  border-color: var(--r-border);
   background: var(--r-bg-hover);
   color: var(--r-text-tertiary);
 }
 
-@media (max-width: 560px) {
+/* In a narrow column the value moves under the name and the ratio stacks on the right. */
+@container (max-width: 460px) {
   .doc-token-row {
     grid-template-columns: 32px minmax(0, 1fr) auto;
     row-gap: 2px;
   }
   .doc-token-row__sample {
     grid-row: span 2;
-    width: 32px;
-    height: 32px;
   }
   .doc-token-row__value {
     grid-column: 2;
@@ -172,6 +183,9 @@ const measured = computed(() =>
   .doc-token-row__ratio {
     grid-column: 3;
     grid-row: 1 / span 2;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
     min-width: 0;
   }
 }

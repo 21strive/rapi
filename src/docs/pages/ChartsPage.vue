@@ -81,7 +81,8 @@ const columnProps: PropRow[] = [
   { name: 'highlight', type: 'number', description: 'The one column in colour; the rest turn grey.' },
   { name: 'references', type: 'ChartReference[]', description: 'Dashed horizontal lines.' },
   { name: 'showValues', type: 'boolean', default: '≤ 12 columns', description: 'Values on the column caps.' },
-  { name: 'max', type: 'number', description: '100 when every value fits (percentages), otherwise a tidy maximum.' },
+  { name: 'percent', type: 'boolean', default: 'false', description: 'Values are percentages: the scale tops out at 100 and labels get a % sign.' },
+  { name: 'max', type: 'number', description: 'Top of the scale. Defaults to a tidy maximum, or 100 with percent.' },
 ]
 
 const bulletCode = `<RBulletChart

@@ -16,6 +16,7 @@ import {
   Wallet,
 } from 'lucide-vue-next'
 import { RNavItem } from '@/design-system'
+import AppMark from './AppMark.vue'
 
 const projectOpen = ref(true)
 
@@ -36,12 +37,12 @@ const financial = [
 <template>
   <div class="ps">
     <div class="ps__logo">
-      <span class="ps__mark" aria-hidden="true">N</span>
+      <AppMark glyph="neraca" tone="brand" />
       <span>Neraca</span>
     </div>
 
     <nav class="ps__nav" aria-label="Main menu">
-      <p class="ps__title">Main menu</p>
+      <p class="ps__title"><span class="r-index" aria-hidden="true">01</span> Main menu</p>
       <RNavItem v-for="item in main" :key="item.label" as="button" type="button" :icon="item.icon" :label="item.label" />
       <RNavItem
         as="button"
@@ -65,7 +66,7 @@ const financial = [
     </nav>
 
     <nav class="ps__nav" aria-label="Financial">
-      <p class="ps__title">Financial</p>
+      <p class="ps__title"><span class="r-index" aria-hidden="true">02</span> Financial</p>
       <RNavItem v-for="item in financial" :key="item.label" as="button" type="button" :icon="item.icon" :label="item.label" />
     </nav>
 
@@ -80,7 +81,7 @@ const financial = [
 .ps {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 24px;
   min-height: 100%;
 }
 
@@ -88,23 +89,10 @@ const financial = [
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 6px;
-  font-size: var(--r-text-xl);
+  padding: 4px 8px;
+  font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
   letter-spacing: var(--r-tracking-tight);
-}
-
-.ps__mark {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--r-brand);
-  box-shadow: var(--r-shadow-highlight);
-  color: var(--r-on-brand);
-  font-size: var(--r-text-md);
-  font-weight: var(--r-weight-bold);
 }
 
 .ps__nav {
@@ -114,10 +102,16 @@ const financial = [
 }
 
 .ps__title {
-  padding: 0 10px 6px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 8px 8px;
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .ps__chevron {
@@ -135,13 +129,12 @@ const financial = [
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin: 2px 0 4px 19px;
-  padding-left: 12px;
+  margin: 2px 0 4px 17px;
+  padding-left: 10px;
   border-left: 1px solid var(--r-border);
 }
 
 .ps__sub .r-nav-item {
-  min-height: 36px;
   font-size: var(--r-text-sm);
 }
 
@@ -150,7 +143,7 @@ const financial = [
   flex-direction: column;
   gap: 2px;
   margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid var(--r-border-subtle);
+  padding-top: 12px;
+  border-top: 1px solid var(--r-border);
 }
 </style>

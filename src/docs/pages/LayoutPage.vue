@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RotateCcw } from 'lucide-vue-next'
-import { RBadge, RButton, RChip, RInput, RSegmented, prefersReducedMotion } from '@/design-system'
+import {
+  RBadge,
+  RButton,
+  RCheckbox,
+  RInput,
+  RKbd,
+  RRadioGroup,
+  RReadout,
+  RRule,
+  RStatus,
+  prefersReducedMotion,
+} from '@/design-system'
 import DocPage from '../components/DocPage.vue'
 import DocSection from '../components/DocSection.vue'
 import Demo from '../components/Demo.vue'
@@ -9,39 +20,89 @@ import CodeBlock from '../components/CodeBlock.vue'
 import DoDont from '../components/DoDont.vue'
 import { useTokenValues } from '../components/color'
 
-const spaceSteps = ['px', '0_5', '1', '1_5', '2', '2_5', '3', '4', '5', '6', '7', '8', '10', '12', '16', '20'].map(
+/* ── Shape ──────────────────────────────────────────────────────────────────── */
+const radii = [
+  { token: '--r-radius-surface', value: '0', use: 'Cards, panels, tables, dialogs, menus', round: false },
+  { token: '--r-radius-control', value: '0', use: 'Buttons, inputs, chips, segmented controls', round: false },
+  { token: '--r-radius-mark', value: '0', use: 'Checkboxes, keys, badges, bars in charts', round: false },
+  { token: '--r-radius-round', value: '999px', use: 'Lamps, radio buttons, data points. Never a container', round: true },
+]
+const checked = ref(true)
+const mode = ref('auto')
+const modes = [
+  { label: 'Automatic', value: 'auto' },
+  { label: 'Manual', value: 'manual' },
+]
+
+/* ── Rules ──────────────────────────────────────────────────────────────────── */
+const lines = [
+  { token: '--r-border-subtle', use: 'Rules inside a panel: between rows, under a table head' },
+  { token: '--r-border', use: 'Around panels, between the cells of a ruled grid, section rules' },
+  { token: '--r-border-strong', use: 'Inputs, floating panels, the rule on top of a spec' },
+]
+const cells = [
+  { label: 'Settled', value: '1,284' },
+  { label: 'In flight', value: '312' },
+  { label: 'Held', value: '9' },
+  { label: 'Failed', value: '2' },
+]
+const bars = [44, 52, 48, 61, 57, 66, 70, 64, 72, 75, 69, 78]
+const FORECAST_FROM = 8
+
+const ruledCss = `<div class="r-grid-ruled" style="grid-template-columns: repeat(4, 1fr)">
+  <div>…</div>  <!-- each cell draws its own right and bottom rule -->
+</div>
+
+<section class="r-marks">…</section>   <!-- corner ticks on an instrument panel -->
+<div class="r-hatch" />                  <!-- forecast, no data, out of window -->`
+
+/* ── Spacing ────────────────────────────────────────────────────────────────── */
+const spaceSteps = ['px', '0_5', '1', '1_5', '2', '2_5', '3', '4', '5', '6', '7', '8', '10', '12', '16', '20', '24'].map(
   (step) => `--r-space-${step}`,
 )
-const radiusSteps = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', 'full'].map((step) => `--r-radius-${step}`)
-const controlSteps = ['xs', 'sm', 'md', 'lg'].map((step) => `--r-control-${step}`)
+const controls = [
+  { token: '--r-control-xs', size: null, use: 'Dense table actions, tags' },
+  { token: '--r-control-sm', size: 'sm', use: 'Toolbars, filters, dense forms' },
+  { token: '--r-control-md', size: 'md', use: 'The default' },
+  { token: '--r-control-lg', size: 'lg', use: 'Sign-in, onboarding, touch' },
+  { token: '--r-control-xl', size: null, use: 'Hero actions on a cover' },
+] as const
+
 const shadows = [
-  { token: '--r-shadow-xs', use: 'Cards, inputs and outline buttons at rest' },
-  { token: '--r-shadow-sm', use: 'The thumb of a segmented control' },
-  { token: '--r-shadow-md', use: 'Hover lift, tooltips, chart tooltips' },
-  { token: '--r-shadow-lg', use: 'Popovers, menus, coachmarks' },
+  { token: '--r-shadow-sm', use: 'Handles and thumbs that sit just above a track' },
+  { token: '--r-shadow-md', use: 'Tooltips and toasts' },
+  { token: '--r-shadow-lg', use: 'Menus and popovers, the .r-panel surface' },
   { token: '--r-shadow-xl', use: 'Dialogs and the command palette' },
-  { token: '--r-shadow-highlight', use: 'The inner top edge of solid buttons' },
 ]
 
-const { values } = useTokenValues(() => [...spaceSteps, ...radiusSteps, ...controlSteps, ...shadows.map((s) => s.token)])
+const { values } = useTokenValues(() => [...spaceSteps, ...controls.map((c) => c.token), ...shadows.map((s) => s.token)])
+const label = (token: string) => token.replace(/^--r-(space|control)-/, '').replace('_', '.')
 
-const label = (token: string) => token.replace(/^--r-(space|radius|control)-/, '').replace('_', '.')
+const density = [
+  { what: 'Table rows', value: '32–40 px' },
+  { what: 'Controls', value: '32 px' },
+  { what: 'Page padding', value: '24 px desktop · 16 px phone' },
+  { what: 'Inside a panel', value: '12 px at least' },
+  { what: 'Between unrelated groups', value: '16–24 px' },
+]
 
-/* Motion: nominal values as written in tokens.css (the live ones drop to 0.01ms under reduced motion). */
+/* ── Motion ─────────────────────────────────────────────────────────────────── */
+// Nominal values from tokens.css; the live ones drop to 0.01ms under reduced motion.
 const durations = [
-  { token: '--r-duration-instant', ms: 80, use: 'Pressed states' },
-  { token: '--r-duration-fast', ms: 140, use: 'Hover colours, small fades' },
-  { token: '--r-duration-base', ms: 200, use: 'Popovers, dialogs, switches' },
-  { token: '--r-duration-slow', ms: 320, use: 'Sliding thumbs and indicators' },
-  { token: '--r-duration-slower', ms: 600, use: 'Chart entrances, count-ups' },
+  { token: '--r-duration-instant', ms: 70, use: 'Pressed states, toggles' },
+  { token: '--r-duration-fast', ms: 110, use: 'Hover colours, small fades' },
+  { token: '--r-duration-base', ms: 160, use: 'Menus, popovers, dialogs' },
+  { token: '--r-duration-slow', ms: 240, use: 'Sliding indicators, drawers' },
+  { token: '--r-duration-slower', ms: 420, use: 'Chart entrances, count-ups' },
 ]
 const easings = [
-  { token: '--r-ease-out', curve: [0.2, 0.8, 0.2, 1], use: 'Most things: fast start, gentle stop' },
-  { token: '--r-ease-in-out', curve: [0.65, 0, 0.35, 1], use: 'Things that move and stay on screen' },
-  { token: '--r-ease-spring', curve: [0.34, 1.36, 0.64, 1], use: 'Check marks and switch thumbs, a small overshoot' },
+  { token: '--r-ease-out', value: 'cubic-bezier(0.2, 0, 0, 1)', curve: [0.2, 0, 0, 1], use: 'Most things: a fast start, a soft stop' },
+  { token: '--r-ease-in-out', value: 'cubic-bezier(0.4, 0, 0.2, 1)', curve: [0.4, 0, 0.2, 1], use: 'Things that move and stay on screen' },
+  { token: '--r-ease-linear', value: 'linear', curve: [0, 0, 1, 1], use: 'Progress bars and loops' },
+  { token: '--r-ease-step', value: 'steps(4, end)', curve: null, use: 'Ticking readouts, like an instrument' },
 ]
-
 const curvePath = ([x1, y1, x2, y2]: number[]) => `M0,100 C${x1 * 100},${100 - y1 * 100} ${x2 * 100},${100 - y2 * 100} 100,0`
+const stepPath = 'M0,100 H25 V75 H50 V50 H75 V25 H100 V0'
 
 const reduced = prefersReducedMotion()
 const played = ref(true)
@@ -58,183 +119,288 @@ function replay() {
   )
 }
 
+const motionCss = `.drawer {
+  transition: transform var(--r-duration-slow) var(--r-ease-out);
+}
+
+/* A live lamp: full for half a cycle, dim for the other half, no fade between. */
+@keyframes r-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+
+/* tokens.css already does this */
+@media (prefers-reduced-motion: reduce) {
+  :root { --r-duration-base: 0.01ms; }
+}`
+
+/* ── Layers ─────────────────────────────────────────────────────────────────── */
 const layers = [
   { token: '--r-z-tooltip', value: 160, name: 'Tooltip', note: 'Above everything, even dialogs' },
-  { token: '--r-z-toast', value: 140, name: 'Toast', note: 'Notices that should not hide behind a popover' },
-  { token: '--r-z-popover', value: 120, name: 'Popover', note: 'Menus and popovers, also when opened inside a dialog' },
+  { token: '--r-z-toast', value: 140, name: 'Toast', note: 'Notices that must not hide behind a popover' },
+  { token: '--r-z-popover', value: 120, name: 'Popover', note: 'Menus and popovers, also when opened from a dialog' },
   { token: '--r-z-modal', value: 100, name: 'Modal', note: 'Dialogs, the command palette, tours' },
   { token: '--r-z-overlay', value: 80, name: 'Overlay', note: 'Drawers and their backdrops' },
   { token: '--r-z-dropdown', value: 50, name: 'Dropdown', note: 'In-page dropdowns' },
-  { token: '--r-z-sticky', value: 10, name: 'Sticky', note: 'Sticky headers and top bars' },
+  { token: '--r-z-sticky', value: 10, name: 'Sticky', note: 'Sticky heads, the strip, top bars' },
 ]
-
-const controlSizes = ['sm', 'md', 'lg'] as const
-
-const view = ref('week')
-const views = [
-  { label: 'Day', value: 'day' },
-  { label: 'Week', value: 'week' },
-  { label: 'Month', value: 'month' },
-]
-
-const radiusCss = `.card    { border-radius: var(--r-radius-xl); padding: 6px; } /* 20 */
-.well    { border-radius: var(--r-radius-lg); padding: 4px; } /* 20 − 6 = 14 */
-.control { border-radius: var(--r-radius-md); }              /* 14 − 4 = 10 */
-.chip    { border-radius: var(--r-radius-full); }`
-
-const motionCss = `.thing {
-  transition: transform var(--r-duration-base) var(--r-ease-out);
-}
-
-/* tokens.css already does this for you */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --r-duration-base: 0.01ms;
-  }
-}`
 </script>
 
 <template>
-  <DocPage eyebrow="Foundations" title="Layout & elevation">
+  <DocPage eyebrow="Foundations" title="Shape, space & motion">
     <template #lead>
-      A 4px grid, corners that get smaller as you go inward, shadows you only notice when they are gone, and motion
-      that gets out of the way.
+      Every corner is 0, hairlines carry the structure, space sits on a 4px grid, and motion is short and plain. Nothing
+      floats unless it really floats, and nothing bounces.
     </template>
 
     <DocSection
-      id="spacing"
-      title="Spacing"
-      description="Every gap, padding and size sits on a 4px grid, with 2px and 6px steps for the tight spots inside controls."
+      id="shape"
+      title="Shape"
+      description="Square corners line up. Panels butt against each other and share one rule, a table meets its head, a ruled grid stays a grid. A circle is kept for the things that are points or states, so it always means something."
     >
-      <div class="doc-space">
-        <div v-for="token in spaceSteps" :key="token" class="doc-space__row">
-          <code class="doc-space__token">space-{{ label(token) }}</code>
-          <span class="doc-space__value">{{ values[token] }}</span>
-          <span class="doc-space__bar" :style="{ width: `var(${token})` }" />
-        </div>
-      </div>
-      <p class="doc-p">
-        A few pairs come up again and again. Cards use 20 to 24px of padding and sit 16px apart. Controls pad 12 to 16px
-        on the sides. Sections on a page are 48 to 72px apart, so a screen breathes without feeling empty.
-      </p>
-
-      <Demo title="Control heights" note="32, 40 and 48px. A button and a field of the same size line up on one row.">
-        <div class="doc-controls">
-          <div v-for="size in controlSizes" :key="size" class="doc-controls__row">
-            <code class="doc-controls__token">control-{{ size }} · {{ values[`--r-control-${size}`] }}</code>
-            <RInput :size="size" placeholder="Search" :aria-label="`Search, ${size}`" class="doc-controls__input" />
-            <RButton :size="size">Apply</RButton>
-            <RButton :size="size" variant="outline">Reset</RButton>
-          </div>
-        </div>
-      </Demo>
-    </DocSection>
-
-    <DocSection
-      id="radius"
-      title="Radius"
-      description="Soft, but never bubbly. The rule for nesting is simple: the inner radius is the outer radius minus the padding between them, so the curves stay parallel."
-    >
-      <div class="doc-radii">
-        <div v-for="token in radiusSteps" :key="token" class="doc-radius">
-          <span class="doc-radius__tile" :style="{ borderRadius: `var(${token})` }" />
-          <code class="doc-radius__token">radius-{{ label(token) }}</code>
-          <span class="doc-radius__value">{{ token.endsWith('full') ? 'full' : values[token] }}</span>
+      <div class="shape-radii r-grid-ruled">
+        <div v-for="r in radii" :key="r.token" class="shape-radius">
+          <span class="shape-radius__tile" :class="{ 'is-round': r.round }" aria-hidden="true" />
+          <code class="shape-radius__token">{{ r.token }}</code>
+          <span class="shape-radius__value">{{ r.value }}</span>
+          <span class="shape-radius__use">{{ r.use }}</span>
         </div>
       </div>
 
-      <Demo title="Nested radius" note="Card 20 → well 14 → control 10 → chip full.">
-        <div class="doc-nest">
-          <div class="doc-nest__card">
-            <span class="doc-nest__tag">Card · 20px, padding 6</span>
-            <div class="doc-nest__well">
-              <span class="doc-nest__tag">Well · 14px, padding 4</span>
-              <div class="doc-nest__control">
-                <span class="doc-nest__tag">Control · 10px</span>
-                <RChip variant="soft" size="sm" tabindex="-1">Chip · full</RChip>
-              </div>
+      <Demo title="Squares and circles" note="Things you act on and read are square. Points and states are round." stack>
+        <div class="shape-groups">
+          <div class="shape-group">
+            <span class="doc-label">Square</span>
+            <div class="doc-row">
+              <RButton size="sm" tabindex="-1">Approve</RButton>
+              <RInput size="sm" placeholder="Search" aria-label="Search" class="shape-input" />
+              <RBadge>In review</RBadge>
+              <RCheckbox v-model="checked" label="Hold" />
+              <RKbd :keys="['mod', 'K']" />
             </div>
           </div>
-          <div class="doc-nest__live">
-            <span class="doc-label">The same rule on real components</span>
-            <RSegmented v-model="view" :options="views" label="View" />
+          <div class="shape-group">
+            <span class="doc-label">Round</span>
+            <div class="doc-row">
+              <RStatus tone="success" label="Nominal" />
+              <RRadioGroup v-model="mode" :options="modes" label="Mode" hide-label orientation="horizontal" />
+              <svg class="shape-point" viewBox="0 0 96 32" aria-label="A data point on a line" role="img">
+                <polyline points="0,26 30,20 48,10 70,16 96,6" />
+                <circle cx="48" cy="10" r="4" />
+              </svg>
+            </div>
           </div>
         </div>
       </Demo>
-      <CodeBlock :code="radiusCss" lang="css" title="The rule in CSS" />
+
       <DoDont
-        do="Shrink the radius as you nest, by the padding in between."
-        dont="Use the same radius inside and out. The inner corners look fat and the gap looks uneven."
+        do="Keep every container and control square. Use a circle only for a status lamp, a radio button or a data point."
+        dont="Round a card, or pill a badge or a button. A rounded corner reads as a consumer app, and once everything is round, a circle stops meaning anything."
       >
         <template #do-example>
-          <span class="doc-nest-mini"><span class="doc-nest-mini__inner" style="border-radius: 10px" /></span>
+          <span class="shape-mini">
+            <span class="shape-mini__head">Batch 0412</span>
+            <span class="doc-row"><RBadge>In review</RBadge><RStatus tone="warning" label="Held" size="sm" /></span>
+          </span>
         </template>
         <template #dont-example>
-          <span class="doc-nest-mini"><span class="doc-nest-mini__inner" style="border-radius: 22px" /></span>
+          <span class="shape-mini is-wrong">
+            <span class="shape-mini__head">Batch 0412</span>
+            <span class="shape-mini__pill">In review</span>
+          </span>
         </template>
       </DoDont>
     </DocSection>
 
     <DocSection
+      id="rules"
+      title="Rules & grids"
+      description="Structure comes from 1px hairlines instead of shadows and gaps. Three line tokens cover every case, and three utility classes build the layouts the brand book draws."
+    >
+      <ul class="rules-lines">
+        <li v-for="l in lines" :key="l.token" class="rules-line">
+          <span class="rules-line__sample" :style="{ borderTopColor: `var(${l.token})` }" aria-hidden="true" />
+          <code class="rules-line__token">{{ l.token }}</code>
+          <span class="rules-line__use">{{ l.use }}</span>
+        </li>
+        <li class="rules-line">
+          <span class="rules-line__sample is-strong" aria-hidden="true" />
+          <code class="rules-line__token">--r-rule-strong</code>
+          <span class="rules-line__use">2px: a selected row's leading edge, the current tab, the top of a page header</span>
+        </li>
+      </ul>
+
+      <Demo title="Ruled grid" note=".r-grid-ruled: cells share one rule instead of floating apart on gaps. Use it for KPI rows and bento layouts." surface="plain" stack>
+        <div class="rules-kpis r-grid-ruled">
+          <div v-for="(c, i) in cells" :key="c.label" class="rules-kpi">
+            <span class="r-index">{{ String(i + 1).padStart(2, '0') }}</span>
+            <span class="r-label">{{ c.label }}</span>
+            <span class="rules-kpi__value">{{ c.value }}</span>
+          </div>
+        </div>
+      </Demo>
+
+      <div class="rules-pair">
+        <Demo title="Registration marks" note=".r-marks: four corner ticks for an instrument panel or a hero frame." center>
+          <div class="rules-marked r-marks">
+            <RReadout label="Chamber pressure" :value="97.2" :decimals="1" unit="bar" sub="Max 110 · Nominal" />
+          </div>
+        </Demo>
+        <Demo title="Hatching" note=".r-hatch: 45° lines mean forecast, no data, or out of window. Never decoration." center>
+          <div class="rules-hatch" role="img" aria-label="Twelve weeks of values, the last four a forecast">
+            <span
+              v-for="(b, i) in bars"
+              :key="i"
+              class="rules-hatch__bar"
+              :class="{ 'r-hatch': i >= FORECAST_FROM }"
+              :style="{ height: `${b}%` }"
+            />
+            <span class="rules-hatch__tag">Forecast</span>
+          </div>
+        </Demo>
+      </div>
+
+      <Demo title="Section rules" note="RRule: a running number, a mono label, a rule to the edge and quiet metadata." stack>
+        <RRule index="01" label="Telemetry" meta="14:02 WIB" />
+        <RRule index="02" label="Payment rails" meta="5 watched" />
+        <RRule label="Cash position" meta="12 Nov 2026" weight="strong" />
+      </Demo>
+
+      <Demo title="The strip" note="A 32px mono bar across the top of an app or page: context on the left, date, clock or status on the right." surface="plain" padding="none">
+        <div class="rules-strip">
+          <span class="rules-strip__start">Ground station <span aria-hidden="true">/</span> Pass 2207</span>
+          <span class="rules-strip__end">07:02:11 UTC <RStatus tone="signal" label="Live" pulse size="sm" /></span>
+        </div>
+      </Demo>
+
+      <CodeBlock :code="ruledCss" title="Utilities" />
+    </DocSection>
+
+    <DocSection
+      id="spacing"
+      title="Spacing"
+      description="Every gap, padding and size sits on a 4px grid, with 2px and 6px steps for the tight spots inside controls. Dense is fine; cramped is not."
+    >
+      <div class="space-scale">
+        <div v-for="token in spaceSteps" :key="token" class="space-scale__row">
+          <code class="space-scale__token">space-{{ label(token) }}</code>
+          <span class="space-scale__value">{{ values[token] }}</span>
+          <span class="space-scale__bar" :style="{ width: `var(${token})` }" />
+        </div>
+      </div>
+
+      <Demo title="Control heights" note="A field and a button of the same size line up on one row. 32px is the default." stack>
+        <div class="space-controls">
+          <div v-for="c in controls" :key="c.token" class="space-controls__row">
+            <span class="space-controls__token"><code>{{ c.token.replace('--r-', '') }}</code> {{ values[c.token] }}</span>
+            <template v-if="c.size">
+              <RInput :size="c.size" placeholder="Account or IBAN" :aria-label="`Account, ${c.size}`" class="space-controls__input" />
+              <RButton :size="c.size" tabindex="-1">Apply</RButton>
+            </template>
+            <span v-else class="space-controls__bar" :style="{ height: `var(${c.token})` }" />
+            <span class="space-controls__use">{{ c.use }}</span>
+          </div>
+        </div>
+      </Demo>
+
+      <table class="doc-spec space-density">
+        <caption class="r-sr-only">Density</caption>
+        <thead>
+          <tr>
+            <th scope="col">Density</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="d in density" :key="d.what">
+            <td>{{ d.what }}</td>
+            <td class="space-density__value">{{ d.value }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </DocSection>
+
+    <DocSection
       id="elevation"
       title="Elevation"
-      description="Shadows in the references are wide and faint: a big blur, a negative spread, a few percent of opacity. They lift a surface off the canvas without drawing a dark edge around it."
+      description="Only things that float above the page get a shadow: menus, popovers, tooltips, toasts and dialogs. Panels on the page have none; a hairline separates them. When a shadow is used, it is short."
     >
-      <div class="doc-shadows">
-        <div v-for="s in shadows" :key="s.token" class="doc-shadow">
-          <div class="doc-shadow__card" :class="{ 'is-highlight': s.token.endsWith('highlight') }" :style="{ boxShadow: `var(${s.token})` }">
-            <code>{{ s.token.replace('--r-shadow-', 'shadow-') }}</code>
+      <Demo title="On the page and above it" note="The panel is ruled. The menu floats, so it gets the strong border and a short shadow.">
+        <div class="lift-scene">
+          <div class="lift-panel">
+            <span class="r-eyebrow">Settlement</span>
+            <span class="lift-panel__value">1,284</span>
+            <span class="r-label">Payments today</span>
           </div>
-          <p class="doc-shadow__use">{{ s.use }}</p>
-          <p class="doc-shadow__value">{{ values[s.token] }}</p>
+          <div class="lift-menu r-panel" aria-hidden="true">
+            <span class="lift-menu__item">Open batch</span>
+            <span class="lift-menu__item is-active">Export CSV <RKbd :keys="['mod', 'E']" size="sm" /></span>
+            <span class="lift-menu__item">Hold payments</span>
+          </div>
+        </div>
+      </Demo>
+
+      <div class="lift-shadows">
+        <div v-for="s in shadows" :key="s.token" class="lift-shadow">
+          <div class="lift-shadow__tile" :style="{ boxShadow: `var(${s.token})` }">
+            <code>{{ s.token.replace('--r-', '') }}</code>
+          </div>
+          <p class="lift-shadow__use">{{ s.use }}</p>
+          <p class="lift-shadow__value">{{ values[s.token] }}</p>
         </div>
       </div>
       <p class="doc-p">
-        In dark mode the same tokens get far stronger values, because a faint shadow vanishes on a dark canvas. Most of
-        the separation there comes from 1px borders instead, which is why floating panels switch to the stronger border
-        in dark mode.
+        <code class="doc-c">--r-shadow-none</code> and <code class="doc-c">--r-shadow-xs</code> are both
+        <code class="doc-c">none</code>: cards, tables and inputs sit flat. Dark mode uses the same tokens with much
+        stronger values, because a faint shadow disappears on a dark page, and floating panels keep the strong border so
+        their edge never depends on the shadow.
       </p>
     </DocSection>
 
     <DocSection
       id="motion"
       title="Motion"
-      description="Five durations and three easings. Most movement uses ease-out: it starts quickly, so the interface feels responsive, and settles gently."
+      description="Short and plain. Things move to show where they came from and where they went, not to entertain. Nothing springs, overshoots or bounces."
     >
-      <p v-if="reduced" class="doc-motion-notice">
-        <RBadge tone="warning" dot>Reduced motion is on</RBadge>
-        Your system asks for reduced motion, so every duration is 0.01ms right now and the dots below jump instead of
-        gliding. That is the intended behaviour.
+      <p v-if="reduced" class="motion-notice">
+        <RStatus tone="warning" label="Reduced motion" size="sm" />
+        Your system asks for reduced motion, so every duration is 0.01ms right now and the blocks below jump instead of
+        sliding. That is the intended behaviour.
       </p>
-      <Demo title="Durations" note="All with ease-out.">
-        <div class="doc-motion" :class="{ 'is-played': played, 'is-resetting': resetting }">
-          <div v-for="d in durations" :key="d.token" class="doc-motion__row">
-            <span class="doc-motion__label"><code>{{ d.token.replace('--r-duration-', '') }}</code> {{ d.ms }}ms</span>
-            <span class="doc-motion__track">
-              <span class="doc-motion__dot" :style="{ transitionDuration: `var(${d.token})`, transitionTimingFunction: 'var(--r-ease-out)' }" />
+      <Demo title="Durations" note="All with --r-ease-out." stack>
+        <div class="motion" :class="{ 'is-played': played, 'is-resetting': resetting }">
+          <div v-for="d in durations" :key="d.token" class="motion__row">
+            <span class="motion__label"><code>{{ d.token.replace('--r-duration-', '') }}</code> {{ d.ms }} ms</span>
+            <span class="motion__track">
+              <span class="motion__block" :style="{ transitionDuration: `var(${d.token})`, transitionTimingFunction: 'var(--r-ease-out)' }" />
             </span>
-            <span class="doc-motion__use">{{ d.use }}</span>
+            <span class="motion__use">{{ d.use }}</span>
           </div>
-          <RButton size="sm" variant="outline" class="doc-motion__replay" @click="replay">
-            <template #leading><RotateCcw /></template>
-            Replay
-          </RButton>
+        </div>
+        <RButton size="sm" variant="outline" class="motion__replay" @click="replay">
+          <template #leading><RotateCcw /></template>
+          Replay
+        </RButton>
+      </Demo>
+      <Demo title="Curves" note="Each over 420 ms, so the shape shows." stack>
+        <div class="motion" :class="{ 'is-played': played, 'is-resetting': resetting }">
+          <div v-for="e in easings" :key="e.token" class="motion__row motion__row--curve">
+            <svg class="motion__curve" viewBox="-4 -4 108 108" aria-hidden="true">
+              <path class="motion__axis" d="M0,0 V100 H100" />
+              <path class="motion__path" :d="e.curve ? curvePath(e.curve) : stepPath" />
+            </svg>
+            <span class="motion__label"><code>{{ e.token.replace('--r-', '') }}</code><small>{{ e.value }}</small></span>
+            <span class="motion__track">
+              <span class="motion__block" :style="{ transitionDuration: 'var(--r-duration-slower)', transitionTimingFunction: `var(${e.token})` }" />
+            </span>
+            <span class="motion__use">{{ e.use }}</span>
+          </div>
         </div>
       </Demo>
-      <Demo title="Easings" note="Each at 600ms, so you can see the shape.">
-        <div class="doc-motion" :class="{ 'is-played': played, 'is-resetting': resetting }">
-          <div v-for="e in easings" :key="e.token" class="doc-motion__row doc-motion__row--ease">
-            <svg class="doc-motion__curve" viewBox="-6 -24 112 148" aria-hidden="true">
-              <path class="doc-motion__axis" d="M0,0 V100 H100" />
-              <path class="doc-motion__path" :d="curvePath(e.curve)" />
-            </svg>
-            <span class="doc-motion__label"><code>{{ e.token.replace('--r-', '') }}</code></span>
-            <span class="doc-motion__track">
-              <span class="doc-motion__dot" :style="{ transitionDuration: 'var(--r-duration-slower)', transitionTimingFunction: `var(${e.token})` }" />
-            </span>
-            <span class="doc-motion__use">{{ e.use }}</span>
-          </div>
-        </div>
+      <Demo title="The two-step blink" note="A live lamp blinks like an instrument: on for half the cycle, dim for the other half, with no fade between.">
+        <RStatus tone="signal" label="Live" pulse />
+        <RStatus tone="danger" label="Alarm" pulse />
+        <span class="motion-blink-note">Only for things that are live right now. Off under reduced motion.</span>
       </Demo>
       <CodeBlock :code="motionCss" lang="css" title="Using the tokens" />
     </DocSection>
@@ -244,229 +410,448 @@ const motionCss = `.thing {
       title="Layers"
       description="Seven z-index steps, far enough apart to slot something in between. Popovers sit above dialogs on purpose: a select or a menu opened inside a dialog has to appear on top of it."
     >
-      <div class="doc-layers" role="list">
-        <div
-          v-for="(layer, i) in layers"
-          :key="layer.token"
-          class="doc-layer"
-          role="listitem"
-          :style="{ '--i': layers.length - 1 - i, zIndex: layers.length - i }"
-        >
-          <span class="doc-layer__value">{{ layer.value }}</span>
-          <span class="doc-layer__name">{{ layer.name }}</span>
-          <code class="doc-layer__token">{{ layer.token }}</code>
-          <span class="doc-layer__note">{{ layer.note }}</span>
-        </div>
-      </div>
+      <ol class="layers">
+        <li v-for="(layer, i) in layers" :key="layer.token" class="layer" :style="{ '--i': i }">
+          <span class="layer__value">{{ layer.value }}</span>
+          <span class="layer__name">{{ layer.name }}</span>
+          <code class="layer__token">{{ layer.token }}</code>
+          <span class="layer__note">{{ layer.note }}</span>
+        </li>
+      </ol>
     </DocSection>
   </DocPage>
 </template>
 
 <style>
-.doc-space {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 20px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
-  background: var(--r-bg-surface);
+/* ── Shape ───────────────────────────────────────────────────────────────── */
+.shape-radii.r-grid-ruled {
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
 }
 
-.doc-space__row {
-  display: grid;
-  grid-template-columns: 96px 48px minmax(0, 1fr);
-  align-items: center;
+.shape-radius {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.shape-radius__tile {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 10px;
+  border: 1px solid var(--r-border-strong);
+  background: var(--r-bg-muted);
+}
+
+.shape-radius__tile.is-round {
+  width: 20px;
+  height: 20px;
+  margin: 22px 0 32px 22px;
+  border: 0;
+  border-radius: var(--r-radius-round);
+  background: var(--r-status-good);
+}
+
+.shape-radius__token {
+  overflow: hidden;
+  font-family: var(--r-font-mono);
+  font-size: 12px;
+  font-weight: var(--r-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shape-radius__value {
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: 11px;
+}
+
+.shape-radius__use {
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-xs);
+  line-height: 1.45;
+}
+
+.shape-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.shape-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shape-input {
+  width: 160px;
+}
+
+.shape-point {
+  width: 96px;
+  height: 32px;
+  overflow: visible;
+}
+.shape-point polyline {
+  fill: none;
+  stroke: var(--r-chart-1);
+  stroke-width: 2;
+}
+.shape-point circle {
+  fill: var(--r-chart-1);
+  stroke: var(--r-chart-surface);
+  stroke-width: 2;
+}
+
+/* The do / don't miniatures. The rounded one is wrong on purpose. */
+.shape-mini {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  min-height: 28px;
-}
-
-.doc-space__token {
-  color: var(--r-text);
-  font-family: var(--r-font-mono);
-  font-size: 12px;
-}
-
-.doc-space__value {
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
-.doc-space__bar {
-  height: 12px;
-  min-width: 1px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--r-brand) 70%, var(--r-bg-surface));
-}
-
-.doc-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-}
-
-.doc-controls__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.doc-controls__token {
-  width: 150px;
-  color: var(--r-text-tertiary);
-  font-family: var(--r-font-mono);
-  font-size: 12px;
-}
-
-.doc-controls__input {
-  flex: 1 1 180px;
-  max-width: 280px;
-}
-
-.doc-radii {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 16px;
-}
-
-.doc-radius {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.doc-radius__tile {
-  height: 88px;
-  margin-bottom: 6px;
-  border: 1.5px solid var(--r-border-strong);
+  width: 200px;
+  padding: 14px;
+  border: 1px solid var(--r-border-strong);
   background: var(--r-bg-surface);
 }
 
-.doc-radius__token {
-  font-family: var(--r-font-mono);
-  font-size: 12px;
+.shape-mini__head {
+  font-size: var(--r-text-md);
+  font-weight: var(--r-weight-semibold);
 }
 
-.doc-radius__value {
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
+.shape-mini.is-wrong {
+  border-color: var(--r-border);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.25);
 }
 
-.doc-nest {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 32px;
-  width: 100%;
-}
-
-.doc-nest__card {
-  flex: 1 1 300px;
-  max-width: 440px;
-  padding: 6px;
-  border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-xl);
-  background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-sm);
-}
-
-.doc-nest__well {
-  padding: 4px;
-  border-radius: var(--r-radius-lg);
-  background: var(--r-bg-track);
-}
-
-.doc-nest__control {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px;
-  border-radius: var(--r-radius-md);
-  background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-sm);
-}
-
-.doc-nest__tag {
-  display: block;
-  padding: 6px 10px 8px;
-  color: var(--r-text-tertiary);
+.shape-mini__pill {
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: var(--r-radius-round);
+  background: var(--r-warning-soft);
+  color: var(--r-warning-text);
   font-size: var(--r-text-xs);
   font-weight: var(--r-weight-medium);
 }
 
-.doc-nest__control .doc-nest__tag {
-  padding: 0;
+/* ── Rules ───────────────────────────────────────────────────────────────── */
+.rules-lines {
+  border-top: 1px solid var(--r-border-strong);
 }
 
-.doc-nest__live {
+.rules-line {
+  display: grid;
+  grid-template-columns: 120px 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--r-border-subtle);
+}
+
+.rules-line__sample {
+  height: 0;
+  border-top: 1px solid;
+}
+
+.rules-line__sample.is-strong {
+  border-top: 2px solid var(--r-ink);
+}
+
+.rules-line__token {
+  font-family: var(--r-font-mono);
+  font-size: 12px;
+}
+
+.rules-line__use {
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-sm);
+}
+
+@media (max-width: 720px) {
+  .rules-line {
+    grid-template-columns: 64px minmax(0, 1fr);
+    row-gap: 4px;
+  }
+  .rules-line__use {
+    grid-column: 2;
+  }
+}
+
+.rules-kpis.r-grid-ruled {
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+}
+
+.rules-kpi {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  padding: 12px 14px 16px;
 }
 
-.doc-nest-mini {
+.rules-kpi__value {
+  margin-top: 6px;
+  font-size: var(--r-text-3xl);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1;
+  letter-spacing: var(--r-tracking-tighter);
+}
+
+.rules-pair {
   display: grid;
-  width: 150px;
-  height: 96px;
-  padding: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 20px;
+}
+
+.rules-marked {
+  padding: 18px 22px;
   border: 1px solid var(--r-border);
-  border-radius: 22px;
   background: var(--r-bg-surface);
 }
 
-.doc-nest-mini__inner {
-  background: var(--r-bg-track);
+.rules-hatch {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  max-width: 280px;
+  height: 120px;
+  padding-top: 20px;
+  border-bottom: 1px solid var(--r-chart-axis);
 }
 
-.doc-shadows {
+.rules-hatch__bar {
+  flex: 1;
+  background-color: var(--r-chart-1);
+}
+
+.rules-hatch__bar.r-hatch {
+  border: 1px solid var(--r-border-strong);
+  border-bottom: 0;
+  background-color: var(--r-bg-surface);
+}
+
+.rules-hatch__tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+
+.rules-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  height: 32px;
+  padding: 0 14px;
+  background: var(--r-bg-surface);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rules-strip__start span {
+  color: var(--r-text-disabled);
+}
+
+.rules-strip__end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--r-text-tertiary);
+}
+
+/* ── Spacing ─────────────────────────────────────────────────────────────── */
+.space-scale {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-top: 1px solid var(--r-border-strong);
+  border-bottom: 1px solid var(--r-border);
+}
+
+.space-scale__row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
-  gap: 28px 20px;
-  padding: 32px;
-  border-radius: var(--r-radius-xl);
-  background: var(--r-bg-canvas);
-  box-shadow: inset 0 0 0 1px var(--r-border-subtle);
+  grid-template-columns: 96px 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 26px;
 }
 
-.doc-shadow {
+.space-scale__token {
+  font-family: var(--r-font-mono);
+  font-size: 12px;
+}
+
+.space-scale__value {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.space-scale__bar {
+  height: 10px;
+  min-width: 1px;
+  background: var(--r-brand);
+}
+
+.space-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.space-controls__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.space-controls__token {
+  width: 150px;
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: 11px;
+}
+
+.space-controls__token code {
+  margin-right: 6px;
+  color: var(--r-text);
+  font-size: 12px;
+}
+
+.space-controls__input {
+  flex: 0 1 220px;
+}
+
+.space-controls__bar {
+  width: 290px;
+  max-width: 100%;
+  border: 1px dashed var(--r-border-strong);
+  background: var(--r-bg-surface);
+}
+
+.space-controls__use {
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-xs);
+}
+
+.space-density {
+  max-width: 560px;
+}
+
+.space-density__value {
+  font-family: var(--r-font-mono);
+  font-size: 12px;
+}
+
+/* ── Elevation ───────────────────────────────────────────────────────────── */
+.lift-scene {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  height: 200px;
+}
+
+.lift-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(260px, 100%);
+  padding: 14px 16px 18px;
+  border: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
+}
+
+.lift-panel__value {
+  font-size: var(--r-text-4xl);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1;
+  letter-spacing: var(--r-tracking-tighter);
+}
+
+.lift-menu {
+  position: absolute;
+  top: 64px;
+  left: min(180px, calc(100% - 220px));
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  padding: 4px;
+}
+
+.lift-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 10px;
+  font-size: var(--r-text-sm);
+}
+
+.lift-menu__item.is-active {
+  background: var(--r-bg-hover);
+}
+
+.lift-shadows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr));
+  gap: 24px 20px;
+  padding: 28px;
+  border: 1px solid var(--r-border);
+  background: var(--r-bg-canvas);
+}
+
+.lift-shadow {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
-.doc-shadow__card {
+.lift-shadow__tile {
   display: grid;
   place-items: center;
-  height: 110px;
+  height: 96px;
   margin-bottom: 8px;
-  border-radius: var(--r-radius-lg);
-  background: var(--r-bg-surface);
+  border: 1px solid var(--r-border-strong);
+  background: var(--r-bg-raised);
 }
-.doc-shadow__card code {
+
+.lift-shadow__tile code {
   color: var(--r-text-secondary);
   font-family: var(--r-font-mono);
   font-size: 12px;
 }
-.doc-shadow__card.is-highlight {
-  background: var(--r-ink);
-}
-.doc-shadow__card.is-highlight code {
-  color: var(--r-on-ink);
-}
 
-.doc-shadow__use {
+.lift-shadow__use {
   font-size: var(--r-text-sm);
   font-weight: var(--r-weight-medium);
 }
 
-.doc-shadow__value {
+.lift-shadow__value {
   color: var(--r-text-tertiary);
   font-family: var(--r-font-mono);
   font-size: 10.5px;
@@ -474,7 +859,8 @@ const motionCss = `.thing {
   overflow-wrap: anywhere;
 }
 
-.doc-motion-notice {
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+.motion-notice {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -485,158 +871,169 @@ const motionCss = `.thing {
   line-height: 1.55;
 }
 
-.doc-motion {
+.motion {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
 }
 
-.doc-motion__row {
+.motion__row {
   display: grid;
-  grid-template-columns: 140px minmax(120px, 1fr) minmax(0, 220px);
+  grid-template-columns: 150px minmax(120px, 1fr) minmax(0, 220px);
   align-items: center;
   gap: 16px;
 }
 
-.doc-motion__row--ease {
-  grid-template-columns: 56px 140px minmax(120px, 1fr) minmax(0, 220px);
+.motion__row--curve {
+  grid-template-columns: 44px 200px minmax(120px, 1fr) minmax(0, 220px);
 }
 
-.doc-motion__label {
+.motion__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   color: var(--r-text-secondary);
-  font-size: var(--r-text-xs);
+  font-family: var(--r-font-mono);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
-.doc-motion__label code {
-  margin-right: 4px;
+
+.motion__label code {
   color: var(--r-text);
-  font-family: var(--r-font-mono);
   font-size: 12px;
+  font-weight: var(--r-weight-semibold);
 }
 
-.doc-motion__track {
+.motion__label small {
+  color: var(--r-text-tertiary);
+  font-size: 10.5px;
+}
+
+.motion__track {
   position: relative;
-  height: 28px;
-  border-radius: var(--r-radius-full);
-  background: var(--r-bg-track);
+  height: 24px;
+  border: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
 }
 
-.doc-motion__dot {
+.motion__block {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--r-brand);
-  box-shadow: var(--r-shadow-sm);
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: var(--r-ink);
   transition-property: left;
 }
 
-.doc-motion.is-played .doc-motion__dot {
-  left: calc(100% - 24px);
+.motion.is-played .motion__block {
+  left: calc(100% - 19px);
 }
 
-.doc-motion.is-resetting .doc-motion__dot {
+.motion.is-resetting .motion__block {
   transition: none !important;
 }
 
-.doc-motion__use {
+.motion__use {
   color: var(--r-text-tertiary);
   font-size: var(--r-text-xs);
   line-height: 1.4;
 }
 
-.doc-motion__replay {
+.motion__replay {
   align-self: flex-start;
 }
 
-.doc-motion__curve {
-  width: 48px;
-  height: 64px;
+.motion__curve {
+  width: 44px;
+  height: 44px;
   overflow: visible;
 }
 
-.doc-motion__axis {
+.motion__axis {
   fill: none;
-  stroke: var(--r-border);
+  stroke: var(--r-border-strong);
   stroke-width: 2;
 }
 
-.doc-motion__path {
+.motion__path {
   fill: none;
   stroke: var(--r-brand);
-  stroke-width: 5;
-  stroke-linecap: round;
+  stroke-width: 4;
+  stroke-linecap: square;
 }
 
-@media (max-width: 640px) {
-  .doc-motion__row,
-  .doc-motion__row--ease {
+.motion-blink-note {
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-sm);
+}
+
+@media (max-width: 720px) {
+  .motion__row,
+  .motion__row--curve {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
-  .doc-motion__curve {
+  .motion__curve {
     display: none;
   }
 }
 
-.doc-layers {
-  position: relative;
+/* ── Layers: an exploded stack of plates, the highest on top ──────────────── */
+.layers {
   display: flex;
   flex-direction: column;
-  padding: 24px 0 8px;
 }
 
-.doc-layer {
-  position: relative;
+.layer {
   display: grid;
-  grid-template-columns: 56px 90px minmax(0, 150px) minmax(0, 1fr);
+  grid-template-columns: 52px 92px minmax(0, 150px) minmax(0, 1fr);
   align-items: center;
   gap: 12px;
-  min-height: 56px;
-  margin-top: -10px;
-  margin-left: calc(var(--i) * 3%);
-  padding: 12px 18px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
-  background: color-mix(in srgb, var(--r-brand) calc(4% + var(--i) * 2.5%), var(--r-bg-surface));
-  box-shadow: var(--r-shadow-md);
+  min-height: 52px;
+  margin-top: -1px;
+  margin-right: calc((6 - var(--i)) * 16px);
+  margin-left: calc(var(--i) * 16px);
+  padding: 10px 16px;
+  border: 1px solid var(--r-border-strong);
+  background: var(--r-bg-surface);
 }
 
-.doc-layer__value {
-  font-size: var(--r-text-xl);
+.layer__value {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
 }
 
-.doc-layer__name {
+.layer__name {
   font-weight: var(--r-weight-medium);
 }
 
-.doc-layer__token {
+.layer__token {
   color: var(--r-text-secondary);
   font-family: var(--r-font-mono);
   font-size: 11.5px;
 }
 
-.doc-layer__note {
+.layer__note {
   color: var(--r-text-secondary);
   font-size: var(--r-text-sm);
 }
 
 @media (max-width: 720px) {
-  .doc-layer {
-    grid-template-columns: 48px minmax(0, 1fr);
+  .layer {
+    grid-template-columns: 44px minmax(0, 1fr);
     row-gap: 2px;
-    margin-left: calc(var(--i) * 1.5%);
+    margin-right: 0;
+    margin-left: calc(var(--i) * 6px);
   }
-  .doc-layer__value {
+  .layer__value {
     grid-row: span 3;
   }
-  .doc-layer__token,
-  .doc-layer__note {
+  .layer__token,
+  .layer__note {
     grid-column: 2;
   }
 }

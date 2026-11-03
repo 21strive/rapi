@@ -81,13 +81,15 @@ const tabStop = computed(() => {
 <template>
   <div class="pk-mini">
     <div class="pk-mini__head">
-      <RIconButton label="Previous month" variant="outline" size="sm" shape="square" @click="shiftMonth(-1)">
-        <ChevronLeft />
-      </RIconButton>
       <span class="pk-mini__month" aria-live="polite">{{ monthLabel }}</span>
-      <RIconButton label="Next month" variant="outline" size="sm" shape="square" @click="shiftMonth(1)">
-        <ChevronRight />
-      </RIconButton>
+      <span class="pk-mini__steps">
+        <RIconButton label="Previous month" variant="ghost" size="sm" @click="shiftMonth(-1)">
+          <ChevronLeft />
+        </RIconButton>
+        <RIconButton label="Next month" variant="ghost" size="sm" @click="shiftMonth(1)">
+          <ChevronRight />
+        </RIconButton>
+      </span>
     </div>
     <table ref="grid" class="pk-mini__grid" role="grid" :aria-label="monthLabel" @keydown="onKeydown">
       <thead>
@@ -131,59 +133,64 @@ const tabStop = computed(() => {
 .pk-mini {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .pk-mini__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-right: -6px;
 }
 
 .pk-mini__month {
   font-size: var(--r-text-md);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-snug);
+}
+
+.pk-mini__steps {
+  display: flex;
 }
 
 .pk-mini__grid {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 2px;
+  border-collapse: collapse;
   table-layout: fixed;
 }
 
 .pk-mini__grid th {
   padding-bottom: 6px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
   text-align: center;
+  text-transform: uppercase;
 }
 
 .pk-mini__grid td {
-  padding: 0;
+  padding: 1px 0;
   text-align: center;
 }
 
+/* The week on screen: a muted band with a 2px rule on its leading edge. */
 .pk-mini__grid tr.is-selected-week td {
   background: var(--r-bg-hover);
 }
 .pk-mini__grid tr.is-selected-week td:first-child {
-  border-radius: 10px 0 0 10px;
-}
-.pk-mini__grid tr.is-selected-week td:last-child {
-  border-radius: 0 10px 10px 0;
+  box-shadow: inset 2px 0 0 var(--r-text-tertiary);
 }
 
 .pk-mini__day {
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0;
-  border-radius: 10px;
   background: none;
   color: var(--r-text);
   font-size: var(--r-text-sm);
@@ -200,28 +207,29 @@ const tabStop = computed(() => {
 .pk-mini__day.is-today:not(.is-selected) {
   color: var(--r-brand-text);
   font-weight: var(--r-weight-semibold);
+  box-shadow: inset 0 0 0 1px var(--r-brand-border);
 }
 .pk-mini__day.is-selected {
   background: var(--r-brand);
-  box-shadow: var(--r-shadow-highlight);
   color: var(--r-on-brand);
   font-weight: var(--r-weight-semibold);
 }
 
+/* A day with events: a point under the date. */
 .pk-mini__dot {
   position: absolute;
   bottom: 4px;
   left: 50%;
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
-  background: var(--r-brand);
+  background: var(--r-text-tertiary);
   transform: translateX(-50%);
 }
 .pk-mini__day.is-selected .pk-mini__dot {
   background: currentColor;
 }
 .pk-mini__day.is-outside .pk-mini__dot {
-  opacity: 0.4;
+  opacity: 0.5;
 }
 </style>
