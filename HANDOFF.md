@@ -51,9 +51,21 @@ push or merge only when asked.
 
 ## 3. Status
 
-See git log on branch `feat/21strive-design-language`. Built in one session on the VM with parallel
-agents: the lead did tokens, brand components, docs chrome and all charts; agents restyled the 27
-existing components, built 15 new ones, rewrote the foundation pages and built the samples.
+Branch `feat/21strive-design-language` (from main `b63760c`), not pushed. Built in one session on the
+VM on 2026-11-03 with parallel agents: the lead did tokens, brand components, docs chrome and all
+charts; agents restyled the 27 existing components, built 15 new ones, rewrote the foundation pages
+and built the 36 samples, then the lead folded their component feedback back into the library.
+
+Checks at the end: `npm run build` clean; axe-core (WCAG 2.1 AA + best practice) over every docs
+page and every sample in both themes; no horizontal overflow and no page errors at 375px on all 50
+routes.
+
+Open questions for the founder:
+- Clear space (half the mark's height) and minimum sizes (mark 10px, lockup 16px) on the Brand page
+  are proposals; the brand book does not state them.
+- The samples invent product names for 21 Strive (Simpul, Sesi) and customers; swap in real names
+  if wanted.
+- Native date fields still follow the browser locale (time fields are 24-hour by default).
 
 ## 4. Working on it
 
