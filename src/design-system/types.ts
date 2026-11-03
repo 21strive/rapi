@@ -3,11 +3,8 @@ import type { Placement } from './composables/floating'
 
 export type Size = 'sm' | 'md' | 'lg'
 
-/**
- * Every tone has a matching `.r-tone-*` class in base.css.
- * 'violet' | 'flame' | 'sky' are leftovers from Rapi 0.1 and are removed before 0.2 ships.
- */
-export type Tone = 'neutral' | 'brand' | 'signal' | 'success' | 'warning' | 'danger' | 'violet' | 'flame' | 'sky'
+/** Every tone has a matching `.r-tone-*` class in base.css. */
+export type Tone = 'neutral' | 'brand' | 'signal' | 'success' | 'warning' | 'danger'
 
 /** The six tones of the 21 Strive language. */
 export type StatusTone = 'neutral' | 'brand' | 'signal' | 'success' | 'warning' | 'danger'

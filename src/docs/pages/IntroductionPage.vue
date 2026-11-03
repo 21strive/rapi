@@ -411,9 +411,10 @@ const changes = [
         </div>
       </dl>
       <p class="doc-p">
-        Token names that 0.1 screens used still resolve for now, mapped onto the new language, so old code keeps
-        rendering while it moves over. They will go before 0.2 is final. The References page credits the shots that
-        started it all.
+        The 0.1 token names are gone. Code written for 0.1 moves over with a short list: radius tokens become
+        <code class="doc-c">--r-radius-surface</code> and <code class="doc-c">--r-radius-control</code>, the violet and
+        flame tones become brand and signal, and the brand ramp becomes the cobalt ramp. The References page credits
+        the shots that started it all.
       </p>
     </DocSection>
 
