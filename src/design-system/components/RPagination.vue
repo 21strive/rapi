@@ -10,6 +10,7 @@ const props = withDefaults(
     pageCount: number
     /** Pages shown on each side of the current one. */
     siblings?: number
+    /** sm 24px · md 28px square buttons. */
     size?: 'sm' | 'md'
     label?: string
   }>(),
@@ -31,7 +32,8 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect())
 
 const siblings = computed(() => {
-  const button = props.size === 'sm' ? 32 : 38
+  // Button width plus the 2px gap between pages.
+  const button = props.size === 'sm' ? 26 : 30
   for (let s = props.siblings; s > 0; s--) {
     // first + last + current + 2 gaps + 2s siblings, plus the two step buttons
     if ((2 * s + 5 + 2) * button <= room.value) return s
@@ -89,22 +91,15 @@ function go(to: number) {
 
 <style>
 .r-pagination {
-  --r-page-size: 36px;
+  --r-page-size: var(--r-control-sm);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   max-width: 100%;
 }
 
 .r-pagination--sm {
-  --r-page-size: 30px;
-}
-
-@media (max-width: 480px) {
-  .r-pagination {
-    --r-page-size: 32px;
-    gap: 2px;
-  }
+  --r-page-size: var(--r-control-xs);
 }
 
 .r-pagination__pages {
@@ -113,6 +108,7 @@ function go(to: number) {
   gap: 2px;
 }
 
+/* Square keys with mono figures. The current page is filled with ink. */
 .r-pagination__page,
 .r-pagination__step {
   display: inline-grid;
@@ -121,22 +117,31 @@ function go(to: number) {
   height: var(--r-page-size);
   padding: 0 6px;
   border: 1px solid transparent;
-  border-radius: var(--r-radius-md);
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-text-secondary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   cursor: pointer;
   transition:
     background-color var(--r-duration-fast) var(--r-ease-out),
+    border-color var(--r-duration-fast) var(--r-ease-out),
     color var(--r-duration-fast) var(--r-ease-out);
 }
 
 .r-pagination--sm .r-pagination__page,
 .r-pagination--sm .r-pagination__step {
-  border-radius: var(--r-radius-sm);
-  font-size: var(--r-text-xs);
+  padding: 0 4px;
+  font-size: var(--r-text-2xs);
+}
+
+/* Keys sit 2px apart, so the focus ring hugs the key instead of covering its neighbour. */
+.r-pagination__page:focus-visible,
+.r-pagination__step:focus-visible {
+  outline-offset: 0;
 }
 
 .r-pagination__page:hover:not(.is-current) {
@@ -145,26 +150,32 @@ function go(to: number) {
 }
 
 .r-pagination__page.is-current {
+  border-color: var(--r-ink);
   background: var(--r-ink);
-  box-shadow: var(--r-shadow-highlight);
   color: var(--r-on-ink);
 }
 
 .r-pagination__step {
-  border-color: var(--r-border);
-  background: var(--r-bg-surface);
+  padding: 0;
+  border-color: var(--r-border-strong);
   color: var(--r-text);
 }
 .r-pagination__step:hover:not(:disabled) {
+  border-color: var(--r-text-tertiary);
   background: var(--r-bg-hover);
 }
 .r-pagination__step:disabled {
+  border-color: var(--r-border);
+  color: var(--r-text-disabled);
   cursor: not-allowed;
-  opacity: 0.4;
 }
 .r-pagination__step svg {
   width: 16px;
   height: 16px;
+}
+.r-pagination--sm .r-pagination__step svg {
+  width: 14px;
+  height: 14px;
 }
 
 .r-pagination__gap {
@@ -172,5 +183,7 @@ function go(to: number) {
   place-items: center;
   min-width: calc(var(--r-page-size) - 8px);
   color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
 }
 </style>

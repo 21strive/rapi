@@ -14,6 +14,7 @@ const props = withDefaults(
     /** Property name or function that gives each row a stable key. */
     rowKey?: string | ((row: Row) => Key)
     selectable?: boolean
+    /** Rows of 40px (comfortable) or 32px (compact). */
     density?: 'compact' | 'comfortable'
     /** Needs `maxHeight` so the table has its own scroll area. */
     stickyHeader?: boolean
@@ -183,53 +184,61 @@ function toggleRow(row: Row) {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: var(--r-text-md);
+  font-size: var(--r-text-sm);
 }
 
+/* Heads: Geist Mono capitals on the muted band, a 1px rule beneath. */
 .r-table th {
-  height: 40px;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  height: 32px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--r-border);
   background: var(--r-bg-muted);
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-medium);
+  letter-spacing: 0.06em;
   text-align: left;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .r-table td {
-  height: 56px;
-  padding: 0 16px;
+  height: 40px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--r-border-subtle);
   color: var(--r-text);
   white-space: nowrap;
 }
 
 .r-table--compact td {
-  height: 44px;
+  height: 32px;
 }
 .r-table--compact th {
-  height: 36px;
+  height: 28px;
 }
 
 .r-table th:first-child,
 .r-table td:first-child {
-  padding-left: 20px;
+  padding-left: 16px;
 }
 .r-table th:last-child,
 .r-table td:last-child {
-  padding-right: 20px;
+  padding-right: 16px;
 }
 
 .r-table tbody tr {
   transition: background-color var(--r-duration-fast) var(--r-ease-out);
 }
 .r-table tbody tr:hover {
-  background: color-mix(in srgb, var(--r-bg-hover) 55%, transparent);
+  background: var(--r-bg-muted);
 }
+/* Selected: the selection tint with a 2px cobalt rule on the leading edge. */
 .r-table tbody tr.is-selected {
-  background: var(--r-brand-soft);
+  background: var(--r-bg-selected);
+}
+.r-table tbody tr.is-selected > td:first-child {
+  box-shadow: inset 2px 0 0 var(--r-brand);
 }
 .r-table tbody tr:last-child td {
   border-bottom: 0;
@@ -244,12 +253,17 @@ function toggleRow(row: Row) {
 .r-table .is-center {
   text-align: center;
 }
-.r-table .is-numeric {
+
+/* Figures line up digit by digit: Geist Mono, tabular, right-aligned. */
+.r-table td.is-numeric {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 .r-table .r-table__select {
-  width: 44px;
+  width: 40px;
   padding-right: 0;
 }
 .r-table td.r-table__select .r-checkbox,
@@ -261,25 +275,31 @@ function toggleRow(row: Row) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin: 0 -6px;
-  padding: 4px 6px;
+  margin: 0 -4px;
+  padding: 2px 4px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--r-radius-control);
   background: none;
   color: inherit;
   font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
   cursor: pointer;
 }
 .r-table__sort:hover {
   background: var(--r-bg-hover);
   color: var(--r-text);
 }
+th[aria-sort='ascending'] .r-table__sort,
+th[aria-sort='descending'] .r-table__sort {
+  color: var(--r-text);
+}
 .r-table__sort svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 .r-table__sort .is-idle {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 th.is-right .r-table__sort {
   flex-direction: row-reverse;
@@ -295,8 +315,9 @@ th.is-right .r-table__sort {
   background: none !important;
 }
 .r-table__empty {
-  padding: 48px 16px;
+  padding: 40px 16px;
   color: var(--r-text-tertiary);
+  font-size: var(--r-text-sm);
   text-align: center;
   white-space: normal;
 }

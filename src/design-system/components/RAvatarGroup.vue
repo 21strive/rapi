@@ -6,7 +6,7 @@ import type { AvatarSize } from '../types'
 const props = withDefaults(
   defineProps<{
     names: string[]
-    /** Avatars shown before the "+N" bubble. */
+    /** Avatars shown before the "+N" tile. */
     max?: number
     size?: AvatarSize
     label?: string
@@ -40,14 +40,15 @@ const groupLabel = computed(() => {
 }
 
 .r-avatar-group > .r-avatar + .r-avatar {
-  margin-left: calc(var(--r-avatar-size) * -0.26);
+  margin-left: calc(var(--r-avatar-size) * -0.2);
 }
 
 .r-avatar-group__more {
-  --r-avatar-bg: var(--r-bg-surface);
+  --r-avatar-bg: var(--r-bg-hover);
   --r-avatar-fg: var(--r-text-secondary);
-  border: 1px solid var(--r-border);
-  font-size: calc(var(--r-avatar-size) * 0.36);
+  font-size: calc(var(--r-avatar-size) * 0.34);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 </style>

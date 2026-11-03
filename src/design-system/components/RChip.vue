@@ -4,13 +4,14 @@ import type { Tone } from '../types'
 
 withDefaults(
   defineProps<{
-    /** `dashed` is the quiet "+ Add filter" chip. */
+    /** `solid` is a filter that is on (ink). `dashed` is the quiet "Add filter" chip. */
     variant?: 'outline' | 'solid' | 'soft' | 'dashed'
     tone?: Tone
     /** Shows a chevron, for chips that open a popover. */
     caret?: boolean
     /** Adds a remove button that emits `remove`. */
     removable?: boolean
+    /** sm 24px · md 28px. */
     size?: 'sm' | 'md'
     /** For toggle chips. Leave unset for plain chips. */
     selected?: boolean
@@ -53,14 +54,14 @@ defineSlots<{ default?(): unknown; leading?(): unknown }>()
 
 <style>
 .r-chip {
-  --r-chip-h: 32px;
-  --r-chip-px: 12px;
+  --r-chip-h: var(--r-control-sm);
+  --r-chip-px: 10px;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   height: var(--r-chip-h);
   border: 1px solid transparent;
-  border-radius: var(--r-radius-full);
+  border-radius: var(--r-radius-control);
   font-size: var(--r-text-sm);
   font-weight: var(--r-weight-medium);
   line-height: 1;
@@ -72,8 +73,8 @@ defineSlots<{ default?(): unknown; leading?(): unknown }>()
 }
 
 .r-chip--sm {
-  --r-chip-h: 28px;
-  --r-chip-px: 10px;
+  --r-chip-h: var(--r-control-xs);
+  --r-chip-px: 8px;
   font-size: var(--r-text-xs);
 }
 
@@ -82,9 +83,11 @@ defineSlots<{ default?(): unknown; leading?(): unknown }>()
   display: inline-flex;
   align-items: center;
   border: 0;
+  border-radius: var(--r-radius-control);
   background: none;
   color: inherit;
   font: inherit;
+  letter-spacing: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -93,7 +96,6 @@ defineSlots<{ default?(): unknown; leading?(): unknown }>()
   gap: 6px;
   height: 100%;
   padding: 0 var(--r-chip-px);
-  border-radius: inherit;
 }
 
 .r-chip--removable .r-chip__main {
@@ -107,47 +109,60 @@ defineSlots<{ default?(): unknown; leading?(): unknown }>()
 
 .r-chip__caret {
   margin-right: -2px;
-  opacity: 0.7;
+  opacity: 0.72;
 }
 
 .r-chip__remove {
   justify-content: center;
   width: 20px;
   height: 20px;
-  margin-right: 6px;
+  margin-right: 3px;
   padding: 0;
-  border-radius: 50%;
-  opacity: 0.7;
+  opacity: 0.72;
 }
-.r-chip__remove:hover {
+.r-chip--sm .r-chip__remove {
+  width: 18px;
+  height: 18px;
+  margin-right: 2px;
+}
+.r-chip__remove:hover:not(:disabled) {
   background: color-mix(in srgb, currentColor 14%, transparent);
   opacity: 1;
 }
 .r-chip__remove svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
+}
+
+.r-chip__main:focus-visible,
+.r-chip__remove:focus-visible {
+  outline-offset: 1px;
 }
 
 .r-chip--outline {
-  border-color: var(--r-border);
-  background: var(--r-bg-surface);
+  border-color: var(--r-border-strong);
+  background: transparent;
   color: var(--r-text);
 }
 .r-chip--outline:hover:not(.is-disabled) {
+  border-color: var(--r-text-tertiary);
   background: var(--r-bg-hover);
 }
-.r-chip--outline.is-selected {
-  border-color: var(--r-brand-border);
-  background: var(--r-brand-soft);
+/* A toggle chip that is on: the selection colour, cobalt. */
+.r-chip--outline.is-selected,
+.r-chip--outline.is-selected:hover:not(.is-disabled) {
+  border-color: var(--r-brand);
+  background: var(--r-bg-selected);
   color: var(--r-brand-text);
 }
 
 .r-chip--solid {
+  border-color: var(--tone-solid);
   background: var(--tone-solid);
   color: var(--tone-on-solid);
-  box-shadow: var(--r-shadow-highlight);
 }
 .r-chip--solid:hover:not(.is-disabled) {
+  border-color: var(--tone-solid-hover);
   background: var(--tone-solid-hover);
 }
 
@@ -173,7 +188,10 @@ defineSlots<{ default?(): unknown; leading?(): unknown }>()
 }
 
 .r-chip.is-disabled {
-  opacity: 0.5;
+  border-color: var(--r-border);
+  border-style: solid;
+  background: transparent;
+  color: var(--r-text-disabled);
 }
 .r-chip.is-disabled button {
   cursor: not-allowed;

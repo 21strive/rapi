@@ -10,6 +10,7 @@ const props = withDefaults(
     label?: string
     description?: string
     disabled?: boolean
+    /** sm 26 × 14px · md 32 × 18px track. */
     size?: 'sm' | 'md'
     id?: string
   }>(),
@@ -52,10 +53,13 @@ const buttonAttrs = computed(() => {
 </template>
 
 <style>
+/* A hardware toggle: a square slot with a square key that slides. Off is an empty slot,
+   on fills with the brand and the key turns white. */
 .r-switch {
-  --r-switch-w: 36px;
-  --r-switch-h: 20px;
-  --r-switch-gap: 2px;
+  --r-switch-w: 32px;
+  --r-switch-h: 18px;
+  --r-switch-thumb: 12px;
+  --r-switch-line: 20px;
   display: inline-flex;
   align-items: flex-start;
   gap: 10px;
@@ -66,8 +70,12 @@ const buttonAttrs = computed(() => {
 }
 
 .r-switch--sm {
-  --r-switch-w: 28px;
-  --r-switch-h: 16px;
+  --r-switch-w: 26px;
+  --r-switch-h: 14px;
+  --r-switch-thumb: 8px;
+  --r-switch-line: 18px;
+  gap: 8px;
+  font-size: var(--r-text-sm);
 }
 
 .r-switch__track {
@@ -75,38 +83,50 @@ const buttonAttrs = computed(() => {
   flex-shrink: 0;
   width: var(--r-switch-w);
   height: var(--r-switch-h);
+  margin-top: calc((var(--r-switch-line) - var(--r-switch-h)) / 2);
   padding: 0;
-  border: 0;
-  border-radius: var(--r-radius-full);
-  background: var(--r-text-disabled);
+  border: 1px solid var(--r-text-tertiary);
+  border-radius: var(--r-radius-control);
+  background: var(--r-bg-surface);
   cursor: inherit;
-  transition: background-color var(--r-duration-base) var(--r-ease-out);
-}
-
-.r-switch.is-on .r-switch__track {
-  background: var(--r-brand);
+  transition:
+    background-color var(--r-duration-fast) var(--r-ease-out),
+    border-color var(--r-duration-fast) var(--r-ease-out);
 }
 
 .r-switch__thumb {
   position: absolute;
-  top: var(--r-switch-gap);
-  left: var(--r-switch-gap);
-  width: calc(var(--r-switch-h) - var(--r-switch-gap) * 2);
-  height: calc(var(--r-switch-h) - var(--r-switch-gap) * 2);
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 1px 2px rgb(16 20 28 / 0.2),
-    0 1px 1px rgb(16 20 28 / 0.06);
-  transition: transform var(--r-duration-base) var(--r-ease-spring);
-}
-
-.r-switch.is-on .r-switch__thumb {
-  transform: translateX(calc(var(--r-switch-w) - var(--r-switch-h)));
+  top: calc((var(--r-switch-h) - 2px - var(--r-switch-thumb)) / 2);
+  left: calc((var(--r-switch-h) - 2px - var(--r-switch-thumb)) / 2);
+  width: var(--r-switch-thumb);
+  height: var(--r-switch-thumb);
+  border-radius: var(--r-radius-mark);
+  background: var(--r-text-tertiary);
+  transition:
+    transform var(--r-duration-fast) var(--r-ease-out),
+    background-color var(--r-duration-fast) var(--r-ease-out);
 }
 
 .r-switch:hover:not(.is-disabled, .is-on) .r-switch__track {
-  background: var(--r-text-tertiary);
+  border-color: var(--r-text-secondary);
+}
+.r-switch:hover:not(.is-disabled, .is-on) .r-switch__thumb {
+  background: var(--r-text-secondary);
+}
+
+/* On: the brand fill (the shade that carries white), so the white key keeps its contrast. */
+.r-switch.is-on .r-switch__track {
+  border-color: var(--r-brand-fill);
+  background: var(--r-brand-fill);
+}
+.r-switch.is-on:hover:not(.is-disabled) .r-switch__track {
+  border-color: var(--r-brand-fill-hover);
+  background: var(--r-brand-fill-hover);
+}
+
+.r-switch.is-on .r-switch__thumb {
+  background: var(--r-on-brand);
+  transform: translateX(calc(var(--r-switch-w) - var(--r-switch-h)));
 }
 
 .r-switch__text {
@@ -117,11 +137,7 @@ const buttonAttrs = computed(() => {
 }
 
 .r-switch__label {
-  line-height: var(--r-switch-h);
-}
-
-.r-switch--md .r-switch__label {
-  line-height: 20px;
+  line-height: var(--r-switch-line);
 }
 
 .r-switch__description {
@@ -131,7 +147,24 @@ const buttonAttrs = computed(() => {
 }
 
 .r-switch.is-disabled {
+  color: var(--r-text-disabled);
   cursor: not-allowed;
-  opacity: 0.5;
+}
+.r-switch.is-disabled .r-switch__track {
+  border-color: var(--r-border-strong);
+  background: var(--r-bg-muted);
+}
+.r-switch.is-disabled .r-switch__thumb {
+  background: var(--r-border-strong);
+}
+.r-switch.is-disabled.is-on .r-switch__track {
+  border-color: var(--r-text-disabled);
+  background: var(--r-text-disabled);
+}
+.r-switch.is-disabled.is-on .r-switch__thumb {
+  background: var(--r-bg-surface);
+}
+.r-switch.is-disabled .r-switch__description {
+  color: var(--r-text-disabled);
 }
 </style>

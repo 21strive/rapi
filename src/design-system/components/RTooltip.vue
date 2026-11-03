@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useId, watchEffect } from 'vue'
 import RKbd from './RKbd.vue'
-import { transformOrigin, useFloating, type Placement } from '../composables/floating'
+import { useFloating, type Placement } from '../composables/floating'
 
 defineOptions({ inheritAttrs: false })
 
@@ -30,7 +30,7 @@ let timer = 0
 
 const target = () => (trigger.value?.firstElementChild as HTMLElement | null) ?? trigger.value
 const floating = useFloating(tip, { anchor: target, open: visible, placement: () => props.placement, offset: 8 })
-const tipStyle = computed(() => [floating.style.value, { '--r-origin': transformOrigin(floating.placement.value) }])
+const tipStyle = computed(() => floating.style.value)
 
 function show(delay: number) {
   if (props.disabled) return
@@ -94,29 +94,32 @@ onBeforeUnmount(() => clearTimeout(timer))
   vertical-align: middle;
 }
 
+/* A dark island in both themes: square, 12px, a strong rule and a short shadow. */
 .r-tooltip {
   z-index: var(--r-z-tooltip);
   display: inline-flex;
   align-items: center;
   gap: 8px;
   max-width: min(280px, calc(100vw - 16px));
-  padding: 6px 9px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-sm);
-  background: var(--r-bg-surface);
+  padding: 5px 8px;
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-surface);
+  background: var(--r-bg-raised);
   box-shadow: var(--r-shadow-md);
   color: var(--r-text);
   font-size: var(--r-text-xs);
   font-weight: var(--r-weight-medium);
-  line-height: 1.35;
+  line-height: 1.4;
   pointer-events: none;
-  transform-origin: var(--r-origin, center bottom);
+}
+
+.r-tooltip .r-kbd {
+  border-color: var(--r-border-strong);
+  background: transparent;
 }
 
 .r-tip-enter-active {
-  transition:
-    opacity var(--r-duration-fast) var(--r-ease-out),
-    transform var(--r-duration-fast) var(--r-ease-out);
+  transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
 .r-tip-leave-active {
   transition: opacity var(--r-duration-instant) var(--r-ease-out);
@@ -124,8 +127,5 @@ onBeforeUnmount(() => clearTimeout(timer))
 .r-tip-enter-from,
 .r-tip-leave-to {
   opacity: 0;
-}
-.r-tip-enter-from {
-  transform: scale(0.96);
 }
 </style>

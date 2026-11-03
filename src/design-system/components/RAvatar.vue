@@ -6,6 +6,7 @@ import type { AvatarSize, AvatarStatus } from '../types'
 const props = withDefaults(
   defineProps<{
     name: string
+    /** xs 20 · sm 24 · md 32 · lg 40 · xl 48px. */
     size?: AvatarSize
     /** A surface-coloured ring, for avatars that overlap or sit on images. */
     ring?: boolean
@@ -40,6 +41,7 @@ const tone = computed(() => identityIndex(props.name))
 </template>
 
 <style>
+/* A square tile with mono initials on the person's identity colour. */
 .r-avatar {
   --r-avatar-size: 32px;
   --r-avatar-ring: var(--r-bg-surface);
@@ -49,10 +51,11 @@ const tone = computed(() => identityIndex(props.name))
   place-items: center;
   width: var(--r-avatar-size);
   height: var(--r-avatar-size);
-  border-radius: 50%;
+  border-radius: var(--r-radius-mark);
   background: var(--r-avatar-bg);
   color: var(--r-avatar-fg);
-  font-size: calc(var(--r-avatar-size) * 0.38);
+  font-family: var(--r-font-mono);
+  font-size: calc(var(--r-avatar-size) * 0.36);
   font-weight: var(--r-weight-semibold);
   line-height: 1;
   letter-spacing: 0;
@@ -61,7 +64,7 @@ const tone = computed(() => identityIndex(props.name))
 
 .r-avatar--xs {
   --r-avatar-size: 20px;
-  font-size: 8.5px;
+  font-size: 9px;
 }
 .r-avatar--sm {
   --r-avatar-size: 24px;
@@ -88,25 +91,26 @@ const tone = computed(() => identityIndex(props.name))
   object-fit: cover;
 }
 
+/* Presence is a lamp: the only round thing on an avatar. */
 .r-avatar__status {
   position: absolute;
-  right: -1px;
-  bottom: -1px;
-  width: max(8px, calc(var(--r-avatar-size) * 0.28));
-  height: max(8px, calc(var(--r-avatar-size) * 0.28));
-  border-radius: 50%;
+  right: -2px;
+  bottom: -2px;
+  width: max(6px, calc(var(--r-avatar-size) * 0.22));
+  height: max(6px, calc(var(--r-avatar-size) * 0.22));
+  border-radius: var(--r-radius-round);
   box-shadow: 0 0 0 2px var(--r-avatar-ring);
 }
 .r-avatar__status--online {
-  background: var(--r-success);
+  background: var(--r-status-good);
 }
 .r-avatar__status--away {
-  background: var(--r-warning);
+  background: var(--r-status-warning);
 }
 .r-avatar__status--busy {
-  background: var(--r-danger);
+  background: var(--r-status-critical);
 }
 .r-avatar__status--offline {
-  background: var(--r-text-disabled);
+  background: var(--r-status-off);
 }
 </style>

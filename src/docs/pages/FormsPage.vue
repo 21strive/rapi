@@ -20,6 +20,8 @@ const emailError = computed(() => {
 const name = ref<string | number | null>('Finance website')
 const from = ref<string | number | null>('2026-11-12')
 const to = ref<string | number | null>('2026-11-15')
+const opens = ref<string | number | null>('09:00')
+const closes = ref<string | number | null>('17:30')
 
 const inputCode = `<script setup lang="ts">
 import { ref } from 'vue'
@@ -41,17 +43,18 @@ const email = ref('')
 
 const inputProps = [
   { name: 'v-model', type: 'string | number | null', default: "''", description: 'The value.' },
-  { name: 'variant', type: "'outline' | 'filled'", default: "'outline'", description: 'Filled has no border until focus. It sits well inside popovers and toolbars.' },
-  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '32, 40 or 48px tall.' },
+  { name: 'variant', type: "'outline' | 'filled'", default: "'outline'", description: 'Outline is a square field with a strong 1px rule. Filled is a muted field with only a bottom rule; it sits well inside popovers and toolbars.' },
+  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '28, 32 or 40px tall.' },
   { name: 'type', type: 'string', default: "'text'", description: 'Any native type: email, search, number, date, time…' },
   { name: 'label', type: 'string', description: 'Visible label, linked to the field.' },
   { name: 'hint', type: 'string', description: 'Help text under the field, linked with aria-describedby.' },
-  { name: 'error', type: 'string', description: 'Shown in red instead of the hint. Also marks the field invalid.' },
+  { name: 'error', type: 'string', description: 'Shown in danger red with an icon instead of the hint. Also marks the field invalid.' },
   { name: 'placeholder', type: 'string', description: 'Example text while the field is empty.' },
-  { name: 'invalid', type: 'boolean', default: 'false', description: 'Red border and aria-invalid without a message.' },
-  { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims the field and skips it in the tab order.' },
+  { name: 'invalid', type: 'boolean', default: 'false', description: 'Danger border and aria-invalid without a message.' },
+  { name: 'disabled', type: 'boolean', default: 'false', description: 'Greys the field out and skips it in the tab order.' },
   { name: 'readonly', type: 'boolean', default: 'false', description: 'Selectable and focusable, but not editable.' },
   { name: 'clearable', type: 'boolean', default: 'false', description: 'Adds a clear button while there is a value.' },
+  { name: 'clock', type: "'24h' | 'locale'", default: "'24h'", description: 'For type="time". 24h is a text field that always reads HH:MM: a number pad on phones, the colon typed for you, and the step attribute (in seconds) applied when the field loses focus. locale keeps the browser\'s own time field, which follows the browser language and can show AM and PM. The value is "HH:MM" either way.' },
   { name: 'id', type: 'string', default: 'auto', description: 'Id of the native input. Generated when left out.' },
 ]
 
@@ -105,12 +108,12 @@ const selectProps = [
   { name: 'options', type: 'SelectOption[]', description: '{ label, value, disabled? }, plus any extra fields you want back in the leading slot.' },
   { name: 'placeholder', type: 'string', description: 'Shown while nothing is selected. It cannot be picked.' },
   { name: 'variant', type: "'outline' | 'filled'", default: "'outline'", description: 'Same looks as RInput.' },
-  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '32, 40 or 48px tall.' },
+  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '28, 32 or 40px tall.' },
   { name: 'label', type: 'string', description: 'Visible label, linked to the select.' },
   { name: 'hint', type: 'string', description: 'Help text under the field.' },
-  { name: 'error', type: 'string', description: 'Shown in red instead of the hint. Also marks it invalid.' },
-  { name: 'invalid', type: 'boolean', default: 'false', description: 'Red border without a message.' },
-  { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims the field and skips it in the tab order.' },
+  { name: 'error', type: 'string', description: 'Shown in danger red with an icon instead of the hint. Also marks it invalid.' },
+  { name: 'invalid', type: 'boolean', default: 'false', description: 'Danger border without a message.' },
+  { name: 'disabled', type: 'boolean', default: 'false', description: 'Greys the field out and skips it in the tab order.' },
   { name: 'id', type: 'string', default: 'auto', description: 'Id of the native select.' },
 ]
 
@@ -157,10 +160,10 @@ const checkboxProps = [
   { name: 'value', type: 'string | number', description: 'Added to or removed from an array model.' },
   { name: 'label', type: 'string', description: 'Text next to the box. The default slot works too.' },
   { name: 'description', type: 'string', description: 'A quieter second line.' },
-  { name: 'indeterminate', type: 'boolean', default: 'false', description: 'Shows a dash for "some of these". Screen readers hear "mixed".' },
-  { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims it and blocks changes.' },
-  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '16 or 18px box.' },
-  { name: 'tone', type: 'Tone', default: "'brand'", description: 'Colour of the checked box.' },
+  { name: 'indeterminate', type: 'boolean', default: 'false', description: 'Shows a bar for "some of these". Screen readers hear "mixed".' },
+  { name: 'disabled', type: 'boolean', default: 'false', description: 'Greys it out and blocks changes.' },
+  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '14 or 16px square box.' },
+  { name: 'tone', type: 'Tone', default: "'brand'", description: 'Colour of the checked box. Cobalt by default.' },
   { name: 'color', type: 'string', description: 'Any CSS colour, e.g. a calendar colour. Overrides the tone and tints the empty box too.' },
   { name: 'id', type: 'string', default: 'auto', description: 'Id of the native input.' },
 ]
@@ -192,8 +195,8 @@ const switchProps = [
   { name: 'v-model', type: 'boolean', default: 'false', description: 'On or off.' },
   { name: 'label', type: 'string', description: 'Text next to the switch. The default slot works too.' },
   { name: 'description', type: 'string', description: 'A quieter second line, linked with aria-describedby.' },
-  { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims it and blocks changes.' },
-  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '28 × 16 or 36 × 20px track.' },
+  { name: 'disabled', type: 'boolean', default: 'false', description: 'Greys it out and blocks changes.' },
+  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '26 × 14 or 32 × 18px track.' },
   { name: 'id', type: 'string', default: 'auto', description: 'Id of the switch button.' },
 ]
 
@@ -256,14 +259,16 @@ const views = [
 
 <template>
   <RSegmented v-model="view" :options="views" label="View" />
+
+  <!-- The solid strip: the selected key is filled with ink. -->
   <RSegmented v-model="view" :options="views" variant="pill" label="View" />
 </template>`
 
 const segmentedProps = [
   { name: 'v-model', type: 'string | number', description: 'Value of the selected option.' },
   { name: 'options', type: 'SegmentedOption[]', description: '{ label, value, icon?, disabled? }' },
-  { name: 'variant', type: "'inset' | 'pill'", default: "'inset'", description: 'A track with a sliding thumb, or separate pills with the active one in ink.' },
-  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Option height 26, 32 or 38px (pills 30, 36, 44px).' },
+  { name: 'variant', type: "'inset' | 'pill'", default: "'inset'", description: 'inset is a ruled track where the selected option is a surface key with a strong rule. pill keeps its 0.1 name and draws the solid strip: keys on shared rules, the selected one filled with ink.' },
+  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '28, 32 or 40px tall.' },
   { name: 'block', type: 'boolean', default: 'false', description: 'Stretches to the container; options share the width.' },
   { name: 'label', type: 'string', description: 'Accessible name of the group, e.g. "View".' },
   { name: 'iconOnly', type: 'boolean', default: 'false', description: 'Shows icons only. Labels become the accessible names and tooltips.' },
@@ -280,7 +285,7 @@ const segmentedProps = [
     <DocSection
       id="input"
       title="Input"
-      description="A text field with an optional label, hint and error. Icons and key hints go in the leading and trailing slots. Outline is the default; filled sits well inside popovers and toolbars."
+      description="A square text field, 32px tall, with a strong 1px rule and a 2px cobalt ring on focus. The label sits above it in Geist, the hint below it, and an error replaces the hint in danger red with an icon. Icons and key hints go in the leading and trailing slots."
     >
       <div class="doc-grid doc-grid--2">
         <Demo title="Outline" note="With an icon, a clear button and a key hint." stack>
@@ -289,7 +294,7 @@ const segmentedProps = [
             <template #trailing><RKbd :keys="['mod', 'K']" /></template>
           </RInput>
         </Demo>
-        <Demo title="Filled" note="Quieter, for search inside a popover." stack>
+        <Demo title="Filled" note="A muted field with a bottom rule, for search inside a popover." stack>
           <RInput v-model="tagQuery" variant="filled" placeholder="Search tags" aria-label="Search tags">
             <template #leading><Search /></template>
           </RInput>
@@ -309,19 +314,27 @@ const segmentedProps = [
             <template #leading><Mail /></template>
           </RInput>
         </Demo>
-        <Demo title="Dates" note="Native date fields, styled to match." stack>
+        <Demo title="Dates and times" note="Times are always 24-hour: type 930 and it reads 09:30." stack>
           <div class="fp-pair">
             <RInput v-model="from" type="date" label="From" />
             <RInput v-model="to" type="date" label="To" />
+          </div>
+          <div class="fp-pair">
+            <RInput v-model="opens" type="time" step="900" label="Window opens">
+              <template #trailing><span class="fp-zone">WIB</span></template>
+            </RInput>
+            <RInput v-model="closes" type="time" step="900" label="Window closes">
+              <template #trailing><span class="fp-zone">WIB</span></template>
+            </RInput>
           </div>
         </Demo>
       </div>
 
       <div class="doc-grid doc-grid--2">
         <Demo title="Sizes" stack>
-          <RInput size="sm" placeholder="Small, 32px" aria-label="Small" />
-          <RInput placeholder="Medium, 40px" aria-label="Medium" />
-          <RInput size="lg" placeholder="Large, 48px" aria-label="Large" />
+          <RInput size="sm" placeholder="Small, 28px" aria-label="Small" />
+          <RInput placeholder="Medium, 32px" aria-label="Medium" />
+          <RInput size="lg" placeholder="Large, 40px" aria-label="Large" />
         </Demo>
         <Demo title="States" stack>
           <RInput v-model="name" label="Project name" clearable />
@@ -355,10 +368,10 @@ const segmentedProps = [
     <DocSection
       id="select"
       title="Select"
-      description="A styled native select. You get the platform's own picker on phones and full keyboard support for free. The leading slot receives the selected option, so a status dot can follow the choice."
+      description="A styled native select with the same square field as Input. You get the platform's own picker on phones and full keyboard support for free. The leading slot receives the selected option, so a status lamp can follow the choice."
     >
       <div class="doc-grid">
-        <Demo title="Status with a dot" stack>
+        <Demo title="Status with a lamp" stack>
           <RSelect v-model="status" :options="statuses" label="Status">
             <template #leading="{ option }">
               <span class="fp-dot" :style="{ background: dotColor(option) }" />
@@ -400,7 +413,7 @@ const segmentedProps = [
     <DocSection
       id="checkbox"
       title="Checkbox"
-      description="For yes-or-no choices and for picking several things from a list. It has an indeterminate state for &quot;some of these&quot;, and it takes any colour when the colour is the meaning, like calendars."
+      description="A 16px square box for yes-or-no choices and for picking several things from a list. Checked fills it with cobalt and a white check; the indeterminate state shows a bar for &quot;some of these&quot;. It takes any colour when the colour is the meaning, like calendars."
     >
       <div class="doc-grid doc-grid--2">
         <Demo title="States" stack>
@@ -436,7 +449,7 @@ const segmentedProps = [
           />
           <RCheckbox v-model="small" size="sm" label="Small, for dense tables and filters" />
         </Demo>
-        <Demo title="Calendar colours" note="Like the calendar list in Ofative." stack>
+        <Demo title="Calendar colours" note="Any CSS colour, when the colour is the meaning." stack>
           <RCheckbox
             v-for="cal in calendars"
             :key="cal.value"
@@ -461,7 +474,7 @@ const segmentedProps = [
     <DocSection
       id="switch"
       title="Switch"
-      description="A switch changes a setting the moment you flip it. It is a button with role=&quot;switch&quot;, so screen readers announce it as on or off, and clicking the label flips it too."
+      description="A switch changes a setting the moment you flip it. It looks like a hardware toggle: a square slot with a square key that slides across and turns the slot cobalt. It is a button with role=&quot;switch&quot;, so screen readers announce it as on or off, and clicking the label flips it too."
     >
       <div class="doc-grid doc-grid--2">
         <Demo title="Settings" stack>
@@ -493,7 +506,7 @@ const segmentedProps = [
     <DocSection
       id="segmented"
       title="Segmented control"
-      description="Two to five options, one at a time. Inset puts a thumb on a soft track, like the Daily, Weekly and Monthly switch in Ofative. Pill shows separate pills with the active one in ink, like the top navigation in Syncrowave. Underneath it is a radio group: Tab reaches the selected option and the arrow keys move the selection."
+      description="Two to five options, one at a time. Inset is a ruled track where the selected option is a surface key with a strong rule and ink text. The solid strip puts the keys on shared rules and fills the selected one with ink. Underneath it is a radio group: Tab reaches the selected option and the arrow keys move the selection."
     >
       <div class="doc-grid doc-grid--2">
         <Demo title="Inset" stack>
@@ -507,7 +520,7 @@ const segmentedProps = [
         </Demo>
       </div>
 
-      <Demo title="Pill">
+      <Demo title="Solid" note="variant=&quot;pill&quot;. The selected key is filled with ink.">
         <RSegmented v-model="section" :options="sections" variant="pill" label="Section" />
       </Demo>
 
@@ -576,10 +589,17 @@ const segmentedProps = [
   width: 168px;
 }
 
+.fp-zone {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  letter-spacing: 0.06em;
+}
+
 .fp-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--r-radius-round);
 }
 
 .fp-indent {
@@ -592,14 +612,13 @@ const segmentedProps = [
 .fp-settings {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
 }
 .fp-settings > * {
   justify-content: space-between;
   flex-direction: row-reverse;
-  padding: 14px 16px;
+  padding: 12px 16px;
 }
 .fp-settings > * + * {
   border-top: 1px solid var(--r-border-subtle);

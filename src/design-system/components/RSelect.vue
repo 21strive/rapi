@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs, useId } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, CircleAlert } from 'lucide-vue-next'
 import type { SelectOption, Size } from '../types'
 
 defineOptions({ inheritAttrs: false })
@@ -11,7 +11,9 @@ const props = withDefaults(
   defineProps<{
     options: SelectOption[]
     placeholder?: string
+    /** Same looks as RInput. */
     variant?: 'outline' | 'filled'
+    /** sm 28px · md 32px · lg 40px. */
     size?: Size
     label?: string
     hint?: string
@@ -72,13 +74,16 @@ const selected = computed(() => props.options.find((option) => option.value === 
       </select>
       <ChevronDown class="r-select__chevron" />
     </div>
-    <p v-if="error || hint" :id="descriptionId" class="r-field__hint" :class="{ 'is-error': !!error }">{{ error || hint }}</p>
+    <p v-if="error || hint" :id="descriptionId" class="r-field__hint" :class="{ 'is-error': !!error }">
+      <CircleAlert v-if="error" class="r-field__icon" aria-hidden="true" />
+      <span>{{ error || hint }}</span>
+    </p>
   </div>
 </template>
 
 <style>
 .r-select__control {
-  padding-right: 36px;
+  padding-right: 32px;
   appearance: none;
   cursor: pointer;
   text-overflow: ellipsis;
@@ -93,18 +98,30 @@ const selected = computed(() => props.options.find((option) => option.value === 
   color: var(--r-text);
 }
 
+.r-select__control:disabled {
+  color: var(--r-text-disabled);
+}
+
 .r-select__chevron {
   position: absolute;
-  right: 12px;
+  right: 8px;
   width: 16px;
   height: 16px;
-  color: var(--r-text-tertiary);
+  color: var(--r-text-secondary);
   pointer-events: none;
 }
 
 .r-input--sm .r-select__chevron {
-  right: 10px;
+  right: 6px;
   width: 14px;
   height: 14px;
+}
+
+.r-input--lg .r-select__chevron {
+  right: 10px;
+}
+
+.r-select.is-disabled .r-select__chevron {
+  color: var(--r-text-disabled);
 }
 </style>

@@ -6,12 +6,14 @@ import { formatNumber, formatNumberParts } from '../composables/format'
 
 const props = withDefaults(
   defineProps<{
+    /** Mono caps above the number. */
     label?: string
     value: number | string
+    /** Before the number, smaller, e.g. "$". */
     prefix?: string
-    /** Same size as the number, e.g. "%". */
+    /** After the number, smaller, e.g. "%". */
     suffix?: string
-    /** Smaller and muted after the number, e.g. "bpm" or "kcal". */
+    /** Mono caps after the number, e.g. "RPS", "kcal" or "IDR". */
     unit?: string
     decimals?: number
     /** Mutes the fraction: $25,912.43 with ".43" quieter. */
@@ -19,6 +21,7 @@ const props = withDefaults(
     trend?: number
     trendLabel?: string
     invertTrend?: boolean
+    /** Number at 24, 40 or 56px. */
     size?: 'md' | 'lg' | 'xl'
     /** Count up from the previous value. Skipped under reduced motion. */
     animate?: boolean
@@ -109,10 +112,8 @@ const spoken = computed(() => {
       <span class="r-sr-only">{{ spoken }}</span>
       <span class="r-stat__number" aria-hidden="true">
         <!-- The final value, invisible, reserves the width so the count-up doesn't push things around. -->
-        <span class="r-stat__ghost">{{ prefix }}{{ final.integer }}{{ final.fraction }}{{ suffix }}</span>
-        <span class="r-stat__live">
-          {{ prefix }}{{ live.integer }}<span v-if="live.fraction" :class="{ 'r-stat__muted': mutedDecimals }">{{ live.fraction }}</span>{{ suffix }}
-        </span>
+        <span class="r-stat__ghost"><span v-if="prefix" class="r-stat__affix r-stat__affix--prefix">{{ prefix }}</span>{{ final.integer }}{{ final.fraction }}<span v-if="suffix" class="r-stat__affix r-stat__affix--suffix">{{ suffix }}</span></span>
+        <span class="r-stat__live"><span v-if="prefix" class="r-stat__affix r-stat__affix--prefix">{{ prefix }}</span>{{ live.integer }}<span v-if="live.fraction" :class="{ 'r-stat__muted': mutedDecimals }">{{ live.fraction }}</span><span v-if="suffix" class="r-stat__affix r-stat__affix--suffix">{{ suffix }}</span></span>
       </span>
       <span v-if="unit" class="r-stat__unit" aria-hidden="true">{{ unit }}</span>
     </div>
@@ -126,28 +127,33 @@ const spoken = computed(() => {
 
 <style>
 .r-stat {
+  --r-stat-size: var(--r-text-4xl);
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
 }
-
-.r-stat__label {
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-md);
-  font-weight: var(--r-weight-medium);
-}
-
-.r-stat {
-  --r-stat-size: var(--r-text-4xl);
-}
 .r-stat--md {
   --r-stat-size: var(--r-text-2xl);
+  gap: 6px;
 }
 .r-stat--xl {
   --r-stat-size: var(--r-text-5xl);
+  gap: 10px;
 }
 
+/* The label is an eyebrow: Geist Mono capitals. */
+.r-stat__label {
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
+}
+
+/* A hero figure: Geist SemiBold, display tracking, proportional digits. */
 .r-stat__value {
   display: flex;
   align-items: baseline;
@@ -157,16 +163,9 @@ const spoken = computed(() => {
   color: var(--r-text);
   font-size: calc(var(--r-stat-size) * var(--r-stat-scale, 1));
   font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.05;
-  letter-spacing: var(--r-tracking-tighter);
-}
-
-.r-stat--md .r-stat__value {
-  letter-spacing: var(--r-tracking-tight);
-}
-.r-stat--md .r-stat__label {
-  font-size: var(--r-text-sm);
+  font-variant-numeric: proportional-nums;
+  line-height: 1;
+  letter-spacing: var(--r-tracking-display);
 }
 
 .r-stat__number {
@@ -180,15 +179,31 @@ const spoken = computed(() => {
   visibility: hidden;
 }
 
+.r-stat__affix {
+  color: var(--r-text-secondary);
+  font-size: 0.6em;
+  font-weight: var(--r-weight-medium);
+  letter-spacing: 0;
+}
+.r-stat__affix--prefix {
+  margin-right: 0.08em;
+}
+.r-stat__affix--suffix {
+  margin-left: 0.06em;
+}
+
 .r-stat__muted {
   color: var(--r-text-tertiary);
 }
 
+/* Units in mono caps, small: 1,284 RPS. */
 .r-stat__unit {
   color: var(--r-text-tertiary);
-  font-size: 0.5em;
+  font-family: var(--r-font-mono);
+  font-size: max(var(--r-text-2xs), 0.28em);
   font-weight: var(--r-weight-medium);
-  letter-spacing: var(--r-tracking-snug);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .r-stat__footer {
@@ -200,6 +215,6 @@ const spoken = computed(() => {
 
 .r-stat__trend-label {
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-size: var(--r-text-xs);
 }
 </style>

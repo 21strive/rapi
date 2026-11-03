@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs, useId, watchEffect } from 'vue'
-import { Check, Minus } from 'lucide-vue-next'
+import { Check } from 'lucide-vue-next'
 import type { Tone } from '../types'
 
 defineOptions({ inheritAttrs: false })
@@ -15,6 +15,7 @@ const props = withDefaults(
     description?: string
     indeterminate?: boolean
     disabled?: boolean
+    /** sm 14px · md 16px box. */
     size?: 'sm' | 'md'
     tone?: Tone
     /** Any CSS colour, e.g. a calendar colour. Overrides the tone. */
@@ -51,7 +52,12 @@ const checked = computed(() =>
     :class="[
       `r-checkbox--${size}`,
       `r-tone-${tone}`,
-      { 'is-checked': checked || indeterminate, 'is-disabled': disabled, 'r-checkbox--colored': !!color },
+      {
+        'is-checked': checked || indeterminate,
+        'is-indeterminate': indeterminate,
+        'is-disabled': disabled,
+        'r-checkbox--colored': !!color,
+      },
     ]"
     :style="color ? { '--tone-solid': color } : undefined"
     v-bind="rootAttrs"
@@ -67,8 +73,8 @@ const checked = computed(() =>
         :disabled="disabled"
         v-bind="inputAttrs"
       />
-      <Minus v-if="indeterminate" class="r-checkbox__icon" />
-      <Check v-else class="r-checkbox__icon" />
+      <span v-if="indeterminate" class="r-checkbox__bar" aria-hidden="true" />
+      <Check v-else class="r-checkbox__icon" aria-hidden="true" />
     </span>
     <span v-if="label || $slots.default || description" class="r-checkbox__text">
       <span class="r-checkbox__label"><slot>{{ label }}</slot></span>
@@ -79,6 +85,8 @@ const checked = computed(() =>
 
 <style>
 .r-checkbox {
+  --r-checkbox-box: 16px;
+  --r-checkbox-line: 20px;
   display: inline-flex;
   align-items: flex-start;
   gap: 10px;
@@ -88,27 +96,28 @@ const checked = computed(() =>
   -webkit-tap-highlight-color: transparent;
 }
 
+.r-checkbox--sm {
+  --r-checkbox-box: 14px;
+  --r-checkbox-line: 18px;
+  gap: 8px;
+  font-size: var(--r-text-sm);
+}
+
+/* A square box. Its 1px rule is dark enough to find (3:1); checked fills with the brand. */
 .r-checkbox__box {
   position: relative;
   display: inline-grid;
   flex-shrink: 0;
   place-items: center;
-  width: 18px;
-  height: 18px;
-  margin-top: 1px;
-  border: 1.5px solid var(--r-border-strong);
-  border-radius: 5px;
+  width: var(--r-checkbox-box);
+  height: var(--r-checkbox-box);
+  margin-top: calc((var(--r-checkbox-line) - var(--r-checkbox-box)) / 2);
+  border: 1px solid var(--r-text-tertiary);
+  border-radius: var(--r-radius-mark);
   background: var(--r-bg-surface);
   transition:
     background-color var(--r-duration-fast) var(--r-ease-out),
     border-color var(--r-duration-fast) var(--r-ease-out);
-}
-
-.r-checkbox--sm .r-checkbox__box {
-  width: 16px;
-  height: 16px;
-  margin-top: 2px;
-  border-radius: 4px;
 }
 
 .r-checkbox__input {
@@ -122,34 +131,37 @@ const checked = computed(() =>
 }
 
 .r-checkbox .r-checkbox__icon {
-  width: 12px;
-  height: 12px;
+  width: calc(var(--r-checkbox-box) - 4px);
+  height: calc(var(--r-checkbox-box) - 4px);
   color: var(--tone-on-solid);
   pointer-events: none;
   opacity: 0;
   stroke-width: 3;
-  transform: scale(0.5);
-  transition:
-    opacity var(--r-duration-fast) var(--r-ease-out),
-    transform var(--r-duration-base) var(--r-ease-spring);
+  transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
 
-.r-checkbox--sm .r-checkbox__icon {
-  width: 11px;
-  height: 11px;
+/* "Some of these": a flat bar instead of the check. */
+.r-checkbox__bar {
+  width: calc(var(--r-checkbox-box) - 6px);
+  height: 2px;
+  background: var(--tone-on-solid);
+  pointer-events: none;
 }
 
 .r-checkbox:hover:not(.is-disabled, .is-checked) .r-checkbox__box {
-  border-color: var(--r-text-tertiary);
+  border-color: var(--r-text-secondary);
 }
 
 .r-checkbox--colored .r-checkbox__box {
   border-color: var(--tone-solid);
 }
 
-/* Identity colours turn light in dark mode, so a coloured box gets a dark check there. */
-[data-theme='dark'] .r-checkbox--colored .r-checkbox__icon {
+/* Identity colours turn light in dark mode, so a coloured box gets a dark mark there. */
+[data-theme='dark'] .r-checkbox--colored :is(.r-checkbox__icon, .r-checkbox__bar) {
   color: var(--r-bg-canvas);
+}
+[data-theme='dark'] .r-checkbox--colored .r-checkbox__bar {
+  background: var(--r-bg-canvas);
 }
 
 .r-checkbox.is-checked .r-checkbox__box {
@@ -159,11 +171,10 @@ const checked = computed(() =>
 
 .r-checkbox.is-checked .r-checkbox__icon {
   opacity: 1;
-  transform: none;
 }
 
 .r-checkbox__box:has(.r-checkbox__input:focus-visible) {
-  outline: 2px solid var(--r-brand);
+  outline: 2px solid var(--r-focus);
   outline-offset: 2px;
 }
 
@@ -175,11 +186,7 @@ const checked = computed(() =>
 }
 
 .r-checkbox__label {
-  line-height: 20px;
-}
-
-.r-checkbox--sm .r-checkbox__label {
-  font-size: var(--r-text-sm);
+  line-height: var(--r-checkbox-line);
 }
 
 .r-checkbox__description {
@@ -189,7 +196,18 @@ const checked = computed(() =>
 }
 
 .r-checkbox.is-disabled {
+  color: var(--r-text-disabled);
   cursor: not-allowed;
-  opacity: 0.5;
+}
+.r-checkbox.is-disabled .r-checkbox__box {
+  border-color: var(--r-border-strong);
+  background: var(--r-bg-muted);
+}
+.r-checkbox.is-disabled.is-checked .r-checkbox__box {
+  border-color: var(--r-text-disabled);
+  background: var(--r-text-disabled);
+}
+.r-checkbox.is-disabled .r-checkbox__description {
+  color: var(--r-text-disabled);
 }
 </style>

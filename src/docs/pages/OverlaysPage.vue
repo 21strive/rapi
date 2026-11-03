@@ -177,14 +177,14 @@ const rowActions: MenuItem[] = [
 ]
 
 const eventColors = [
-  { index: 1, name: 'Blue' },
-  { index: 2, name: 'Violet' },
-  { index: 3, name: 'Pink' },
-  { index: 4, name: 'Rose' },
-  { index: 5, name: 'Orange' },
-  { index: 6, name: 'Amber' },
-  { index: 7, name: 'Green' },
-  { index: 8, name: 'Teal' },
+  { index: 1, name: 'Cobalt' },
+  { index: 2, name: 'Orange' },
+  { index: 3, name: 'Teal' },
+  { index: 4, name: 'Amber' },
+  { index: 5, name: 'Magenta' },
+  { index: 6, name: 'Green' },
+  { index: 7, name: 'Grey' },
+  { index: 8, name: 'Red' },
 ]
 const eventColor = ref(1)
 const eventWhen = ref('Fri 12 Jan · 08:00 – 09:00')
@@ -376,17 +376,33 @@ function confirmDelete() {
   deleteOpen.value = false
 }
 
+const drawerOpen = ref(false)
+const batchApproved = ref(false)
+const batchRows = [
+  { label: 'Batch', value: 'PAY-2611-A' },
+  { label: 'Payouts', value: '1,284' },
+  { label: 'Total', value: 'IDR 4,820,350,000' },
+  { label: 'Cut-off', value: '12 Nov 2026, 15:00 WIB' },
+  { label: 'Bank', value: 'BCA · KlikBCA Bisnis' },
+  { label: 'Prepared by', value: 'Sekar Ayu' },
+]
+function approveBatch() {
+  batchApproved.value = true
+  drawerOpen.value = false
+}
+
 const dialogCode = `<script setup lang="ts">
 import { ref } from 'vue'
 import { RButton, RDialog, RInput } from '@/design-system'
 
 const open = ref(false)
 const email = ref('')
+const details = ref(false)
 <\/script>
 
 <template>
   <RButton @click="open = true">Invite teammate</RButton>
-  <RDialog v-model:open="open" title="Invite a teammate" description="The link works for 7 days.">
+  <RDialog v-model:open="open" eyebrow="Team" title="Invite a teammate" description="The link works for 7 days.">
     <form id="invite" @submit.prevent="send">
       <RInput v-model="email" label="Work email" type="email" />
     </form>
@@ -395,13 +411,24 @@ const email = ref('')
       <RButton type="submit" form="invite">Send invite</RButton>
     </template>
   </RDialog>
+
+  <!-- A full-height drawer docked to the right edge. -->
+  <RDialog v-model:open="details" side="right" eyebrow="Payment run" title="PAY-2611-A">
+    <p>1,284 payouts, IDR 4,820,350,000, cut-off 15:00 WIB.</p>
+    <template #footer="{ close }">
+      <RButton variant="outline" @click="close">Close</RButton>
+      <RButton tone="brand">Approve batch</RButton>
+    </template>
+  </RDialog>
 </template>`
 
 const dialogProps: PropRow[] = [
   { name: 'v-model:open', type: 'boolean', default: 'false', description: 'Open state.' },
   { name: 'title', type: 'string', description: 'Heading, also the accessible name.' },
   { name: 'description', type: 'string', description: 'One or two sentences under the title, also read as the description.' },
-  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '400, 520 or 720px wide. Under 520px of screen it becomes a bottom sheet.' },
+  { name: 'eyebrow', type: 'string', description: 'Mono caps above the title, e.g. "STEP 2 OF 3" or "PAYMENT RUN".' },
+  { name: 'side', type: "'center' | 'right'", default: "'center'", description: 'center is a modal in the middle of the screen. right is a full-height drawer docked to the right edge that slides in; focus, scroll lock, Escape and the backdrop work the same.' },
+  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '400, 520 or 720px wide, for both sides. Under 520px of screen a centred dialog becomes a bottom sheet and a drawer takes the full width.' },
   { name: 'closable', type: 'boolean', default: 'true', description: 'Show the close button in the corner.' },
   { name: 'dismissible', type: 'boolean', default: 'true', description: 'Close on Escape and on a click outside. Turn off for flows that must be finished or cancelled.' },
   { name: 'initialFocus', type: 'string', description: 'Selector of the element to focus first. Defaults to the first field in the body.' },
@@ -511,7 +538,7 @@ const coachSteps: { title: string; body: string; tone: Tone }[] = [
   {
     title: 'Highlight what you need',
     body: 'Give a row a colour so you can find it again at a glance. Everyone on the project sees the same highlights.',
-    tone: 'violet',
+    tone: 'brand',
   },
   {
     title: 'Work on it together',
@@ -521,7 +548,7 @@ const coachSteps: { title: string; body: string; tone: Tone }[] = [
   {
     title: 'Read the trend',
     body: 'Select a few columns and a small chart shows how they move week to week.',
-    tone: 'sky',
+    tone: 'signal',
   },
   {
     title: 'Keep it tidy',
@@ -545,7 +572,7 @@ const coachmarkCode = `<RCoachmark
   title="Highlight what you need"
   :step="1"
   :total="4"
-  media-tone="violet"
+  media-tone="brand"
   @skip="dismiss"
   @next="step++"
 >
@@ -558,9 +585,9 @@ const coachmarkCode = `<RCoachmark
 const coachmarkProps: PropRow[] = [
   { name: 'title', type: 'string', description: 'Short heading, also the accessible name.' },
   { name: 'step', type: 'number', description: 'Current step, starting at 1. Step 1 shows Skip, later steps show Back.' },
-  { name: 'total', type: 'number', description: 'Number of steps; shows “2 of 4”. On the last step the main button says Done.' },
+  { name: 'total', type: 'number', description: 'Number of steps; shows “02 / 04” in mono. On the last step the main button says Done.' },
   { name: 'closable', type: 'boolean', default: 'true', description: 'Show the close button.' },
-  { name: 'mediaTone', type: 'Tone', default: "'violet'", description: 'Colour of the illustration well.' },
+  { name: 'mediaTone', type: 'Tone', default: "'brand'", description: 'Tint of the flat illustration well.' },
   { name: 'nextLabel', type: 'string', default: "'Continue'", description: 'Main button text.' },
   { name: 'backLabel', type: 'string', default: "'Back'", description: 'Back button text.' },
   { name: 'skipLabel', type: 'string', default: "'Skip'", description: 'Skip button text on the first step.' },
@@ -620,8 +647,7 @@ const tourProps: PropRow[] = [
   { name: 'v-model:open', type: 'boolean', default: 'false', description: 'Whether the tour is running.' },
   { name: 'v-model:step', type: 'number', default: '0', description: 'Current step index, starting at 0.' },
   { name: 'steps', type: 'TourStep[]', description: 'Each step has target (a CSS selector), title, body, and optionally placement and mediaTone.' },
-  { name: 'padding', type: 'number', default: '8', description: 'Space between the target and the edge of the spotlight.' },
-  { name: 'radius', type: 'number', default: '16', description: 'Corner radius of the spotlight.' },
+  { name: 'padding', type: 'number', default: '8', description: 'Space between the target and the edge of the square spotlight. The corner brackets sit in it.' },
   { name: '@finish', type: '() => void', description: 'The last step was confirmed.' },
   { name: '@skip', type: '() => void', description: 'Closed early with Skip, the close button or Escape.' },
   { name: '#media', type: 'slot { step, index }', description: 'Illustration for the current step.' },
@@ -640,7 +666,7 @@ const tourProps: PropRow[] = [
       title="Popover"
       description="A floating panel tied to a trigger, or to a point on screen. It flips when it would leave the viewport, follows the trigger while you scroll, and closes on Escape or a click outside."
     >
-      <Demo title="Filter" note="Like Finanzen's project filter. Apply it and the chips below follow." stack>
+      <Demo title="Filter" note="A project filter. Apply it and the chips below follow." stack>
         <div class="ov-filter-bar">
           <span class="ov-filter-bar__title">List project</span>
           <RPopover
@@ -664,7 +690,7 @@ const tourProps: PropRow[] = [
               <div class="ov-filter">
                 <div class="ov-filter__head">
                   <span class="ov-filter__title">Filter</span>
-                  <RIconButton label="Close filter" variant="ghost" size="sm" shape="square" @click="close"><X /></RIconButton>
+                  <RIconButton label="Close filter" variant="ghost" size="sm" @click="close"><X /></RIconButton>
                 </div>
                 <div class="ov-filter__body">
                   <div class="ov-filter__group">
@@ -860,7 +886,7 @@ const tourProps: PropRow[] = [
         <Demo title="With shortcuts" note="Hover or Tab through the buttons." center>
           <div class="ov-toolbar" role="group" aria-label="Event actions">
             <RTooltip v-for="action in toolbar" :key="action.label" :content="action.label" :shortcut="action.keys" :describe="false">
-              <RIconButton :label="action.label" variant="ghost" shape="square" :aria-keyshortcuts="action.aria">
+              <RIconButton :label="action.label" variant="ghost" :aria-keyshortcuts="action.aria">
                 <component :is="action.icon" />
               </RIconButton>
             </RTooltip>
@@ -898,7 +924,7 @@ const tourProps: PropRow[] = [
     <DocSection
       id="dialog"
       title="Dialog"
-      description="A modal for one focused task. Focus moves to the first field and stays inside until it closes, the page behind stops scrolling, and Escape or the backdrop closes it unless you turn that off."
+      description="A square modal for one focused task. Focus moves to the first field and stays inside until it closes, the page behind stops scrolling, and Escape or the backdrop closes it unless you turn that off. With side=&quot;right&quot; the same component is a full-height drawer, for details and longer forms."
     >
       <Demo title="Form and confirmation" center>
         <RButton @click="openInvite">
@@ -913,7 +939,26 @@ const tourProps: PropRow[] = [
         <p class="ov-result ov-result--full" aria-live="polite">{{ inviteSent }}</p>
       </Demo>
 
-      <RDialog v-model:open="inviteOpen" title="Invite a teammate" description="They get an email with a link that works for 7 days.">
+      <Demo title="Drawer" note="side=&quot;right&quot;: docked to the right edge, full height, 520px wide at size md." center>
+        <RButton variant="outline" @click="drawerOpen = true">Open payment run</RButton>
+        <p class="ov-result ov-result--full" aria-live="polite">{{ batchApproved ? 'PAY-2611-A approved for the 15:00 WIB cut-off.' : '' }}</p>
+      </Demo>
+
+      <RDialog v-model:open="drawerOpen" side="right" eyebrow="Payment run" title="PAY-2611-A" description="Payouts to merchants for 11 Nov 2026.">
+        <dl class="ov-spec">
+          <div v-for="row in batchRows" :key="row.label" class="ov-spec__row">
+            <dt>{{ row.label }}</dt>
+            <dd>{{ row.value }}</dd>
+          </div>
+        </dl>
+        <p class="ov-small ov-drawer-note">Approving sends the batch to the bank. Payouts that fail come back to the review queue.</p>
+        <template #footer="{ close }">
+          <RButton variant="outline" @click="close">Close</RButton>
+          <RButton tone="brand" @click="approveBatch">Approve batch</RButton>
+        </template>
+      </RDialog>
+
+      <RDialog v-model:open="inviteOpen" eyebrow="Team" title="Invite a teammate" description="They get an email with a link that works for 7 days.">
         <form id="ov-invite" class="ov-form" novalidate @submit.prevent="sendInvite">
           <RInput v-model="invite.name" label="Full name" placeholder="Kim Ji-soo" autocomplete="name" />
           <RInput
@@ -958,7 +1003,7 @@ const tourProps: PropRow[] = [
     <DocSection
       id="command-palette"
       title="Command palette"
-      description="Search across everything you can do. It is always a dark island, like the Untitled UI reference, so it reads the same on any page. Items can open a nested page; Backspace or ← on an empty input goes back."
+      description="Search across everything you can do. It is always a square dark island, so it reads the same on any page, with mono group headings and key hints. Items can open a nested page; Backspace or ← on an empty input goes back."
     >
       <Demo title="With a nested page" note="Try “remind”, pick Remind me, then press Backspace." stack>
         <button type="button" class="ov-palette-trigger" @click="paletteOpen = true">
@@ -987,7 +1032,7 @@ const tourProps: PropRow[] = [
     <DocSection
       id="coachmark"
       title="Coachmark"
-      description="An onboarding card with a title, a short explanation, an illustration and step controls. It holds no state; you decide what Continue and Back mean."
+      description="A square onboarding card with a title, a short explanation, an illustration in a flat well, a mono step counter and an ink Continue button. It holds no state; you decide what Continue and Back mean."
     >
       <div class="ov-coach-grid">
         <Demo title="Four steps" note="Skip, Back, Continue and Done all work." center>
@@ -1005,7 +1050,7 @@ const tourProps: PropRow[] = [
             {{ currentCoach.body }}
             <template #media>
               <div class="ov-art" aria-hidden="true">
-                <div v-if="coachStep === 1" class="ov-art__screen">
+                <div v-if="coachStep === 1" class="ov-art__screen" data-theme="dark">
                   <span class="ov-art__bar" style="width: 46%" />
                   <span class="ov-art__bar" style="width: 28%" />
                   <span class="ov-art__bar ov-art__bar--lit" style="width: 58%" />
@@ -1014,7 +1059,7 @@ const tourProps: PropRow[] = [
                     <span v-for="n in 8" :key="n" :style="{ background: `var(--r-identity-${n})`, color: `var(--r-identity-${n}-text)` }">A</span>
                   </div>
                 </div>
-                <div v-else-if="coachStep === 2" class="ov-art__screen ov-art__screen--rows">
+                <div v-else-if="coachStep === 2" class="ov-art__screen ov-art__screen--rows" data-theme="dark">
                   <div v-for="n in [6, 7, 8]" :key="n" class="ov-art__line" :class="{ 'is-lit': n === 7 }">
                     <span class="ov-art__num">{{ n }}</span>
                     <span class="ov-art__bar" :style="{ width: n === 7 ? '64%' : '70%' }" />
@@ -1025,13 +1070,13 @@ const tourProps: PropRow[] = [
                     </template>
                   </div>
                 </div>
-                <div v-else-if="coachStep === 3" class="ov-art__screen ov-art__screen--chart">
+                <div v-else-if="coachStep === 3" class="ov-art__screen ov-art__screen--chart" data-theme="dark">
                   <span class="ov-art__caption">Usage</span>
                   <div class="ov-art__columns">
                     <span v-for="(h, i) in [38, 54, 46, 70, 62, 84, 76]" :key="i" :style="{ height: `${h}%` }" :class="{ 'is-lit': i === 5 }" />
                   </div>
                 </div>
-                <div v-else class="ov-art__screen ov-art__screen--checks">
+                <div v-else class="ov-art__screen ov-art__screen--checks" data-theme="dark">
                   <div v-for="(row, i) in ['Wireframes', 'Prototype', 'Handoff']" :key="row" class="ov-art__check" :class="{ 'is-done': i < 2 }">
                     <span class="ov-art__box" />
                     {{ row }}
@@ -1049,7 +1094,7 @@ const tourProps: PropRow[] = [
               Request support from your team and ship faster.
               <template #media>
                 <div class="ov-art" aria-hidden="true">
-                  <div class="ov-art__screen ov-art__screen--rows">
+                  <div class="ov-art__screen ov-art__screen--rows" data-theme="dark">
                     <div v-for="n in [6, 7, 8]" :key="n" class="ov-art__line" :class="{ 'is-lit': n === 7 }">
                       <span class="ov-art__num">{{ n }}</span>
                       <span class="ov-art__bar" style="width: 66%" />
@@ -1074,7 +1119,7 @@ const tourProps: PropRow[] = [
     <DocSection
       id="tour"
       title="Tour"
-      description="Coachmarks pointed at real parts of the page. The tour dims everything else, cuts a soft spotlight around the target, scrolls it into view and places the card next to it."
+      description="Coachmarks pointed at real parts of the page. The tour dims everything else, cuts a square spotlight with corner brackets around the target, scrolls it into view and places the card next to it."
     >
       <Demo title="A three-step tour" stack>
         <div class="ov-tour-board">
@@ -1083,7 +1128,7 @@ const tourProps: PropRow[] = [
           </RCard>
           <RCard class="ov-tour-side">
             <div class="ov-tour-filters doc-row">
-              <RChip variant="solid" tone="violet" caret>Pending</RChip>
+              <RChip variant="solid" caret>Pending</RChip>
               <RChip caret>Tag</RChip>
               <RChip variant="dashed">Add filter</RChip>
             </div>
@@ -1104,7 +1149,7 @@ const tourProps: PropRow[] = [
         v-model:open="tourOpen"
         v-model:step="tourStep"
         :steps="tourSteps"
-        @finish="tourDone = 'Tour finished. Nice.'"
+        @finish="tourDone = 'Tour finished.'"
         @skip="tourDone = 'Tour skipped.'"
       />
 
@@ -1145,11 +1190,9 @@ const tourProps: PropRow[] = [
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px 14px 20px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 12px 12px 12px 16px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .ov-filter-bar__title {
@@ -1162,7 +1205,7 @@ const tourProps: PropRow[] = [
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  min-height: 32px;
+  min-height: 28px;
 }
 
 /* Header and footer stay put; the fields scroll when the screen is short. */
@@ -1188,10 +1231,9 @@ const tourProps: PropRow[] = [
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 10px 10px 16px;
-  border-bottom: 1px solid var(--r-border-subtle);
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid var(--r-border);
   background: var(--r-bg-muted);
-  border-radius: var(--r-radius-lg) var(--r-radius-lg) 0 0;
 }
 
 .ov-filter__title {
@@ -1211,15 +1253,20 @@ const tourProps: PropRow[] = [
   justify-content: space-between;
 }
 
+/* Group labels in the label voice. */
 .ov-filter__label {
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .ov-filter__clear {
   padding: 2px 4px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-brand-text);
   font-size: var(--r-text-sm);
@@ -1233,11 +1280,7 @@ const tourProps: PropRow[] = [
 .ov-filter__dates {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.ov-filter__dates .r-field__label {
-  color: var(--r-text);
-  font-size: var(--r-text-sm);
+  gap: 8px;
 }
 
 .ov-filter__foot {
@@ -1246,18 +1289,19 @@ const tourProps: PropRow[] = [
   justify-content: space-between;
   gap: 8px;
   margin-top: 16px;
-  padding: 14px 16px;
-  border-top: 1px solid var(--r-border-subtle);
+  padding: 12px 16px;
+  border-top: 1px solid var(--r-border);
 }
 
+/* A status lamp: one of the few round things. */
 .ov-status-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: var(--tone-solid);
+  border-radius: var(--r-radius-round);
+  background: var(--tone-lamp, var(--tone-solid));
 }
 .ov-status-dot.is-empty {
-  border: 1.5px solid var(--r-border-strong);
+  border: 1px solid var(--r-text-tertiary);
   background: transparent;
 }
 
@@ -1267,9 +1311,8 @@ const tourProps: PropRow[] = [
   align-items: center;
   gap: 12px;
   width: min(100%, 360px);
-  padding: 8px 8px 8px 16px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
+  padding: 6px 6px 6px 16px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
 }
 .ov-row__name {
@@ -1281,10 +1324,9 @@ const tourProps: PropRow[] = [
 .ov-calendar {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
-  background: var(--r-bg-surface);
   overflow: hidden;
+  border: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
 }
 
 .ov-calendar__times {
@@ -1296,7 +1338,8 @@ const tourProps: PropRow[] = [
   height: 64px;
   padding: 6px 8px 0 0;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-2xs);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -1316,7 +1359,7 @@ const tourProps: PropRow[] = [
   width: min(100%, 300px);
   margin-top: 4px;
   padding: 10px 12px 12px;
-  border-radius: var(--r-radius-md);
+  box-shadow: inset 2px 0 0 currentColor;
   cursor: context-menu;
   transition: background-color var(--r-duration-base) var(--r-ease-out);
 }
@@ -1334,10 +1377,12 @@ const tourProps: PropRow[] = [
 }
 
 .ov-event__time {
-  font-size: var(--r-text-xs);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
   font-variant-numeric: tabular-nums;
 }
 
+/* Identity colours as square swatches, like the avatars that use them. */
 .ov-dots {
   display: flex;
   flex-wrap: wrap;
@@ -1348,8 +1393,8 @@ const tourProps: PropRow[] = [
   width: 20px;
   height: 20px;
   padding: 0;
-  border: 1.5px solid color-mix(in srgb, var(--dot-ink) 28%, transparent);
-  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--dot-ink) 32%, transparent);
+  border-radius: var(--r-radius-mark);
   background: var(--dot);
   cursor: pointer;
   transition: box-shadow var(--r-duration-fast) var(--r-ease-out);
@@ -1358,18 +1403,16 @@ const tourProps: PropRow[] = [
   border-color: var(--dot-ink);
   box-shadow:
     0 0 0 2px var(--r-bg-raised),
-    0 0 0 3.5px var(--dot-ink);
+    0 0 0 3px var(--dot-ink);
 }
 
 /* Tooltip */
 .ov-toolbar {
   display: inline-flex;
   gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-lg);
+  padding: 2px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .ov-metric {
@@ -1377,9 +1420,8 @@ const tourProps: PropRow[] = [
   flex-direction: column;
   gap: 8px;
   width: min(100%, 280px);
-  padding: 18px 20px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 16px 20px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
 }
 
@@ -1388,18 +1430,21 @@ const tourProps: PropRow[] = [
   align-items: center;
   gap: 4px;
   color: var(--r-text-secondary);
-  font-size: var(--r-text-sm);
-  font-weight: var(--r-weight-medium);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .ov-info {
   display: inline-grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-text-tertiary);
   cursor: help;
@@ -1409,8 +1454,8 @@ const tourProps: PropRow[] = [
   color: var(--r-text);
 }
 .ov-info svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 
 /* Dialog form */
@@ -1420,35 +1465,64 @@ const tourProps: PropRow[] = [
   gap: 16px;
 }
 
+/* Drawer: a datasheet of the batch, label in mono caps on the left, value on the right. */
+.ov-spec {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--r-border-subtle);
+}
+.ov-spec__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.2fr);
+  align-items: baseline;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--r-border-subtle);
+}
+.ov-spec__row dt {
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ov-spec__row dd {
+  margin: 0;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.ov-drawer-note {
+  margin-top: 16px;
+}
+
 /* Command palette trigger */
 .ov-palette-trigger {
   display: flex;
   align-items: center;
   gap: 12px;
   width: min(100%, 520px);
-  height: 52px;
+  height: 40px;
   margin: 0 auto;
-  padding: 0 18px;
-  border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-lg);
+  padding: 0 12px;
+  border: 1px solid var(--r-border-strong);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-sm);
   color: var(--r-text-tertiary);
   font-size: var(--r-text-md);
   cursor: pointer;
 }
 .ov-palette-trigger:hover {
-  border-color: var(--r-border-strong);
+  border-color: var(--r-text-tertiary);
 }
 .ov-palette-trigger svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 .ov-palette-trigger + .ov-result {
   text-align: center;
 }
 
-/* Coachmark illustrations: small dark product screens on a pastel well */
+/* Coachmark illustrations: small dark product screens (data-theme="dark") in the flat well. */
 .ov-coach-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
@@ -1461,14 +1535,13 @@ const tourProps: PropRow[] = [
   place-items: center;
   width: 100%;
   padding: 28px 16px;
-  border-radius: var(--r-radius-lg);
   background: var(--r-bg-canvas);
 }
 
 .ov-art {
   position: absolute;
   inset: 0;
-  padding: 26px 0 0 30px;
+  padding: 24px 0 0 28px;
 }
 
 .ov-art__screen {
@@ -1477,41 +1550,40 @@ const tourProps: PropRow[] = [
   flex-direction: column;
   gap: 10px;
   height: 100%;
-  padding: 18px 18px 0;
-  border-radius: 14px 0 0 0;
-  background: #17181b;
-  color: #e9eaee;
-  font-size: 12px;
+  padding: 16px 16px 0;
+  border-top: 1px solid var(--r-border-strong);
+  border-left: 1px solid var(--r-border-strong);
+  background: var(--r-bg-surface);
+  color: var(--r-text);
+  font-size: var(--r-text-xs);
 }
 
 .ov-art__bar {
   display: block;
-  height: 14px;
-  border-radius: 999px;
-  background: #2c2e33;
+  height: 12px;
+  background: var(--r-bg-hover);
 }
 .ov-art__bar--lit {
-  background: color-mix(in srgb, var(--tone-solid) 55%, #ffffff);
+  background: var(--tone-solid);
 }
 
 .ov-art__people {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-self: flex-start;
   margin-top: 4px;
-  padding: 7px 9px;
-  border: 1px solid #2c2e33;
-  border-radius: 999px;
-  background: #0f1012;
+  padding: 6px;
+  border: 1px solid var(--r-border);
+  background: var(--r-bg-canvas);
 }
 .ov-art__people span {
   display: grid;
   place-items: center;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  font-size: 10px;
-  font-weight: 600;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
 }
 
 .ov-art__screen--rows {
@@ -1524,15 +1596,16 @@ const tourProps: PropRow[] = [
   align-items: center;
   gap: 12px;
   height: 40px;
-  border-bottom: 1px solid #2a2c31;
+  border-bottom: 1px solid var(--r-border);
 }
 .ov-art__line.is-lit .ov-art__bar {
-  outline: 2px solid color-mix(in srgb, var(--tone-solid) 70%, #ffffff);
+  outline: 2px solid var(--tone-solid);
   outline-offset: 6px;
 }
 .ov-art__num {
   width: 10px;
-  color: #8a8f99;
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
 }
 .ov-art__cursor {
   position: absolute;
@@ -1542,7 +1615,7 @@ const tourProps: PropRow[] = [
   height: 0;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
-  border-left: 13px solid #e7a4f1;
+  border-left: 13px solid var(--r-chart-5);
   transform: rotate(-35deg);
 }
 .ov-art__name {
@@ -1550,11 +1623,12 @@ const tourProps: PropRow[] = [
   top: 28px;
   left: 54px;
   padding: 1px 6px;
-  border-radius: 999px;
-  background: #e7a4f1;
-  color: #3b1243;
-  font-size: 10px;
-  font-weight: 600;
+  background: var(--r-chart-5);
+  color: var(--r-text-inverse);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  text-transform: uppercase;
 }
 .ov-art__badge {
   position: absolute;
@@ -1564,31 +1638,33 @@ const tourProps: PropRow[] = [
   place-items: center;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--tone-solid) 70%, #ffffff);
-  color: #0d2b16;
-  font-size: 10px;
-  font-weight: 600;
+  background: var(--tone-solid);
+  color: var(--tone-on-solid);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
 }
 
 .ov-art__caption {
-  font-size: 12px;
-  font-weight: 600;
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .ov-art__columns {
   display: flex;
   flex: 1;
   align-items: flex-end;
-  gap: 8px;
-  padding-bottom: 0;
+  gap: 2px;
+  border-bottom: 1px solid var(--r-border-strong);
 }
 .ov-art__columns span {
   flex: 1;
-  border-radius: 6px 6px 0 0;
-  background: #2c2e33;
+  background: var(--r-chart-context);
 }
 .ov-art__columns span.is-lit {
-  background: color-mix(in srgb, var(--tone-solid) 60%, #ffffff);
+  background: var(--tone-solid);
 }
 
 .ov-art__screen--checks {
@@ -1598,21 +1674,20 @@ const tourProps: PropRow[] = [
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #c9ccd3;
+  color: var(--r-text-secondary);
 }
 .ov-art__check.is-done {
-  color: #6f747e;
+  color: var(--r-text-tertiary);
   text-decoration: line-through;
 }
 .ov-art__box {
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid #4a4e57;
-  border-radius: 5px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--r-text-tertiary);
 }
 .ov-art__check.is-done .ov-art__box {
-  border-color: transparent;
-  background: color-mix(in srgb, var(--tone-solid) 70%, #ffffff);
+  border-color: var(--tone-solid);
+  background: var(--tone-solid);
 }
 
 /* Tour */

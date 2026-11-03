@@ -31,6 +31,7 @@ const variants = ['solid', 'soft', 'outline', 'ghost'] as const
 const tones = [
   { value: 'neutral', label: 'Neutral', action: 'Continue' },
   { value: 'brand', label: 'Brand', action: 'Publish' },
+  { value: 'signal', label: 'Signal', action: 'Go live' },
   { value: 'danger', label: 'Danger', action: 'Delete' },
   { value: 'success', label: 'Success', action: 'Approve' },
 ] as const
@@ -58,13 +59,14 @@ const deleting = ref(false)
   </RButton>
 
   <RButton tone="danger" variant="soft" :loading="deleting">Delete project</RButton>
+
+  <RButton tone="signal">Go live</RButton>
 </template>`
 
 const buttonProps = [
   { name: 'variant', type: "'solid' | 'soft' | 'outline' | 'ghost'", default: "'solid'", description: 'Solid carries the main action; the others step back in that order.' },
-  { name: 'tone', type: "'neutral' | 'brand' | 'danger' | 'success'", default: "'neutral'", description: 'Neutral solid renders in ink. Use danger and success to confirm what an action does.' },
-  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '32, 40 or 48px tall.' },
-  { name: 'shape', type: "'rounded' | 'pill'", default: "'rounded'", description: '10px corners, or fully round.' },
+  { name: 'tone', type: "'neutral' | 'brand' | 'signal' | 'danger' | 'success'", default: "'neutral'", description: 'Neutral solid renders in ink. Brand is the one primary action of a flow. Signal is orange with a black label, for live or urgent actions only. Danger and success confirm what an action does.' },
+  { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg'", default: "'md'", description: '24, 28, 32 or 40px tall.' },
   { name: 'block', type: 'boolean', default: 'false', description: 'Takes the full width of its container.' },
   { name: 'loading', type: 'boolean', default: 'false', description: 'Shows a spinner, keeps the width, sets aria-busy and ignores clicks.' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims the button and blocks clicks.' },
@@ -95,10 +97,9 @@ import { RIconButton, RTooltip } from '@/design-system'
 const iconButtonProps = [
   { name: 'label', type: 'string', description: 'Required. The accessible name, since there is no visible text.' },
   { name: 'variant', type: "'outline' | 'ghost' | 'soft' | 'solid'", default: "'outline'", description: 'Outline for buttons on a card, ghost for toolbars, soft on coloured cards.' },
-  { name: 'tone', type: "'neutral' | 'brand' | 'danger' | 'success'", default: "'neutral'", description: 'Colour for the soft and solid variants.' },
-  { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: '32, 40 or 48px square.' },
-  { name: 'shape', type: "'circle' | 'square'", default: "'circle'", description: 'Round, or a square with the control radius.' },
-  { name: 'dot', type: 'boolean', default: 'false', description: 'A small red dot in the corner, for unread things.' },
+  { name: 'tone', type: "'neutral' | 'brand' | 'signal' | 'danger' | 'success'", default: "'neutral'", description: 'Colour for the soft, ghost and solid variants.' },
+  { name: 'size', type: "'xs' | 'sm' | 'md' | 'lg'", default: "'md'", description: '24, 28, 32 or 40px square.' },
+  { name: 'dot', type: 'boolean', default: 'false', description: 'A signal lamp in the corner, for something new or unread.' },
   { name: 'pressed', type: 'boolean', description: 'Turns it into a toggle and sets aria-pressed. Leave it unset for plain buttons.' },
   { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims the button and blocks clicks.' },
   { name: 'type', type: "'button' | 'submit' | 'reset'", default: "'button'", description: 'Native button type.' },
@@ -148,7 +149,7 @@ const removeTag = (tag: string) => (tags.value = tags.value.filter((t) => t !== 
 <\/script>
 
 <template>
-  <RChip variant="solid" tone="violet" caret>
+  <RChip variant="solid" caret>
     <template #leading><CircleDot /></template>
     Pending
   </RChip>
@@ -170,14 +171,14 @@ const removeTag = (tag: string) => (tags.value = tags.value.filter((t) => t !== 
 </template>`
 
 const chipProps = [
-  { name: 'variant', type: "'outline' | 'solid' | 'soft' | 'dashed'", default: "'outline'", description: 'Solid marks a filter that is on. Dashed is the quiet "Add filter" chip.' },
-  { name: 'tone', type: 'Tone', default: "'neutral'", description: 'Any tone: neutral, brand, success, warning, danger, violet, flame or sky.' },
+  { name: 'variant', type: "'outline' | 'solid' | 'soft' | 'dashed'", default: "'outline'", description: 'Solid (ink) marks a filter that is on. Dashed is the quiet "Add filter" chip.' },
+  { name: 'tone', type: 'Tone', default: "'neutral'", description: 'Any tone: neutral, brand, signal, success, warning or danger. Neutral solid is ink.' },
   { name: 'caret', type: 'boolean', default: 'false', description: 'Adds a chevron, for chips that open a popover.' },
   { name: 'removable', type: 'boolean', default: 'false', description: 'Adds a second button that emits remove.' },
   { name: 'removeLabel', type: 'string', default: "'Remove filter'", description: 'Accessible name of the remove button. Name the filter, e.g. "Remove Design".' },
   { name: 'selected', type: 'boolean', description: 'Turns it into a toggle chip with aria-pressed. Leave it unset for plain chips.' },
-  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '28 or 32px tall.' },
-  { name: 'disabled', type: 'boolean', default: 'false', description: 'Dims the chip and blocks both buttons.' },
+  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '24 or 28px tall.' },
+  { name: 'disabled', type: 'boolean', default: 'false', description: 'Switches the chip off and blocks both buttons.' },
 ]
 </script>
 
@@ -191,7 +192,7 @@ const chipProps = [
     <DocSection
       id="button"
       title="Button"
-      description="The everyday action. Solid neutral is the default and renders in ink, like the Continue buttons in the references. Brand blue is kept for selection and for the rare moment that is the brand, so most screens never need a blue button."
+      description="The everyday action, square and 32px tall. Solid neutral is the default and renders in ink. Cobalt is for the one primary action of a flow, orange signal only for live or urgent actions such as Go live or Acknowledge alarm, and danger for anything destructive."
     >
       <Demo title="Variants" note="Four levels of emphasis. Read them left to right as loud to quiet.">
         <RButton>Continue</RButton>
@@ -217,11 +218,11 @@ const chipProps = [
       </Demo>
 
       <div class="doc-grid doc-grid--2">
-        <Demo title="Sizes and shapes">
+        <Demo title="Sizes" note="24, 28, 32 and 40px.">
+          <RButton size="xs">Extra small</RButton>
           <RButton size="sm">Small</RButton>
           <RButton>Medium</RButton>
           <RButton size="lg">Large</RButton>
-          <RButton shape="pill" variant="outline">Pill</RButton>
         </Demo>
         <Demo title="With icons">
           <RButton>
@@ -284,7 +285,7 @@ const chipProps = [
     <DocSection
       id="icon-button"
       title="Icon button"
-      description="A button that holds a single icon, like the round arrow in the corner of a card or the more button at the end of a row. It has no visible text, so the label prop is required: that is what a screen reader announces."
+      description="A square button that holds a single icon, like the arrow in the corner of a card or the more button at the end of a row. It has no visible text, so the label prop is required: that is what a screen reader announces."
     >
       <div class="doc-grid doc-grid--2">
         <Demo title="Variants">
@@ -294,16 +295,16 @@ const chipProps = [
           <RIconButton label="Add" variant="solid"><Plus /></RIconButton>
           <RIconButton label="Delete" variant="soft" tone="danger"><Trash2 /></RIconButton>
         </Demo>
-        <Demo title="Square and sizes">
-          <RIconButton label="Edit" shape="square" size="sm"><Pencil /></RIconButton>
-          <RIconButton label="Edit" shape="square"><Pencil /></RIconButton>
-          <RIconButton label="Edit" shape="square" size="lg"><Pencil /></RIconButton>
-          <RIconButton label="Settings" size="sm"><Settings /></RIconButton>
-          <RIconButton label="Settings" size="lg"><Settings /></RIconButton>
+        <Demo title="Sizes" note="24, 28, 32 and 40px square.">
+          <RIconButton label="Edit" size="xs"><Pencil /></RIconButton>
+          <RIconButton label="Edit" size="sm"><Pencil /></RIconButton>
+          <RIconButton label="Edit"><Pencil /></RIconButton>
+          <RIconButton label="Edit" size="lg"><Pencil /></RIconButton>
+          <RIconButton label="Settings" variant="solid" tone="brand"><Settings /></RIconButton>
         </Demo>
       </div>
 
-      <Demo title="In context" note="A card header, a toolbar with an unread dot, and a toggle.">
+      <Demo title="In context" note="A card header, a toolbar with an unread lamp, and a toggle.">
         <div class="ap-card-head">
           <span class="ap-card-head__title">Total insight</span>
           <RIconButton label="Open insight report"><ArrowUpRight /></RIconButton>
@@ -337,14 +338,13 @@ const chipProps = [
     <DocSection
       id="chip"
       title="Chip"
-      description="Chips sit in a row above a list and open a filter or toggle one. A solid chip shows a filter that is on, like the violet chips in Finalytic; the dashed chip adds a new one. Removable chips have a separate remove button, so both parts are reachable with Tab."
+      description="Chips sit in a row above a list and open a filter or toggle one. They are square and 28px tall. A solid chip, in ink, shows a filter that is on; the dashed chip adds a new one. Removable chips have a separate remove button, so both parts are reachable with Tab."
     >
       <Demo title="Filter row" note="Click a chip to turn its filter on or off.">
         <RChip
           v-for="filter in filterDefs"
           :key="filter.id"
           :variant="filterOn[filter.id] ? 'solid' : 'outline'"
-          tone="violet"
           caret
           @click="filterOn[filter.id] = !filterOn[filter.id]"
         >
@@ -386,11 +386,11 @@ const chipProps = [
         <RChip variant="soft">Soft</RChip>
         <RChip variant="soft" tone="brand">Brand</RChip>
         <RChip variant="soft" tone="success">Paid</RChip>
-        <RChip variant="solid" tone="brand">Solid</RChip>
-        <RChip variant="solid" tone="flame">Flame</RChip>
+        <RChip variant="solid">Solid</RChip>
+        <RChip variant="solid" tone="signal">Live</RChip>
         <RChip variant="dashed">Dashed</RChip>
         <RChip size="sm" caret>Small</RChip>
-        <RChip size="sm" variant="solid" tone="violet" removable remove-label="Remove small filter">Small</RChip>
+        <RChip size="sm" variant="solid" removable remove-label="Remove small filter">Small</RChip>
         <RChip disabled>Disabled</RChip>
       </Demo>
 
@@ -407,8 +407,8 @@ const chipProps = [
         dont="Use chips for actions like Save or Delete. A chip says something about the list; a button changes something."
       >
         <template #do-example>
-          <RChip variant="solid" tone="violet" caret tabindex="-1">Pending</RChip>
-          <RChip variant="solid" tone="violet" caret tabindex="-1">Tag</RChip>
+          <RChip variant="solid" caret tabindex="-1">Pending</RChip>
+          <RChip variant="solid" caret tabindex="-1">Tag</RChip>
           <RChip variant="dashed" tabindex="-1">Add filter</RChip>
         </template>
         <template #dont-example>
@@ -460,11 +460,9 @@ const chipProps = [
   justify-content: space-between;
   gap: 16px;
   width: min(300px, 100%);
-  padding: 16px 16px 16px 20px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 12px 12px 12px 16px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .ap-card-head__title {

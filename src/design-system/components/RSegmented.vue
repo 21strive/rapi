@@ -8,8 +8,12 @@ const model = defineModel<string | number>()
 const props = withDefaults(
   defineProps<{
     options: SegmentedOption[]
-    /** `inset`: a track with a sliding thumb. `pill`: separate pills, the active one in ink. */
+    /**
+     * `inset`: a ruled track; the selected option is a surface key with a strong rule and ink text.
+     * `pill`: reads as solid in Rapi 0.2, a strip of keys with the selected one filled in ink.
+     */
     variant?: 'inset' | 'pill'
+    /** sm 28px · md 32px · lg 40px. */
     size?: Size
     /** Stretch to the container, options share the width. */
     block?: boolean
@@ -23,7 +27,7 @@ const props = withDefaults(
 
 const root = ref<HTMLElement | null>(null)
 const buttons: (HTMLButtonElement | null)[] = []
-const thumb = ref({ x: 0, width: 0, visible: false, animated: false })
+const thumb = ref({ x: 0, y: 0, width: 0, height: 0, visible: false, animated: false })
 
 const activeIndex = computed(() => props.options.findIndex((option) => option.value === model.value))
 const focusIndex = computed(() => (activeIndex.value >= 0 ? activeIndex.value : props.options.findIndex((o) => !o.disabled)))
@@ -35,7 +39,15 @@ function measure() {
     return
   }
   const first = !thumb.value.visible
-  thumb.value = { x: el.offsetLeft, width: el.offsetWidth, visible: true, animated: !first }
+  // x and y, so the key still lands on its option when a narrow container wraps the track.
+  thumb.value = {
+    x: el.offsetLeft,
+    y: el.offsetTop,
+    width: el.offsetWidth,
+    height: el.offsetHeight,
+    visible: true,
+    animated: !first,
+  }
   // Turn the transition on after the first placement, so the thumb doesn't slide in from 0.
   if (first) requestAnimationFrame(() => (thumb.value = { ...thumb.value, animated: true }))
 }
@@ -87,7 +99,7 @@ function onKeydown(event: KeyboardEvent) {
       v-if="variant === 'inset'"
       class="r-segmented__thumb"
       :class="{ 'is-visible': thumb.visible, 'is-animated': thumb.animated }"
-      :style="{ transform: `translateX(${thumb.x}px)`, width: `${thumb.width}px` }"
+      :style="{ transform: `translate(${thumb.x}px, ${thumb.y}px)`, width: `${thumb.width}px`, height: `${thumb.height}px` }"
       aria-hidden="true"
     />
     <button
@@ -113,8 +125,9 @@ function onKeydown(event: KeyboardEvent) {
 
 <style>
 .r-segmented {
-  --r-seg-h: 32px;
-  --r-seg-px: 14px;
+  --r-seg-h: var(--r-control-md);
+  --r-seg-px: 12px;
+  --r-seg-option-h: var(--r-seg-h);
   position: relative;
   display: inline-flex;
   flex-shrink: 0;
@@ -124,12 +137,12 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .r-segmented--sm {
-  --r-seg-h: 26px;
+  --r-seg-h: var(--r-control-sm);
   --r-seg-px: 10px;
 }
 .r-segmented--lg {
-  --r-seg-h: 38px;
-  --r-seg-px: 18px;
+  --r-seg-h: var(--r-control-lg);
+  --r-seg-px: 16px;
 }
 
 .r-segmented--block {
@@ -145,10 +158,10 @@ function onKeydown(event: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: var(--r-seg-h);
+  height: var(--r-seg-option-h);
   padding: 0 var(--r-seg-px);
   border: 1px solid transparent;
-  border-radius: var(--r-radius-full);
+  border-radius: var(--r-radius-control);
   background: transparent;
   color: var(--r-text-secondary);
   font-size: var(--r-text-sm);
@@ -180,7 +193,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .r-segmented--icon-only .r-segmented__option {
-  width: calc(var(--r-seg-h) + 4px);
+  width: var(--r-seg-option-h);
   padding: 0;
 }
 
@@ -188,17 +201,30 @@ function onKeydown(event: KeyboardEvent) {
   color: var(--r-text);
 }
 
-.r-segmented__option:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
+.r-segmented__option:focus-visible {
+  z-index: 2;
+  outline-offset: 0;
 }
 
-/* Inset: a recessed track and a sliding thumb. */
+.r-segmented__option:disabled {
+  color: var(--r-text-disabled);
+  cursor: not-allowed;
+}
+
+/* Inset: a ruled track. The selected option is a surface key with a strong rule and ink text,
+   and the key slides between options. */
 .r-segmented--inset {
+  --r-seg-option-h: calc(var(--r-seg-h) - 6px);
+  flex-wrap: wrap;
   gap: 2px;
-  padding: 3px;
-  border-radius: var(--r-radius-full);
-  background: var(--r-bg-track);
+  padding: 2px;
+  border: 1px solid var(--r-border);
+  border-radius: var(--r-radius-control);
+  background: var(--r-bg-surface);
+}
+
+.r-segmented--inset .r-segmented__option:hover:not(.is-active, :disabled) {
+  background: var(--r-bg-hover);
 }
 
 .r-segmented--inset .r-segmented__option.is-active {
@@ -208,12 +234,11 @@ function onKeydown(event: KeyboardEvent) {
 .r-segmented__thumb {
   position: absolute;
   z-index: -1;
-  top: 3px;
-  bottom: 3px;
+  top: 0;
   left: 0;
-  border-radius: var(--r-radius-full);
-  background: var(--r-bg-thumb);
-  box-shadow: var(--r-shadow-sm);
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-control);
+  background: var(--r-bg-surface);
   opacity: 0;
 }
 .r-segmented__thumb.is-visible {
@@ -221,37 +246,28 @@ function onKeydown(event: KeyboardEvent) {
 }
 .r-segmented__thumb.is-animated {
   transition:
-    transform var(--r-duration-slow) var(--r-ease-out),
-    width var(--r-duration-slow) var(--r-ease-out);
+    transform var(--r-duration-base) var(--r-ease-out),
+    width var(--r-duration-base) var(--r-ease-out);
 }
 
-/* Pill: separate pills, the selected one in ink. */
+/* Pill, read as solid: a strip of keys on shared rules, the selected one filled in ink.
+   Every key steps back 1px over its neighbours, so rules stay single when the strip wraps. */
 .r-segmented--pill {
-  --r-seg-h: 36px;
-  --r-seg-px: 18px;
   flex-wrap: wrap;
-  gap: 6px;
+  padding: 1px 0 0 1px;
 }
-.r-segmented--pill.r-segmented--sm {
-  --r-seg-h: 30px;
-  --r-seg-px: 12px;
-}
-.r-segmented--pill.r-segmented--lg {
-  --r-seg-h: 44px;
-  --r-seg-px: 22px;
-}
-
 .r-segmented--pill .r-segmented__option {
-  border-color: var(--r-border);
-  background: var(--r-bg-surface);
+  margin: -1px 0 0 -1px;
+  border-color: var(--r-border-strong);
+  background: transparent;
 }
 .r-segmented--pill .r-segmented__option:hover:not(.is-active, :disabled) {
   background: var(--r-bg-hover);
 }
 .r-segmented--pill .r-segmented__option.is-active {
+  z-index: 1;
   border-color: var(--r-ink);
   background: var(--r-ink);
-  box-shadow: var(--r-shadow-highlight);
   color: var(--r-on-ink);
 }
 </style>

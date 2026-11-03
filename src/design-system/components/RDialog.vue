@@ -12,8 +12,15 @@ const props = withDefaults(
   defineProps<{
     title?: string
     description?: string
-    /** sm 400px, md 520px, lg 720px. Below 520px wide the dialog becomes a bottom sheet. */
+    /** Mono caps above the title, e.g. "STEP 2 OF 3" or "PAYMENT RUN". */
+    eyebrow?: string
+    /**
+     * Width: sm 400px, md 520px, lg 720px. Below 520px of screen a centred dialog becomes a
+     * bottom sheet and a drawer takes the full width.
+     */
     size?: 'sm' | 'md' | 'lg'
+    /** `center`: a modal in the middle of the screen. `right`: a full-height drawer docked to the right edge. */
+    side?: 'center' | 'right'
     /** Show the close button. */
     closable?: boolean
     /** Close on Escape and on a backdrop click. Turn off for flows that must be finished or cancelled. */
@@ -21,7 +28,7 @@ const props = withDefaults(
     /** Selector of the element to focus first. Defaults to the first field in the body. */
     initialFocus?: string
   }>(),
-  { size: 'md', closable: true, dismissible: true },
+  { size: 'md', side: 'center', closable: true, dismissible: true },
 )
 
 const emit = defineEmits<{ closed: [] }>()
@@ -67,8 +74,8 @@ function onBackdrop(event: PointerEvent) {
 
 <template>
   <Teleport to="body">
-    <Transition name="r-dialog" @after-leave="emit('closed')">
-      <div v-if="open" class="r-dialog" @pointerdown="onBackdrop">
+    <Transition :name="side === 'right' ? 'r-drawer' : 'r-dialog'" @after-leave="emit('closed')">
+      <div v-if="open" class="r-dialog" :class="`r-dialog--${side}`" @pointerdown="onBackdrop">
         <div
           ref="panel"
           class="r-dialog__panel"
@@ -80,14 +87,15 @@ function onBackdrop(event: PointerEvent) {
           tabindex="-1"
           v-bind="$attrs"
         >
-          <div v-if="title || description || $slots.header || closable" class="r-dialog__header">
+          <div v-if="title || description || eyebrow || $slots.header || closable" class="r-dialog__header">
             <div class="r-dialog__heading">
               <slot name="header">
+                <p v-if="eyebrow" class="r-dialog__eyebrow">{{ eyebrow }}</p>
                 <h2 v-if="title" :id="titleId" class="r-dialog__title">{{ title }}</h2>
                 <p v-if="description" :id="descriptionId" class="r-dialog__description">{{ description }}</p>
               </slot>
             </div>
-            <RIconButton v-if="closable" label="Close" variant="soft" size="sm" shape="square" class="r-dialog__close" @click="close">
+            <RIconButton v-if="closable" label="Close" variant="ghost" size="sm" class="r-dialog__close" @click="close">
               <X />
             </RIconButton>
           </div>
@@ -109,32 +117,29 @@ function onBackdrop(event: PointerEvent) {
   padding: 16px;
   overflow-y: auto;
   background: var(--r-bg-overlay);
-  backdrop-filter: blur(2px);
 }
 
+/* A floating panel: square, a strong 1px rule and a short shadow. */
 .r-dialog__panel {
+  --r-dialog-w: 520px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 520px;
+  max-width: var(--r-dialog-w);
   max-height: calc(100dvh - 32px);
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-surface);
   background: var(--r-bg-raised);
-  box-shadow: var(--r-shadow-xl);
+  box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
   outline: none;
 }
 
-[data-theme='dark'] .r-dialog__panel {
-  border-color: var(--r-border);
-}
-
 .r-dialog__panel--sm {
-  max-width: 400px;
+  --r-dialog-w: 400px;
 }
 .r-dialog__panel--lg {
-  max-width: 720px;
+  --r-dialog-w: 720px;
 }
 
 .r-dialog__header {
@@ -142,11 +147,22 @@ function onBackdrop(event: PointerEvent) {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 22px 24px 0;
+  padding: 20px 20px 0;
 }
 
 .r-dialog__heading {
   min-width: 0;
+}
+
+.r-dialog__eyebrow {
+  margin-bottom: 6px;
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .r-dialog__title {
@@ -164,13 +180,13 @@ function onBackdrop(event: PointerEvent) {
 }
 
 .r-dialog__close {
-  margin: -2px -6px 0 0;
+  margin: -4px -8px 0 0;
 }
 
 .r-dialog__body {
   flex: 1;
   min-height: 0;
-  padding: 20px 24px;
+  padding: 16px 20px 20px;
   overflow-y: auto;
 }
 
@@ -180,44 +196,71 @@ function onBackdrop(event: PointerEvent) {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding: 16px 24px 20px;
-  border-top: 1px solid var(--r-border-subtle);
+  padding: 12px 20px;
+  border-top: 1px solid var(--r-border);
 }
 
-/* Small screens: a bottom sheet is easier to reach with a thumb. */
+/* Right: a full-height drawer docked to the right edge. Header and footer stay put; the body scrolls. */
+.r-dialog--right {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+  overflow: hidden;
+}
+
+.r-dialog--right .r-dialog__panel {
+  width: min(var(--r-dialog-w), 100vw);
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  border-width: 0 0 0 1px;
+}
+
+.r-dialog--right .r-dialog__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--r-border);
+}
+
+.r-dialog--right .r-dialog__close {
+  margin: -2px -8px 0 0;
+}
+
+.r-dialog--right .r-dialog__body {
+  padding: 20px;
+}
+
+/* Small screens: a centred dialog becomes a bottom sheet, easier to reach with a thumb. */
 @media (max-width: 520px) {
-  .r-dialog {
+  .r-dialog--center {
     align-items: end;
     padding: 0;
   }
-  .r-dialog__panel,
-  .r-dialog__panel--sm,
-  .r-dialog__panel--lg {
+  .r-dialog--center .r-dialog__panel {
     max-width: none;
     max-height: calc(100dvh - 24px);
-    border-radius: var(--r-radius-xl) var(--r-radius-xl) 0 0;
+    border-width: 1px 0 0;
     padding-bottom: env(safe-area-inset-bottom);
   }
-  .r-dialog__header {
-    padding: 20px 20px 0;
+  .r-dialog--center .r-dialog__header {
+    padding: 16px 16px 0;
   }
-  .r-dialog__body {
-    padding: 16px 20px;
+  .r-dialog--center .r-dialog__body {
+    padding: 16px;
   }
-  .r-dialog__footer {
-    padding: 14px 20px 18px;
+  .r-dialog--center .r-dialog__footer {
+    padding: 12px 16px;
   }
 }
 
+/* Centred: the backdrop and panel fade, the panel rises 8px. Nothing scales. */
 .r-dialog-enter-active,
 .r-dialog-leave-active {
   transition: opacity var(--r-duration-base) var(--r-ease-out);
 }
 .r-dialog-enter-active .r-dialog__panel,
 .r-dialog-leave-active .r-dialog__panel {
-  transition:
-    transform var(--r-duration-base) var(--r-ease-out),
-    opacity var(--r-duration-base) var(--r-ease-out);
+  transition: transform var(--r-duration-base) var(--r-ease-out);
 }
 .r-dialog-enter-from,
 .r-dialog-leave-to {
@@ -225,8 +268,7 @@ function onBackdrop(event: PointerEvent) {
 }
 .r-dialog-enter-from .r-dialog__panel,
 .r-dialog-leave-to .r-dialog__panel {
-  opacity: 0;
-  transform: translateY(10px) scale(0.97);
+  transform: translateY(8px);
 }
 
 @media (max-width: 520px) {
@@ -234,5 +276,23 @@ function onBackdrop(event: PointerEvent) {
   .r-dialog-leave-to .r-dialog__panel {
     transform: translateY(32px);
   }
+}
+
+/* Drawer: the backdrop fades while the panel slides in from the right edge, fully opaque. */
+.r-drawer-enter-active,
+.r-drawer-leave-active {
+  transition: background-color var(--r-duration-base) var(--r-ease-out);
+}
+.r-drawer-enter-active .r-dialog__panel,
+.r-drawer-leave-active .r-dialog__panel {
+  transition: transform var(--r-duration-base) var(--r-ease-out);
+}
+.r-drawer-enter-from,
+.r-drawer-leave-to {
+  background-color: transparent;
+}
+.r-drawer-enter-from .r-dialog__panel,
+.r-drawer-leave-to .r-dialog__panel {
+  transform: translateX(100%);
 }
 </style>

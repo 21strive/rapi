@@ -9,7 +9,7 @@ withDefaults(
     badge?: string | number
     badgeTone?: Tone
     active?: boolean
-    /** `soft`: grey highlight. `solid`: filled with the brand colour. */
+    /** `soft`: a grey row with a 2px ink rule on its leading edge. `solid`: filled with ink. */
     variant?: 'soft' | 'solid'
     /**
      * What to render: 'a', 'button', or a component such as RouterLink.
@@ -43,13 +43,14 @@ defineSlots<{ trailing?(): unknown }>()
 
 <style>
 .r-nav-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 38px;
+  min-height: var(--r-control-md);
   padding: 0 10px;
   border: 0;
-  border-radius: var(--r-radius-md);
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-text-secondary);
   font-size: var(--r-text-md);
@@ -64,13 +65,17 @@ defineSlots<{ trailing?(): unknown }>()
 }
 
 .r-nav-item:hover {
-  background: color-mix(in srgb, var(--r-bg-hover) 70%, transparent);
+  background: var(--r-bg-hover);
   color: var(--r-text);
 }
 
+.r-nav-item:focus-visible {
+  outline-offset: -2px;
+}
+
 .r-nav-item__icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: var(--r-text-tertiary);
   transition: color var(--r-duration-fast) var(--r-ease-out);
 }
@@ -86,18 +91,26 @@ defineSlots<{ trailing?(): unknown }>()
   white-space: nowrap;
 }
 
+/* Counts are mono tags. Neutral is quiet; any other tone is filled. */
 .r-nav-item__badge {
   display: inline-grid;
   place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--r-radius-full);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-radius-mark);
   background: var(--tone-soft);
   color: var(--tone-text);
-  font-size: var(--r-text-2xs);
-  font-weight: var(--r-weight-semibold);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.r-nav-item__badge.r-tone-neutral {
+  background: var(--r-bg-pressed);
+  color: var(--r-text-secondary);
 }
 .r-nav-item__badge:not(.r-tone-neutral) {
   background: var(--tone-solid);
@@ -106,28 +119,30 @@ defineSlots<{ trailing?(): unknown }>()
 
 .r-nav-item.is-collapsed {
   justify-content: center;
-  width: 40px;
+  width: var(--r-control-md);
   padding: 0;
 }
 
+/* Soft: the current page is a grey row with an ink rule on its leading edge. */
 .r-nav-item--soft.is-active {
   background: var(--r-bg-hover);
+  box-shadow: inset 2px 0 0 var(--r-ink);
   color: var(--r-text);
 }
 .r-nav-item--soft.is-active .r-nav-item__icon {
   color: var(--r-text);
 }
 
+/* Solid: the current page is filled with ink. */
 .r-nav-item--solid.is-active {
-  background: var(--r-brand);
-  box-shadow: var(--r-shadow-highlight), 0 6px 16px -8px color-mix(in srgb, var(--r-brand) 70%, transparent);
-  color: var(--r-on-brand);
+  background: var(--r-ink);
+  color: var(--r-on-ink);
 }
 .r-nav-item--solid.is-active .r-nav-item__icon {
   color: inherit;
 }
 .r-nav-item--solid.is-active .r-nav-item__badge {
-  background: rgb(255 255 255 / 0.22);
+  background: color-mix(in srgb, var(--r-on-ink) 20%, transparent);
   color: inherit;
 }
 </style>

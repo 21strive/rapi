@@ -11,8 +11,10 @@ const props = withDefaults(
     precision?: number
     /** Lower is better (costs, churn, response time): a drop turns green. */
     invert?: boolean
+    /** `soft`: a tinted square tag. `plain`: coloured figures only. */
     variant?: 'soft' | 'plain'
     icon?: boolean
+    /** sm 18px · md 20px. */
     size?: 'sm' | 'md'
   }>(),
   { suffix: '%', precision: 1, variant: 'soft', size: 'md' },
@@ -30,6 +32,7 @@ const amount = computed(() =>
   formatNumber(Math.abs(props.value), { minimumFractionDigits: props.precision, maximumFractionDigits: props.precision }),
 )
 
+// The true minus sign (U+2212), so the sign is as wide as the plus and reads as maths.
 const shown = computed(() => {
   const sign = direction.value === 'up' ? '+' : direction.value === 'down' ? '−' : ''
   return `${sign}${amount.value}${props.suffix}`
@@ -60,37 +63,46 @@ const Icon = computed(() =>
   align-items: center;
   gap: 2px;
   color: var(--tone-text);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-semibold);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   letter-spacing: 0;
   white-space: nowrap;
 }
 
+/* Flat changes read in the secondary text colour, not the muted badge grey. */
+.r-trend.r-tone-neutral {
+  color: var(--r-text-secondary);
+}
+
 .r-trend svg {
-  width: 13px;
-  height: 13px;
-  stroke-width: 2.25;
+  width: 12px;
+  height: 12px;
+  stroke-width: 2;
 }
 
 .r-trend--soft {
-  height: 22px;
-  padding: 0 7px;
-  border-radius: var(--r-radius-full);
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-radius-mark);
   background: var(--tone-soft);
 }
 
 .r-trend--soft:has(svg) {
-  padding-left: 5px;
+  padding-left: 4px;
 }
 
 .r-trend--sm {
-  font-size: var(--r-text-2xs);
+  font-size: var(--r-text-3xs);
 }
 .r-trend--sm.r-trend--soft {
   height: 18px;
-  padding: 0 6px;
+  padding: 0 5px;
+}
+.r-trend--sm.r-trend--soft:has(svg) {
+  padding-left: 3px;
 }
 .r-trend--sm svg {
   width: 11px;

@@ -6,6 +6,7 @@ const props = withDefaults(
   defineProps<{
     /** Named keys are translated per platform: 'mod' is ⌘ on a Mac and Ctrl elsewhere. */
     keys?: string[]
+    /** sm 18px · md 20px · lg 24px. */
     size?: 'sm' | 'md' | 'lg'
   }>(),
   { size: 'md' },
@@ -33,6 +34,14 @@ const KEYS: Record<string, [glyph: string, spoken: string]> = {
   delete: ['⌦', 'Delete'],
   tab: ['Tab', 'Tab'],
   space: ['Space', 'Space'],
+  // Glyphs written by hand still get a spoken name.
+  '⌘': ['⌘', 'Command'],
+  '⌥': ['⌥', 'Option'],
+  '⇧': ['⇧', 'Shift'],
+  '⌃': ['⌃', 'Control'],
+  '↵': ['↵', 'Enter'],
+  '⌫': ['⌫', 'Backspace'],
+  '⌦': ['⌦', 'Delete'],
 }
 
 const labels = computed(() =>
@@ -58,9 +67,10 @@ const labels = computed(() =>
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
 }
 
+/* A square keycap: 1px rule, a slightly heavier bottom edge, Geist Mono. */
 .r-kbd {
   display: inline-flex;
   flex-shrink: 0;
@@ -71,11 +81,11 @@ const labels = computed(() =>
   height: 20px;
   padding: 0 5px;
   border: 1px solid var(--r-border);
-  border-radius: 6px;
+  border-bottom-color: var(--r-border-strong);
+  border-radius: var(--r-radius-mark);
   background: var(--r-bg-surface);
-  box-shadow: 0 1px 0 var(--r-border-subtle);
-  color: var(--r-text-tertiary);
-  font-family: var(--r-font-sans);
+  color: var(--r-text-secondary);
+  font-family: var(--r-font-mono);
   font-size: var(--r-text-2xs);
   font-weight: var(--r-weight-medium);
   line-height: 1;
@@ -92,15 +102,17 @@ const labels = computed(() =>
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
-  border-radius: 5px;
-  font-size: 10px;
+  font-size: var(--r-text-3xs);
+}
+.r-kbd--sm svg {
+  width: 11px;
+  height: 11px;
 }
 
 .r-kbd--lg {
-  min-width: 26px;
-  height: 26px;
-  padding: 0 7px;
-  border-radius: 7px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
   font-size: var(--r-text-xs);
 }
 .r-kbd--lg svg {

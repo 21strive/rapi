@@ -8,6 +8,7 @@ const model = defineModel<string | number>()
 const props = withDefaults(
   defineProps<{
     items: TabItem[]
+    /** sm 32px · md 40px tall. */
     size?: 'sm' | 'md'
     /** Accessible name for the tab list. */
     label?: string
@@ -127,7 +128,7 @@ function onKeydown(event: KeyboardEvent) {
   display: flex;
   gap: 24px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--r-border-subtle);
+  border-bottom: 1px solid var(--r-border);
   scrollbar-width: none;
 }
 .r-tabs__list::-webkit-scrollbar {
@@ -139,9 +140,10 @@ function onKeydown(event: KeyboardEvent) {
   flex-shrink: 0;
   align-items: center;
   gap: 8px;
-  height: 42px;
+  height: var(--r-control-lg);
   padding: 0 2px;
   border: 0;
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-text-tertiary);
   font-size: var(--r-text-md);
@@ -151,18 +153,17 @@ function onKeydown(event: KeyboardEvent) {
   transition: color var(--r-duration-fast) var(--r-ease-out);
 }
 .r-tabs__tab:hover:not(.is-active, :disabled) {
-  color: var(--r-text-secondary);
+  color: var(--r-text);
 }
 .r-tabs__tab.is-active {
   color: var(--r-text);
 }
 .r-tabs__tab:focus-visible {
   outline-offset: -2px;
-  border-radius: 6px;
 }
 .r-tabs__tab:disabled {
+  color: var(--r-text-disabled);
   cursor: not-allowed;
-  opacity: 0.45;
 }
 .r-tabs__tab svg {
   width: 16px;
@@ -170,25 +171,33 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .r-tabs--sm .r-tabs__list {
-  gap: 18px;
+  gap: 16px;
 }
 .r-tabs--sm .r-tabs__tab {
-  height: 36px;
+  height: var(--r-control-md);
+  gap: 6px;
   font-size: var(--r-text-sm);
 }
+.r-tabs--sm .r-tabs__tab svg {
+  width: 14px;
+  height: 14px;
+}
 
+/* Counts are mono tags; the selected tab's count turns to ink. */
 .r-tabs__count {
   display: inline-grid;
   place-items: center;
-  min-width: 20px;
+  min-width: 18px;
   height: 18px;
-  padding: 0 6px;
-  border-radius: var(--r-radius-full);
+  padding: 0 5px;
+  border-radius: var(--r-radius-mark);
   background: var(--r-bg-hover);
   color: var(--r-text-secondary);
-  font-size: var(--r-text-2xs);
-  font-weight: var(--r-weight-semibold);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
   transition:
     background-color var(--r-duration-fast) var(--r-ease-out),
     color var(--r-duration-fast) var(--r-ease-out);
@@ -197,13 +206,16 @@ function onKeydown(event: KeyboardEvent) {
   background: var(--r-ink);
   color: var(--r-on-ink);
 }
+.r-tabs__tab:disabled .r-tabs__count {
+  color: var(--r-text-disabled);
+}
 
+/* A 2px ink rule under the selected tab, square at the ends, sitting on the list's rule. */
 .r-tabs__indicator {
   position: absolute;
   bottom: 0;
   left: 0;
   height: 2px;
-  border-radius: 2px 2px 0 0;
   background: var(--r-ink);
   opacity: 0;
 }
@@ -212,8 +224,8 @@ function onKeydown(event: KeyboardEvent) {
 }
 .r-tabs__indicator.is-animated {
   transition:
-    transform var(--r-duration-slow) var(--r-ease-out),
-    width var(--r-duration-slow) var(--r-ease-out);
+    transform var(--r-duration-base) var(--r-ease-out),
+    width var(--r-duration-base) var(--r-ease-out);
 }
 
 .r-tabs__panel {
@@ -221,6 +233,5 @@ function onKeydown(event: KeyboardEvent) {
 }
 .r-tabs__panel:focus-visible {
   outline-offset: 4px;
-  border-radius: 4px;
 }
 </style>

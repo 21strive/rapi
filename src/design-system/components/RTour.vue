@@ -14,9 +14,10 @@ const props = withDefaults(
     steps: TourStep[]
     /** Space between the target and the spotlight edge. */
     padding?: number
+    /** @deprecated The spotlight is square in Rapi 0.2. Still accepted, ignored. */
     radius?: number
   }>(),
-  { padding: 8, radius: 16 },
+  { padding: 8 },
 )
 
 const emit = defineEmits<{ finish: []; skip: [] }>()
@@ -100,7 +101,6 @@ const spotStyle = computed(() => {
     top: `${b.top - props.padding}px`,
     width: `${b.width + props.padding * 2}px`,
     height: `${b.height + props.padding * 2}px`,
-    borderRadius: `${props.radius}px`,
   }
 })
 
@@ -191,11 +191,11 @@ function back() {
   inset: 0;
 }
 
+/* A square spotlight. Everything else is dimmed by a wide shadow in the overlay colour. */
 .r-tour__spot {
   position: fixed;
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--r-brand) 70%, transparent),
-    0 0 0 9999px var(--r-bg-overlay);
+  border-radius: var(--r-radius-surface);
+  box-shadow: 0 0 0 9999px var(--r-bg-overlay);
   pointer-events: none;
   transition:
     left var(--r-duration-slow) var(--r-ease-out),
@@ -203,6 +203,27 @@ function back() {
     width var(--r-duration-slow) var(--r-ease-out),
     height var(--r-duration-slow) var(--r-ease-out),
     opacity var(--r-duration-base) var(--r-ease-out);
+}
+
+/* Corner brackets in the focus colour, like a lock-on reticle. They sit in the padding around
+   the target, never over it. */
+.r-tour__spot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  --m: 12px;
+  --t: 2px;
+  --c: var(--r-focus);
+  background:
+    linear-gradient(var(--c), var(--c)) left top / var(--m) var(--t),
+    linear-gradient(var(--c), var(--c)) left top / var(--t) var(--m),
+    linear-gradient(var(--c), var(--c)) right top / var(--m) var(--t),
+    linear-gradient(var(--c), var(--c)) right top / var(--t) var(--m),
+    linear-gradient(var(--c), var(--c)) left bottom / var(--m) var(--t),
+    linear-gradient(var(--c), var(--c)) left bottom / var(--t) var(--m),
+    linear-gradient(var(--c), var(--c)) right bottom / var(--m) var(--t),
+    linear-gradient(var(--c), var(--c)) right bottom / var(--t) var(--m);
+  background-repeat: no-repeat;
 }
 
 .r-tour__card {

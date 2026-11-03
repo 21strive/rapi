@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, useId, watchEffect } from 'vue'
-import {
-  provideFloatingRegistry,
-  transformOrigin,
-  useFloating,
-  useRegisterFloating,
-  type Placement,
-  type Point,
-} from '../composables/floating'
+import { provideFloatingRegistry, useFloating, useRegisterFloating, type Placement, type Point } from '../composables/floating'
 import { useClickOutside, useEscape, useFocusTrap, useLayer } from '../composables/dom'
 
 defineOptions({ inheritAttrs: false })
@@ -105,10 +98,7 @@ watchEffect(() => {
 
 const pad = computed(() => props.padding ?? (props.kind === 'menu' ? 'sm' : 'md'))
 
-const panelStyle = computed(() => [
-  floating.style.value,
-  { width: props.width, '--r-origin': transformOrigin(floating.placement.value) },
-])
+const panelStyle = computed(() => [floating.style.value, { width: props.width }])
 </script>
 
 <template>
@@ -141,38 +131,34 @@ const panelStyle = computed(() => [
   vertical-align: middle;
 }
 
+/* The shared floating surface (.r-panel): square, a strong 1px rule and a short shadow. */
 .r-popover {
   z-index: var(--r-z-popover);
   max-width: calc(100vw - 16px);
   max-height: calc(100dvh - 16px);
   overflow: auto;
   outline: none;
-  transform-origin: var(--r-origin, top left);
 }
 
 .r-popover--pad-none {
   padding: 0;
 }
 .r-popover--pad-sm {
-  padding: 6px;
+  padding: 4px;
 }
 .r-popover--pad-md {
   padding: 16px;
 }
 
+/* Floating things fade in place. Nothing scales or springs. */
 .r-pop-enter-active {
-  transition:
-    opacity var(--r-duration-fast) var(--r-ease-out),
-    transform var(--r-duration-base) var(--r-ease-out);
+  transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
 .r-pop-leave-active {
-  transition:
-    opacity var(--r-duration-fast) var(--r-ease-out),
-    transform var(--r-duration-fast) var(--r-ease-out);
+  transition: opacity var(--r-duration-instant) var(--r-ease-out);
 }
 .r-pop-enter-from,
 .r-pop-leave-to {
   opacity: 0;
-  transform: scale(0.96);
 }
 </style>

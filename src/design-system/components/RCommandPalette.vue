@@ -277,21 +277,23 @@ watch(page, () => scrollActiveIntoView())
           </div>
           <div class="r-command__footer" aria-hidden="true">
             <span class="r-command__hint">
-              <RKbd size="lg"><ArrowUp /></RKbd>
-              <RKbd size="lg"><ArrowDown /></RKbd>
-              to navigate
+              <span class="r-command__keys">
+                <RKbd><ArrowUp /></RKbd>
+                <RKbd><ArrowDown /></RKbd>
+              </span>
+              Navigate
             </span>
             <span class="r-command__hint">
-              <RKbd size="lg"><CornerDownLeft /></RKbd>
-              to select
+              <RKbd><CornerDownLeft /></RKbd>
+              Select
             </span>
             <span class="r-command__hint">
-              <RKbd size="lg">esc</RKbd>
-              to close
+              <RKbd>esc</RKbd>
+              Close
             </span>
             <span class="r-command__hint" :class="{ 'is-muted': !page }">
-              <RKbd size="lg"><ArrowLeft /></RKbd>
-              return to parent
+              <RKbd><ArrowLeft /></RKbd>
+              Back
             </span>
           </div>
         </div>
@@ -312,41 +314,40 @@ watch(page, () => scrollActiveIntoView())
   background: var(--r-bg-overlay);
 }
 
+/* Always a dark island (data-theme="dark"): square, flat, a strong rule and a short shadow. */
 .r-command__panel {
   display: flex;
   flex-direction: column;
   width: min(640px, 100%);
   max-height: min(560px, calc(100dvh - max(12vh, 16px) - 16px));
   overflow: hidden;
-  border: 1px solid var(--r-border);
-  border-radius: var(--r-radius-xl);
-  background: linear-gradient(180deg, var(--r-bg-hover) 0%, var(--r-bg-raised) 100%);
-  box-shadow:
-    var(--r-shadow-xl),
-    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-surface);
+  background: var(--r-bg-raised);
+  box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
 }
 
 .r-command__crumb {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 14px 0 10px;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 6px;
   border-bottom: 1px solid var(--r-border);
-  background: rgb(255 255 255 / 0.04);
-  font-size: var(--r-text-md);
+  background: var(--r-bg-muted);
+  font-size: var(--r-text-sm);
   font-weight: var(--r-weight-semibold);
 }
 
 .r-command__back {
   display: inline-grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: var(--r-control-sm);
+  height: var(--r-control-sm);
   padding: 0;
   border: 0;
-  border-radius: var(--r-radius-sm);
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-text-tertiary);
   cursor: pointer;
@@ -361,8 +362,8 @@ watch(page, () => scrollActiveIntoView())
 }
 
 .r-command__crumb-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: var(--r-text-secondary);
 }
 
@@ -370,16 +371,16 @@ watch(page, () => scrollActiveIntoView())
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 58px;
-  padding: 0 18px;
+  height: 52px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--r-border);
 }
 
 .r-command__search-icon,
 .r-command__help {
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: var(--r-text-tertiary);
 }
 
@@ -401,30 +402,34 @@ watch(page, () => scrollActiveIntoView())
 .r-command__list {
   flex: 1;
   min-height: 0;
-  padding: 8px;
+  padding: 4px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scroll-padding: 8px;
+  scroll-padding: 4px;
 }
 
 .r-command__group + .r-command__group {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
+/* Group headings are labels: Geist Mono capitals. */
 .r-command__group-label {
-  padding: 8px 12px 6px;
+  padding: 10px 12px 6px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .r-command__item {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 44px;
+  min-height: 36px;
   padding: 0 12px;
-  border-radius: var(--r-radius-md);
+  border-radius: var(--r-radius-control);
   color: var(--r-text);
   font-size: var(--r-text-md);
   font-weight: var(--r-weight-medium);
@@ -432,18 +437,20 @@ watch(page, () => scrollActiveIntoView())
   user-select: none;
 }
 
+/* The active row: the hover grey and a 2px cobalt rule on the leading edge, like a selected table row. */
 .r-command__item.is-active {
-  background: rgb(255 255 255 / 0.09);
+  background: var(--r-bg-hover);
+  box-shadow: inset 2px 0 0 var(--r-brand);
 }
 
 .r-command__item.is-disabled {
+  color: var(--r-text-disabled);
   cursor: not-allowed;
-  opacity: 0.45;
 }
 
 .r-command__icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: var(--r-text-secondary);
 }
 
@@ -467,7 +474,8 @@ watch(page, () => scrollActiveIntoView())
 
 .r-command__meta {
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -476,43 +484,55 @@ watch(page, () => scrollActiveIntoView())
 }
 
 .r-command__chevron {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: var(--r-text-tertiary);
 }
 
 .r-command__empty {
   padding: 32px 16px;
   color: var(--r-text-tertiary);
+  font-size: var(--r-text-sm);
   text-align: center;
 }
 
+/* Key hints in the label voice: keycaps and Geist Mono capitals. */
 .r-command__footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 20px;
-  padding: 12px 16px;
+  gap: 8px 20px;
+  padding: 10px 16px;
   border-top: 1px solid var(--r-border);
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-sm);
+  background: var(--r-bg-muted);
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .r-command__hint {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
 .r-command__hint.is-muted {
-  opacity: 0.45;
+  opacity: 0.4;
+}
+
+.r-command__keys {
+  display: inline-flex;
+  gap: 2px;
 }
 
 .r-command__footer .r-kbd {
   border-color: var(--r-border-strong);
   background: transparent;
-  box-shadow: none;
   color: var(--r-text-secondary);
+  text-transform: none;
 }
 
 /* Touch screens have no use for key hints. */
@@ -536,6 +556,6 @@ watch(page, () => scrollActiveIntoView())
 }
 .r-command-enter-from .r-command__panel,
 .r-command-leave-to .r-command__panel {
-  transform: scale(0.98) translateY(-6px);
+  transform: translateY(-6px);
 }
 </style>

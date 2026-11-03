@@ -83,9 +83,9 @@ const navItemProps: PropRow[] = [
   { name: 'label', type: 'string', description: 'The visible text. When collapsed it becomes the accessible name and a native title.' },
   { name: 'icon', type: 'Component', description: 'A Lucide icon (or any component) shown before the label.' },
   { name: 'badge', type: 'string | number', description: 'A count or short tag on the right, like unread items.' },
-  { name: 'badgeTone', type: 'Tone', default: "'neutral'", description: 'Neutral badges are soft; any other tone is filled.' },
+  { name: 'badgeTone', type: 'Tone', default: "'neutral'", description: 'Neutral counts are quiet; any other tone is filled.' },
   { name: 'active', type: 'boolean', default: 'false', description: 'Marks the current page and sets aria-current="page".' },
-  { name: 'variant', type: "'soft' | 'solid'", default: "'soft'", description: 'Soft is a grey highlight; solid fills the active item with the brand colour.' },
+  { name: 'variant', type: "'soft' | 'solid'", default: "'soft'", description: 'Soft is a grey row with a 2px ink rule on its leading edge; solid fills the active item with ink.' },
   { name: 'as', type: 'string | Component', default: "'a'", description: "What to render: 'a', 'button', or a component such as RouterLink. Extra attributes like to or href pass straight through." },
   { name: 'collapsed', type: 'boolean', default: 'false', description: 'Icon only, for narrow rails. Pair it with a tooltip.' },
   { name: '#trailing', type: 'slot', description: 'Anything after the label, such as a chevron for a group that expands.' },
@@ -148,7 +148,7 @@ const items = [
 const tabsProps: PropRow[] = [
   { name: 'v-model', type: 'string | number', description: 'The value of the selected tab.' },
   { name: 'items', type: 'TabItem[]', description: 'Each item has label, value, and optionally count, icon and disabled.' },
-  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: 'Height of the tab row and the label size.' },
+  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: 'A 32 or 40px tab row, with 13 or 14px labels.' },
   { name: 'label', type: 'string', description: 'Accessible name for the tab list, e.g. “Payments”.' },
   { name: 'id', type: 'string', default: 'auto', description: 'Prefix for the tab and panel ids. Generated when left out.' },
   { name: '#default', type: 'slot { value }', description: 'The panel. Rendered inside role="tabpanel" and linked to the selected tab.' },
@@ -181,7 +181,7 @@ const paginationProps: PropRow[] = [
   { name: 'v-model', type: 'number', default: '1', description: 'The current page, starting at 1.' },
   { name: 'pageCount', type: 'number', description: 'How many pages there are.' },
   { name: 'siblings', type: 'number', default: '1', description: 'Pages shown on each side of the current one before an ellipsis.' },
-  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: 'Button size. Below 480px wide the buttons shrink a little on their own.' },
+  { name: 'size', type: "'sm' | 'md'", default: "'md'", description: '24 or 28px square buttons.' },
   { name: 'label', type: 'string', default: "'Pagination'", description: 'Accessible name for the nav landmark. Change it when a page has two.' },
 ]
 </script>
@@ -190,15 +190,15 @@ const paginationProps: PropRow[] = [
   <DocPage
     eyebrow="Components"
     title="Navigation"
-    lead="How people move around: sidebar rows, tabs inside a view, and pages of a long list. The active state is always in ink or brand, never only in colour of the text."
+    lead="How people move around: sidebar rows, tabs inside a view, and pages of a long list. The active state is always more than a change of text colour: an ink rule, an ink fill or an underline."
   >
     <DocSection
       id="nav-item"
       title="Nav item"
-      description="One row in a sidebar. It renders whatever you pass to as, so the same row works as a RouterLink, a plain link or a button, and the library never depends on vue-router."
+      description="One square 32px row in a sidebar. It renders whatever you pass to as, so the same row works as a RouterLink, a plain link or a button, and the library never depends on vue-router."
     >
       <div class="nav-demos">
-        <Demo title="Solid" note="Finanzen-style. The fill says where you are.">
+        <Demo title="Solid" note="The ink fill says where you are.">
           <div class="nav-demo-sidebar">
             <div class="nav-demo-sidebar__brand">
               <span class="nav-demo-sidebar__logo" aria-hidden="true">F</span>
@@ -234,7 +234,7 @@ const paginationProps: PropRow[] = [
           </div>
         </Demo>
 
-        <Demo title="Soft, with badges" note="Quieter, for apps where the content does the talking.">
+        <Demo title="Soft, with counts" note="A grey row and an ink rule. Quieter, for apps where the content does the talking.">
           <div class="nav-demo-sidebar">
             <div class="nav-demo-sidebar__brand">
               <span class="nav-demo-sidebar__logo nav-demo-sidebar__logo--soft" aria-hidden="true">O</span>
@@ -283,9 +283,9 @@ const paginationProps: PropRow[] = [
     <DocSection
       id="tabs"
       title="Tabs"
-      description="Switch between views of the same thing. The ink underline slides to the selected tab, counts sit in small pills, and the arrow keys move between tabs (Home and End jump to the ends)."
+      description="Switch between views of the same thing. A 2px ink rule slides under the selected tab, counts sit in mono tags, and the arrow keys move between tabs (Home and End jump to the ends)."
     >
-      <Demo title="With counts" note="Like Finalytic's payment views. Refunds is disabled." stack>
+      <Demo title="With counts" note="Payment views. Refunds is disabled." stack>
         <div class="nav-tabs-card">
           <RTabs v-model="paymentsTab" :items="paymentTabs" label="Payments">
             <template #default="{ value }">
@@ -325,7 +325,7 @@ const paginationProps: PropRow[] = [
     <DocSection
       id="pagination"
       title="Pagination"
-      description="Pages of a long list. The current page is an ink square, gaps collapse into an ellipsis, and Previous and Next stay put so they don't jump while you click."
+      description="Pages of a long list, on square 28px keys with mono figures. The current page is filled with ink, gaps collapse into an ellipsis, and Previous and Next stay put so they don't jump while you click."
     >
       <Demo title="Table footer" stack>
         <div class="nav-pagination-footer">
@@ -366,18 +366,16 @@ const paginationProps: PropRow[] = [
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  padding: 14px 12px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 12px 8px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .nav-demo-sidebar__brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px 14px;
+  padding: 4px 10px 12px;
   font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
   letter-spacing: var(--r-tracking-tight);
@@ -388,23 +386,26 @@ const paginationProps: PropRow[] = [
   place-items: center;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
   background: var(--r-brand);
   color: var(--r-on-brand);
+  font-family: var(--r-font-mono);
   font-size: var(--r-text-sm);
   font-weight: var(--r-weight-bold);
 }
 .nav-demo-sidebar__logo--soft {
-  border-radius: 8px;
   background: var(--r-ink);
   color: var(--r-on-ink);
 }
 
+/* Group labels in the label voice, like the docs sidebar. */
 .nav-demo-sidebar__group {
-  padding: 12px 10px 6px;
+  padding: 14px 10px 6px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  font-weight: var(--r-weight-medium);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .nav-demo-sidebar__foot {
@@ -417,21 +418,17 @@ const paginationProps: PropRow[] = [
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 10px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 8px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .nav-tabs-card {
   min-width: 0;
   max-width: 100%;
   padding: 4px 20px 20px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .nav-payments {
@@ -452,6 +449,8 @@ const paginationProps: PropRow[] = [
 }
 .nav-payments__id {
   color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-variant-numeric: tabular-nums;
 }
 .nav-payments__client {
@@ -460,7 +459,9 @@ const paginationProps: PropRow[] = [
   white-space: nowrap;
 }
 .nav-payments__amount {
-  font-weight: var(--r-weight-semibold);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
+  font-weight: var(--r-weight-medium);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -490,11 +491,9 @@ const paginationProps: PropRow[] = [
   align-items: center;
   justify-content: space-between;
   gap: 12px 20px;
-  padding: 14px 18px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 12px 16px;
+  border: 1px solid var(--r-border);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
 }
 
 .nav-pagination-footer__range {

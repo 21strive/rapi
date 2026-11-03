@@ -1,24 +1,38 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
+import RSupergraphic from './RSupergraphic.vue'
 
 const props = withDefaults(
   defineProps<{
     title?: string
     subtitle?: string
+    /** Mono caps above the title, the brand's Small Header: "TREASURY", "SECTOR 7". */
+    eyebrow?: string
+    /** A running number in the top-left corner, e.g. "01". */
+    index?: string
+    /** Mono caps at the right of the header: a status, a timestamp, an id. */
+    meta?: string
+    /** Registration marks on the four corners, for instrument panels and hero frames. */
+    marks?: boolean
+    /** The faint logogram behind `brand` and `ink` cards. Turn it off behind a chart or a table. */
+    supergraphic?: boolean
     padding?: 'none' | 'sm' | 'md' | 'lg'
     /**
-     * `brand` and `flame` are the loud cards (one per screen is plenty). `ink` is a dark island.
-     * Coloured cards re-point the text and border tokens, so components inside adapt.
+     * `brand` (flat cobalt) and `signal` (International Orange, black text) are the loud panels:
+     * one per screen at most. `ink` is a dark island in both themes. `flame` is the 0.1 name of
+     * `signal`. Coloured cards re-point the text and border tokens, so components inside adapt.
      */
-    variant?: 'surface' | 'muted' | 'outline' | 'brand' | 'flame' | 'ink'
-    /** Hover lift. Pair with `as="a"` or `as="button"` so it is reachable by keyboard. */
+    variant?: 'surface' | 'muted' | 'outline' | 'brand' | 'ink' | 'signal' | 'flame'
+    /** Hover state. Pair with `as="a"` or `as="button"` so it is reachable by keyboard. */
     interactive?: boolean
     as?: string
     /** Heading element for the title. */
     titleAs?: 'h2' | 'h3' | 'h4' | 'p'
   }>(),
-  { padding: 'md', variant: 'surface', as: 'div', titleAs: 'h3' },
+  { padding: 'md', variant: 'surface', as: 'div', titleAs: 'h3', supergraphic: true },
 )
+
+const slots = useSlots()
 
 defineSlots<{
   default?(): unknown
@@ -27,25 +41,45 @@ defineSlots<{
   footer?(): unknown
 }>()
 
-const colored = computed(() => props.variant === 'brand' || props.variant === 'flame')
+const tone = computed(() => (props.variant === 'flame' ? 'signal' : props.variant))
+const showSupergraphic = computed(() => props.supergraphic && (tone.value === 'brand' || tone.value === 'ink'))
+const hasHeader = computed(
+  () => !!(props.title || props.subtitle || props.eyebrow || props.index || props.meta || slots.header || slots.actions),
+)
+// Meta rides on the kicker line when there is one, so it stays top-right in a narrow card.
+const hasKicker = computed(() => !!(props.index || props.eyebrow))
 </script>
 
 <template>
   <component
     :is="as"
     class="r-card"
-    :class="[`r-card--${variant}`, `r-card--pad-${padding}`, { 'r-card--interactive': interactive }]"
-    :data-theme="variant === 'ink' ? 'dark' : undefined"
+    :class="[`r-card--${tone}`, `r-card--pad-${padding}`, { 'r-card--interactive': interactive, 'r-marks': marks }]"
+    :data-theme="tone === 'ink' ? 'dark' : undefined"
   >
-    <span v-if="colored" class="r-card__sheen" aria-hidden="true" />
-    <div v-if="title || subtitle || $slots.header || $slots.actions" class="r-card__header">
+    <RSupergraphic
+      v-if="showSupergraphic"
+      class="r-card__supergraphic"
+      variant="one"
+      :tone="tone === 'brand' ? 'brand' : 'inverse'"
+      anchor="bottom-right"
+    />
+    <div v-if="hasHeader" class="r-card__header">
       <div class="r-card__heading">
+        <p v-if="hasKicker" class="r-card__kicker">
+          <span v-if="index" class="r-card__index">{{ index }}</span>
+          <span v-if="eyebrow" class="r-card__eyebrow">{{ eyebrow }}</span>
+          <span v-if="meta" class="r-card__meta">{{ meta }}</span>
+        </p>
         <slot name="header">
           <component :is="titleAs" v-if="title" class="r-card__title">{{ title }}</component>
           <p v-if="subtitle" class="r-card__subtitle">{{ subtitle }}</p>
         </slot>
       </div>
-      <div v-if="$slots.actions" class="r-card__actions"><slot name="actions" /></div>
+      <div v-if="(meta && !hasKicker) || $slots.actions" class="r-card__aside">
+        <span v-if="meta && !hasKicker" class="r-card__meta">{{ meta }}</span>
+        <div v-if="$slots.actions" class="r-card__actions"><slot name="actions" /></div>
+      </div>
     </div>
     <slot />
     <div v-if="$slots.footer" class="r-card__footer"><slot name="footer" /></div>
@@ -53,16 +87,16 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
 </template>
 
 <style>
+/* A square panel: a 1px rule, no shadow. Structure comes from rules, not elevation. */
 .r-card {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  border: 1px solid var(--r-border);
+  border-radius: var(--r-radius-surface);
   background: var(--r-bg-surface);
-  box-shadow: var(--r-shadow-xs);
   color: var(--r-text);
   text-decoration: none;
   isolation: isolate;
@@ -72,18 +106,20 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
   padding: 0;
 }
 .r-card--pad-sm {
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
 }
 .r-card--pad-md {
-  padding: 20px;
+  padding: 16px;
 }
 .r-card--pad-lg {
+  gap: 20px;
   padding: 24px;
 }
 
 @media (min-width: 640px) {
   .r-card--pad-md {
-    padding: 24px;
+    padding: 20px;
   }
   .r-card--pad-lg {
     padding: 32px;
@@ -97,11 +133,23 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 16px;
 }
 
 .r-card--pad-none > .r-card__header {
-  padding: 20px 20px 0;
+  padding: 16px 16px 0;
+}
+.r-card--pad-none > .r-card__footer {
+  padding: 0 16px 16px;
+}
+
+@media (min-width: 640px) {
+  .r-card--pad-none > .r-card__header {
+    padding: 20px 20px 0;
+  }
+  .r-card--pad-none > .r-card__footer {
+    padding: 0 20px 20px;
+  }
 }
 
 .r-card__heading {
@@ -109,10 +157,42 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
   min-width: 0;
 }
 
+/* Index and eyebrow share the top line, as on the 21 Strive spec pages. */
+.r-card__kicker {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  font-family: var(--r-font-mono);
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.r-card__kicker + * {
+  margin-top: 6px;
+}
+
+.r-card__index {
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-3xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.r-card__eyebrow {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .r-card__title {
   font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
-  line-height: 1.35;
+  line-height: 1.3;
   letter-spacing: var(--r-tracking-snug);
 }
 
@@ -122,14 +202,41 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
   font-size: var(--r-text-sm);
 }
 
-.r-card__actions {
+.r-card__aside {
   display: flex;
   flex-shrink: 0;
   flex-wrap: wrap;
   align-items: center;
+  gap: 8px 12px;
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.r-card__meta {
+  flex-shrink: 0;
+  color: var(--r-text-tertiary);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Actions may be taller than the title line; they overhang it by 4px instead of pushing it down. */
+.r-card__kicker > .r-card__meta {
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.r-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   max-width: 100%;
-  margin: -4px -4px -4px auto;
+  margin: -4px 0;
 }
 
 .r-card__footer {
@@ -139,109 +246,125 @@ const colored = computed(() => props.variant === 'brand' || props.variant === 'f
   margin-top: auto;
 }
 
+/* The logogram sits behind the content, above the panel colour. */
+.r-card > .r-card__supergraphic {
+  z-index: -1;
+}
+
+/* Registration marks draw above the logogram. */
+.r-card.r-marks::before {
+  z-index: 1;
+}
+
 .r-card--muted {
-  border-color: transparent;
+  border-color: var(--r-border-subtle);
   background: var(--r-bg-muted);
-  box-shadow: none;
 }
 
 .r-card--outline {
-  border-color: var(--r-border);
   background: transparent;
-  box-shadow: none;
 }
 
 .r-card--interactive {
   cursor: pointer;
   transition:
-    box-shadow var(--r-duration-base) var(--r-ease-out),
-    transform var(--r-duration-base) var(--r-ease-out),
-    border-color var(--r-duration-base) var(--r-ease-out);
+    background-color var(--r-duration-fast) var(--r-ease-out),
+    border-color var(--r-duration-fast) var(--r-ease-out);
 }
 .r-card--interactive:hover {
-  border-color: var(--r-border);
-  box-shadow: var(--r-shadow-md);
-  transform: translateY(-1px);
+  border-color: var(--r-border-strong);
+  background: var(--r-bg-muted);
 }
 .r-card--interactive:active {
-  transform: none;
+  background: var(--r-bg-hover);
 }
 
-/* Loud cards. Text and borders are re-pointed so nested components read on colour. */
-.r-card--brand,
-.r-card--flame {
-  border-color: transparent;
-  color-scheme: dark;
-  --r-text: #fff;
-  --r-text-secondary: rgb(255 255 255 / 0.86);
-  --r-text-tertiary: rgb(255 255 255 / 0.74);
-  --r-border-subtle: rgb(255 255 255 / 0.16);
-  --r-border: rgb(255 255 255 / 0.26);
-  --r-border-strong: rgb(255 255 255 / 0.4);
-  --r-bg-surface: rgb(255 255 255 / 0.14);
-  --r-bg-muted: rgb(255 255 255 / 0.1);
-  --r-bg-hover: rgb(255 255 255 / 0.2);
-  --r-bg-pressed: rgb(255 255 255 / 0.28);
-  --r-bg-track: rgb(255 255 255 / 0.16);
-  --r-bg-thumb: #fff;
-  --r-ink: #fff;
-  --r-ink-hover: rgb(255 255 255 / 0.9);
-  --r-on-ink: #15181e;
-  --r-success-soft: rgb(255 255 255 / 0.2);
-  --r-success-text: #fff;
-  --r-danger-soft: rgb(255 255 255 / 0.2);
-  --r-danger-text: #fff;
-  --r-chart-1: #fff;
-  --r-chart-1-soft: rgb(255 255 255 / 0.45);
-  --r-chart-track: rgb(255 255 255 / 0.16);
-  --r-chart-grid: rgb(255 255 255 / 0.2);
-  --r-chart-axis: rgb(255 255 255 / 0.74);
-  --r-shadow-xs: none;
-  --r-focus-ring: 0 0 0 3px rgb(255 255 255 / 0.4);
-}
-
+/* Brand: flat 21 Strive cobalt, white text. Tokens are re-pointed so nested components read. */
 .r-card--brand {
-  background: linear-gradient(140deg, var(--r-feature-brand-from) 0%, var(--r-feature-brand-to) 100%);
-  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--r-feature-brand-to) 55%, transparent);
+  border-color: var(--r-feature-brand);
+  background: var(--r-feature-brand);
+  color-scheme: dark;
+  --r-text: var(--r-on-brand);
+  --r-text-secondary: color-mix(in srgb, var(--r-on-brand) 82%, transparent);
+  --r-text-tertiary: color-mix(in srgb, var(--r-on-brand) 68%, transparent);
+  --r-text-disabled: color-mix(in srgb, var(--r-on-brand) 42%, transparent);
+  --r-border-subtle: color-mix(in srgb, var(--r-on-brand) 14%, transparent);
+  --r-border: color-mix(in srgb, var(--r-on-brand) 24%, transparent);
+  --r-border-strong: color-mix(in srgb, var(--r-on-brand) 46%, transparent);
+  --r-bg-surface: var(--r-feature-brand);
+  --r-bg-raised: var(--r-feature-brand);
+  --r-bg-muted: color-mix(in srgb, var(--r-on-brand) 8%, transparent);
+  --r-bg-hover: color-mix(in srgb, var(--r-on-brand) 14%, transparent);
+  --r-bg-pressed: color-mix(in srgb, var(--r-on-brand) 22%, transparent);
+  --r-bg-selected: color-mix(in srgb, var(--r-on-brand) 16%, transparent);
+  --r-bg-track: color-mix(in srgb, var(--r-on-brand) 16%, transparent);
+  --r-ink: var(--r-on-brand);
+  --r-ink-hover: color-mix(in srgb, var(--r-on-brand) 86%, var(--r-feature-brand));
+  --r-on-ink: var(--r-feature-brand);
+  --r-brand-text: var(--r-on-brand);
+  --r-brand-soft: color-mix(in srgb, var(--r-on-brand) 14%, transparent);
+  --r-brand-border: color-mix(in srgb, var(--r-on-brand) 40%, transparent);
+  --r-success-soft: color-mix(in srgb, var(--r-on-brand) 16%, transparent);
+  --r-success-text: var(--r-on-brand);
+  --r-danger-soft: color-mix(in srgb, var(--r-on-brand) 16%, transparent);
+  --r-danger-text: var(--r-on-brand);
+  --r-focus: var(--r-on-brand);
+  --r-focus-ring: 0 0 0 1px var(--r-feature-brand), 0 0 0 3px var(--r-on-brand);
+  --r-chart-1: var(--r-on-brand);
+  --r-chart-context: color-mix(in srgb, var(--r-on-brand) 34%, transparent);
+  --r-chart-track: color-mix(in srgb, var(--r-on-brand) 16%, transparent);
+  --r-chart-grid: color-mix(in srgb, var(--r-on-brand) 18%, transparent);
+  --r-chart-axis: color-mix(in srgb, var(--r-on-brand) 46%, transparent);
+  --r-chart-label: color-mix(in srgb, var(--r-on-brand) 72%, transparent);
+  --r-chart-surface: var(--r-feature-brand);
 }
 
-.r-card--flame {
-  background: linear-gradient(150deg, var(--r-feature-flame-from) 0%, var(--r-feature-flame-to) 100%);
-  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--r-feature-flame-to) 55%, transparent);
+/* Signal: International Orange with black text. Live, now, the one thing that needs eyes. */
+.r-card--signal {
+  border-color: var(--r-signal);
+  background: var(--r-signal);
+  color-scheme: light;
+  --r-text: var(--r-on-signal);
+  --r-text-secondary: color-mix(in srgb, var(--r-on-signal) 80%, transparent);
+  --r-text-tertiary: color-mix(in srgb, var(--r-on-signal) 66%, transparent);
+  --r-text-disabled: color-mix(in srgb, var(--r-on-signal) 40%, transparent);
+  --r-border-subtle: color-mix(in srgb, var(--r-on-signal) 14%, transparent);
+  --r-border: color-mix(in srgb, var(--r-on-signal) 24%, transparent);
+  --r-border-strong: color-mix(in srgb, var(--r-on-signal) 44%, transparent);
+  --r-bg-surface: var(--r-signal);
+  --r-bg-raised: var(--r-signal);
+  --r-bg-muted: color-mix(in srgb, var(--r-on-signal) 6%, transparent);
+  --r-bg-hover: color-mix(in srgb, var(--r-on-signal) 10%, transparent);
+  --r-bg-pressed: color-mix(in srgb, var(--r-on-signal) 16%, transparent);
+  --r-bg-selected: color-mix(in srgb, var(--r-on-signal) 12%, transparent);
+  --r-bg-track: color-mix(in srgb, var(--r-on-signal) 14%, transparent);
+  --r-ink: var(--r-on-signal);
+  --r-ink-hover: color-mix(in srgb, var(--r-on-signal) 84%, var(--r-signal));
+  --r-on-ink: var(--r-signal);
+  --r-brand-text: var(--r-on-signal);
+  --r-success-soft: color-mix(in srgb, var(--r-on-signal) 10%, transparent);
+  --r-success-text: var(--r-on-signal);
+  --r-danger-soft: color-mix(in srgb, var(--r-on-signal) 10%, transparent);
+  --r-danger-text: var(--r-on-signal);
+  --r-focus: var(--r-on-signal);
+  --r-focus-ring: 0 0 0 1px var(--r-signal), 0 0 0 3px var(--r-on-signal);
+  --r-chart-1: var(--r-on-signal);
+  --r-chart-now: var(--r-on-signal);
+  --r-chart-context: color-mix(in srgb, var(--r-on-signal) 30%, transparent);
+  --r-chart-track: color-mix(in srgb, var(--r-on-signal) 14%, transparent);
+  --r-chart-grid: color-mix(in srgb, var(--r-on-signal) 16%, transparent);
+  --r-chart-axis: color-mix(in srgb, var(--r-on-signal) 44%, transparent);
+  --r-chart-label: color-mix(in srgb, var(--r-on-signal) 72%, transparent);
+  --r-chart-surface: var(--r-signal);
 }
 
-.r-card--brand :focus-visible,
-.r-card--flame :focus-visible {
-  outline-color: #fff;
-}
-
-.r-card__sheen {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  overflow: hidden;
-  border-radius: inherit;
-  background:
-    radial-gradient(90% 75% at 100% 100%, rgb(255 255 255 / 0.22), transparent 62%),
-    radial-gradient(55% 60% at 0% 0%, rgb(255 255 255 / 0.1), transparent 70%);
-  pointer-events: none;
-}
-
-.r-card__sheen::after {
-  position: absolute;
-  right: -18%;
-  bottom: -55%;
-  width: 90%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(255 255 255 / 0.16), transparent);
-  content: '';
-}
-
-/* Ink: a dark island (data-theme="dark"), so everything inside picks up dark tokens. */
+/* Ink: a dark island (data-theme="dark"), so everything inside picks up the dark tokens. */
 .r-card--ink {
-  border-color: rgb(255 255 255 / 0.06);
-  background: linear-gradient(180deg, #1b1f26, #121418);
-  box-shadow: var(--r-shadow-md);
+  border-color: var(--r-border-subtle);
+  background: var(--r-feature-ink);
+  --r-bg-surface: var(--r-feature-ink);
+  --r-chart-surface: var(--r-feature-ink);
+  /* The ring token is computed on :root, so an island re-declares it with its own colours. */
+  --r-focus-ring: 0 0 0 1px var(--r-feature-ink), 0 0 0 3px var(--r-focus);
 }
 </style>

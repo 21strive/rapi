@@ -12,7 +12,7 @@ const props = withDefaults(
     step?: number
     total?: number
     closable?: boolean
-    /** Background of the illustration well. */
+    /** Tint of the flat illustration well. */
     mediaTone?: Tone
     nextLabel?: string
     backLabel?: string
@@ -21,7 +21,7 @@ const props = withDefaults(
   }>(),
   {
     closable: true,
-    mediaTone: 'violet',
+    mediaTone: 'brand',
     nextLabel: 'Continue',
     backLabel: 'Back',
     skipLabel: 'Skip',
@@ -37,20 +37,24 @@ const titleId = useId()
 const bodyId = useId()
 const isFirst = computed(() => !props.step || props.step <= 1)
 const isLast = computed(() => !!props.step && !!props.total && props.step >= props.total)
+const pad = (n: number) => String(n).padStart(2, '0')
 </script>
 
 <template>
   <div class="r-coachmark" role="dialog" :aria-labelledby="titleId" :aria-describedby="bodyId">
     <div class="r-coachmark__head">
       <h2 :id="titleId" class="r-coachmark__title">{{ title }}</h2>
-      <RIconButton v-if="closable" label="Close" variant="soft" size="sm" shape="square" @click="emit('close')">
+      <RIconButton v-if="closable" label="Close" variant="ghost" size="sm" class="r-coachmark__close" @click="emit('close')">
         <X />
       </RIconButton>
     </div>
     <div :id="bodyId" class="r-coachmark__body"><slot /></div>
     <div v-if="$slots.media" class="r-coachmark__media" :class="`r-tone-${mediaTone}`"><slot name="media" /></div>
     <div class="r-coachmark__foot">
-      <span v-if="step && total" class="r-coachmark__count">{{ step }} of {{ total }}</span>
+      <span v-if="step && total" class="r-coachmark__count">
+        <span aria-hidden="true">{{ pad(step) }} / {{ pad(total) }}</span>
+        <span class="r-sr-only">Step {{ step }} of {{ total }}</span>
+      </span>
       <div class="r-coachmark__actions">
         <RButton v-if="isFirst" variant="outline" @click="emit('skip')">{{ skipLabel }}</RButton>
         <RButton v-else variant="outline" @click="emit('back')">{{ backLabel }}</RButton>
@@ -61,22 +65,19 @@ const isLast = computed(() => !!props.step && !!props.total && props.step >= pro
 </template>
 
 <style>
+/* A floating card: square, a strong 1px rule and a short shadow. */
 .r-coachmark {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 380px;
+  width: 360px;
   max-width: 100%;
-  padding: 22px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-xl);
+  padding: 20px;
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-surface);
   background: var(--r-bg-raised);
   box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
-}
-
-[data-theme='dark'] .r-coachmark {
-  border-color: var(--r-border);
 }
 
 .r-coachmark__head {
@@ -87,26 +88,32 @@ const isLast = computed(() => !!props.step && !!props.total && props.step >= pro
 }
 
 .r-coachmark__title {
-  padding-top: 4px;
+  padding-top: 2px;
   font-size: var(--r-text-lg);
   font-weight: var(--r-weight-semibold);
   line-height: 1.35;
   letter-spacing: var(--r-tracking-snug);
 }
 
-.r-coachmark__body {
-  margin-top: -6px;
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-md);
-  line-height: var(--r-leading-relaxed);
+.r-coachmark__close {
+  margin: -4px -8px 0 0;
 }
 
+.r-coachmark__body {
+  margin-top: -8px;
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-md);
+  line-height: var(--r-leading-normal);
+}
+
+/* The illustration well: a flat tint of the tone, square, no gradient. */
 .r-coachmark__media {
   position: relative;
   height: 168px;
   overflow: hidden;
-  border-radius: var(--r-radius-lg);
-  background: color-mix(in srgb, var(--tone-solid) 34%, var(--r-bg-raised));
+  border: 1px solid var(--r-border);
+  border-radius: var(--r-radius-surface);
+  background: color-mix(in srgb, var(--tone-solid) 14%, var(--r-bg-raised));
 }
 
 .r-coachmark__foot {
@@ -114,13 +121,15 @@ const isLast = computed(() => !!props.step && !!props.total && props.step >= pro
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 4px;
 }
 
+/* Step counter in mono: 02 / 04. */
 .r-coachmark__count {
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-md);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
 .r-coachmark__actions {

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Check, ChevronRight } from 'lucide-vue-next'
+import RKbd from './RKbd.vue'
 import { getFocusable } from '../composables/dom'
-import { provideFloatingRegistry, transformOrigin, useFloating } from '../composables/floating'
+import { provideFloatingRegistry, useFloating } from '../composables/floating'
 import type { MenuItem } from '../types'
 
 defineOptions({ inheritAttrs: false })
@@ -56,12 +57,32 @@ const subFloating = useFloating(sub, {
   anchor: () => (openIndex.value === null ? null : itemEls[openIndex.value]),
   open: () => openIndex.value !== null,
   placement: 'right-start',
-  offset: 6,
-  crossOffset: -7,
+  // The submenu butts against its parent so the two panels share one rule, and its first item
+  // lines up with the item that opened it (4px padding + 1px rule).
+  offset: 4,
+  crossOffset: -5,
   fitHeight: true,
 })
 
-const subStyle = computed(() => [subFloating.style.value, { '--r-origin': transformOrigin(subFloating.placement.value) }])
+const subStyle = computed(() => subFloating.style.value)
+
+/* "⌘E" → ⌘ E, "Ctrl+E" → Ctrl E, "⇧⌘N" → ⇧ ⌘ N: each key gets its own keycap. */
+const MODIFIER_GLYPHS = new Set(['⌘', '⌥', '⇧', '⌃'])
+function keysOf(shortcut: string): string[] {
+  if (shortcut.length > 1 && shortcut.includes('+')) {
+    return shortcut
+      .split('+')
+      .map((key) => key.trim())
+      .filter(Boolean)
+  }
+  const chars = [...shortcut]
+  const keys: string[] = []
+  let i = 0
+  while (i < chars.length - 1 && MODIFIER_GLYPHS.has(chars[i])) keys.push(chars[i++])
+  const last = chars.slice(i).join('')
+  if (last) keys.push(last)
+  return keys
+}
 
 function isEnabled(item: MenuItem | undefined) {
   return !!item && !item.divider && !item.heading && !item.disabled
@@ -286,7 +307,7 @@ defineExpose({ focusFirst })
           <span class="r-menu__label">{{ item.label }}</span>
           <span v-if="item.description" class="r-menu__description">{{ item.description }}</span>
         </span>
-        <span v-if="item.shortcut" class="r-menu__shortcut">{{ item.shortcut }}</span>
+        <RKbd v-if="item.shortcut" class="r-menu__shortcut" :keys="keysOf(item.shortcut)" size="sm" />
         <Check v-if="item.checked" class="r-menu__check" />
         <ChevronRight v-if="item.children?.length" class="r-menu__chevron" />
       </button>
@@ -314,28 +335,29 @@ defineExpose({ focusFirst })
 .r-menu {
   display: flex;
   flex-direction: column;
-  min-width: 208px;
+  min-width: 200px;
   outline: none;
 }
 
 .r-menu__header {
-  margin: 0 -6px 6px;
-  padding: 6px 12px 10px;
+  margin: -4px -4px 4px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--r-border-subtle);
 }
 
+/* Dense 28px rows. Hover and keyboard both move the highlight; the keyboard adds a focus rule. */
 .r-menu__item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  min-height: 36px;
-  padding: 6px 10px;
+  min-height: var(--r-control-sm);
+  padding: 4px 8px;
   border: 0;
-  border-radius: var(--r-radius-sm);
+  border-radius: var(--r-radius-control);
   background: none;
   color: var(--r-text);
-  font-size: var(--r-text-md);
+  font-size: var(--r-text-sm);
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -348,12 +370,16 @@ defineExpose({ focusFirst })
 }
 
 .r-menu__item:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--r-border-strong);
+  outline: 2px solid var(--r-focus);
+  outline-offset: -2px;
 }
 
 .r-menu__item[aria-disabled='true'] {
+  color: var(--r-text-disabled);
   cursor: not-allowed;
-  opacity: 0.45;
+}
+.r-menu__item[aria-disabled='true'] .r-menu__icon {
+  color: inherit;
 }
 
 .r-menu__item.is-danger {
@@ -370,12 +396,12 @@ defineExpose({ focusFirst })
   display: inline-grid;
   flex-shrink: 0;
   place-items: center;
-  width: 18px;
+  width: 16px;
   color: var(--r-text-tertiary);
 }
 .r-menu__icon svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
 }
 
 .r-menu__text {
@@ -400,44 +426,41 @@ defineExpose({ focusFirst })
 }
 
 .r-menu__shortcut {
-  margin-left: 20px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  letter-spacing: 0.08em;
-  white-space: nowrap;
+  margin-left: 16px;
 }
 
 .r-menu__check,
 .r-menu__chevron {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   margin-left: 8px;
   color: var(--r-text-tertiary);
 }
 .r-menu__check {
-  color: var(--r-brand);
+  color: var(--r-brand-text);
 }
 
 .r-menu__divider {
   height: 1px;
-  margin: 6px -6px;
+  margin: 4px -4px;
   background: var(--r-border-subtle);
 }
 
+/* Group headings are labels: Geist Mono capitals. */
 .r-menu__heading {
-  padding: 8px 10px 4px;
+  padding: 8px 8px 4px;
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-2xs);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-semibold);
-  letter-spacing: var(--r-tracking-wide);
+  letter-spacing: var(--r-tracking-caps);
   text-transform: uppercase;
 }
 
 .r-menu-sub {
   z-index: calc(var(--r-z-popover) + 1);
   max-height: calc(100dvh - 16px);
-  padding: 6px;
+  padding: 4px;
   overflow: auto;
-  transform-origin: var(--r-origin, top left);
 }
 </style>

@@ -14,6 +14,8 @@ export type StatusTone = 'neutral' | 'brand' | 'signal' | 'success' | 'warning' 
 
 export type ButtonVariant = 'solid' | 'soft' | 'outline' | 'ghost'
 export type ButtonTone = 'neutral' | 'brand' | 'signal' | 'danger' | 'success'
+/** Control heights: xs 24 · sm 28 · md 32 · lg 40. */
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 export type AvatarStatus = 'online' | 'away' | 'busy' | 'offline'
@@ -56,10 +58,12 @@ export interface TableColumn<Row = Record<string, any>> {
   sortable?: boolean
   /** Right-aligned, tabular figures. */
   numeric?: boolean
+  /* Method syntax on purpose: typed columns (TableColumn<Invoice>[]) stay assignable to RTable's
+     columns prop, because method parameters are checked bivariantly. */
   /** Value used for sorting when it differs from what is shown. */
-  sortValue?: (row: Row) => string | number | null | undefined
+  sortValue?(row: Row): string | number | null | undefined
   /** Text for the cell when there is no `cell-{key}` slot. */
-  format?: (value: any, row: Row) => string
+  format?(value: any, row: Row): string
 }
 
 export interface TableSort {
