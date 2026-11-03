@@ -58,8 +58,7 @@
   font-family: var(--r-font-mono);
   font-size: 9.5px;
   font-weight: var(--r-weight-semibold);
-  letter-spacing: var(--r-tracking-caps);
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* Value labels placed on marks (end of a line, top of a column). Text tokens, never series colour. */

@@ -29,8 +29,9 @@ Nothing floats, nothing bounces, nothing is decorated. The data is the loudest t
    selection and the one primary action in a flow. International Orange (`#FF4F00`) marks what is
    live, now, or needs eyes, and nothing else. Status colours never appear without an icon or a
    word.
-5. **Numbers are instruments.** Tabular figures wherever numbers line up; units small, in mono
-   caps; hero figures large, Geist SemiBold, tight tracking, proportional.
+5. **Numbers are instruments.** Tabular figures wherever numbers line up; units small, in Geist
+   Mono, spelled the way the unit is spelled (ms, km/h, µg/m³; never uppercased, because SI units
+   are case-sensitive); hero figures large, Geist SemiBold, tight tracking, proportional.
 6. **Index everything.** Running numbers (01, 02), eyebrows over titles, a mono strip across the
    top of a page with the context on the left and the date or status on the right.
 
@@ -98,7 +99,7 @@ four corners of a panel), `.r-hatch` (45° hatching that means forecast, no data
 - **Overlays** are square panels with a strong border and a short shadow. The command palette and
   tooltips are dark islands.
 - **Readouts** (`RReadout`) are for telemetry and instruments: mono caps label, large mono or pixel
-  figure, unit in mono caps.
+  figure, unit in mono with its own case.
 - **Icons** are Lucide at 1.5 stroke with square caps (base.css sets this). 16px in controls,
   14px in dense rows.
 
@@ -133,8 +134,8 @@ The method comes from the dataviz guidelines; the look comes from the brand.
 - Realistic data: real-looking names from Indonesia and elsewhere, IDR / USD / SGD amounts with
   correct separators, 24-hour times with a zone (`14:02 WIB`, `07:02 UTC`), dates like
   `12 Nov 2026`. Never lorem ipsum.
-- Numbers: thousands separators, units after the figure in mono caps (`1,284 RPS`, `37.2 °C`),
-  signed deltas (`+1.9%`, `−0.4 pp`) with the true minus sign.
+- Numbers: thousands separators, units after the figure in Geist Mono with their own case
+  (`1,284 req/s`, `37.2 °C`, `182 ms`), signed deltas (`+1.9%`, `−0.4 pp`) with the true minus sign.
 
 ## Don't
 

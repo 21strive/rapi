@@ -218,4 +218,11 @@ const inactive = computed(() => props.disabled || props.loading)
   margin: auto;
   animation: r-spin 0.8s linear infinite;
 }
+
+/* Toggle buttons: aria-pressed="true" reads as switched on, a solid fill in the tone. */
+.r-button[aria-pressed='true']:not(.r-button--solid) {
+  border-color: var(--tone-solid);
+  background: var(--tone-solid);
+  color: var(--tone-on-solid);
+}
 </style>

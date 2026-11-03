@@ -251,7 +251,8 @@ const cells = (value: string) => Array.from(value, (ch) => ({ ch, digit: /\d/.te
   font-weight: var(--r-weight-medium);
   line-height: 1;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  /* Units keep their own case: ms is not Ms, µg is not MG. */
+  text-transform: none;
   white-space: nowrap;
 }
 

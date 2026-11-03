@@ -96,7 +96,15 @@ const domain = computed(() => {
   const refs = (props.references ?? []).map((r) => r.value)
   const lo = props.min ?? Math.min(0, ...values.value, ...refs)
   const hi = props.max ?? Math.max(1, ...values.value, ...refs)
-  return niceDomain(lo, hi, props.yTicks)
+  const d = niceDomain(lo, hi, props.yTicks)
+  // An explicit min or max is kept exactly; the tidy ticks fill the space between, and the limit
+  // gets its own label when it is not too close to the nearest tick.
+  const min = props.min ?? d.min
+  const max = props.max ?? d.max
+  const ticks = d.ticks.filter((t) => t >= min - 1e-9 && t <= max + 1e-9)
+  if (props.min != null && ticks.length && ticks[0] - min >= d.step / 2) ticks.unshift(min)
+  if (props.max != null && ticks.length && max - ticks[ticks.length - 1] >= d.step / 2) ticks.push(max)
+  return { ...d, min, max, ticks }
 })
 
 const geometry = computed(() => {

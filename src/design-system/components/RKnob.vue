@@ -344,7 +344,8 @@ onBeforeUnmount(() => {
   font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-medium);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  /* Units keep their own case: ms is not Ms, µg is not MG. */
+  text-transform: none;
 }
 
 .r-knob.is-disabled {

@@ -214,7 +214,8 @@ const ariaLabel = computed(
   font-size: 10px;
   font-weight: var(--r-weight-semibold);
   letter-spacing: 0.06em;
-  text-transform: uppercase;
+  /* Units keep their own case: ms is not Ms, µg is not MG. */
+  text-transform: none;
 }
 
 .r-dial__label {

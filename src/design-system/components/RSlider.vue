@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { computed, useId } from 'vue'
+import { computed, useAttrs, useId } from 'vue'
 import { formatNumber, withMinus } from '../composables/format'
 import type { SliderMark } from '../types'
 
 /** A range slider with tick marks and a mono value readout. Square thumb. */
+defineOptions({ inheritAttrs: false })
 const model = defineModel<number>({ default: 0 })
+
+// class and style dress the wrapper; aria-*, name and events go to the native input.
+const attrs = useAttrs()
+const rootAttrs = computed(() => ({ class: attrs.class, style: attrs.style }))
+const inputAttrs = computed(() => {
+  const { class: _class, style: _style, ...rest } = attrs
+  return rest
+})
 const props = withDefaults(
   defineProps<{
     label: string
@@ -73,7 +82,11 @@ function onInput(event: Event) {
 </script>
 
 <template>
-  <div class="r-slider" :class="{ 'is-disabled': disabled, 'has-labels': labelled }" :style="{ '--r-slider-fill': fill }">
+  <div
+    class="r-slider"
+    :class="[{ 'is-disabled': disabled, 'has-labels': labelled }, rootAttrs.class]"
+    :style="[{ '--r-slider-fill': fill }, rootAttrs.style as any]"
+  >
     <div class="r-slider__head">
       <label class="r-slider__label" :for="id">{{ label }}</label>
       <span v-if="showValue" class="r-slider__value" aria-hidden="true">
@@ -95,6 +108,7 @@ function onInput(event: Event) {
         :value="model"
         :disabled="disabled"
         :aria-valuetext="ariaValueText"
+        v-bind="inputAttrs"
         @input="onInput"
       />
     </div>
@@ -166,7 +180,8 @@ function onInput(event: Event) {
   font-size: var(--r-text-3xs);
   font-weight: var(--r-weight-medium);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  /* Units keep their own case: ms is not Ms, µg is not MG. */
+  text-transform: none;
 }
 
 .r-slider__control {

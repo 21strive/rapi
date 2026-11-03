@@ -221,7 +221,7 @@ onBeforeUnmount(() => window.clearInterval(timer))
           </div>
         </div>
         <div class="s-aq-cell">
-          <RReadout label="PM2.5" :value="fmt1(live.pm)" unit="ug/m³">
+          <RReadout label="PM2.5" :value="fmt1(live.pm)" unit="µg/m³">
             <template #meta>02</template>
           </RReadout>
           <div class="s-aq-foot">

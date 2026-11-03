@@ -203,7 +203,8 @@ const spoken = computed(() => {
   font-size: max(var(--r-text-2xs), 0.28em);
   font-weight: var(--r-weight-medium);
   letter-spacing: 0.06em;
-  text-transform: uppercase;
+  /* Units keep their own case: ms is not Ms, µg is not MG. */
+  text-transform: none;
 }
 
 .r-stat__footer {
