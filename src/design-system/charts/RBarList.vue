@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useId } from 'vue'
 import ChartTooltip from './ChartTooltip.vue'
+import ChartLegend from './ChartLegend.vue'
 import { colorAt, niceDomain, useChartFocus } from './utils'
 import { useElementSize } from '../composables/dom'
 import { formatCompact, formatNumber } from '../composables/format'
@@ -26,13 +27,14 @@ const props = withDefaults(
     axis?: boolean
     showValues?: boolean
     legend?: boolean
-    /** Soft left-to-right gradient on the first series. */
+    /** Kept for 0.1 compatibility; bars are flat now. */
     gradient?: boolean
+    /** Bar thickness in px, 24 at most. */
     barHeight?: number
     format?: (value: number) => string
     label: string
   }>(),
-  { showValues: true, gradient: true, barHeight: 28 },
+  { showValues: true, gradient: false, barHeight: 12 },
 )
 
 const plot = ref<HTMLElement | null>(null)
@@ -49,7 +51,7 @@ const seriesList = computed(() => {
   const count = Math.max(1, ...props.items.map((i) => valuesOf(i).length))
   return Array.from({ length: count }, (_, i) => ({
     name: props.series?.[i]?.name ?? `Series ${i + 1}`,
-    color: props.series?.[i]?.color ?? (i === 0 ? 'var(--r-chart-1)' : i === 1 ? 'var(--r-chart-1-soft)' : colorAt(i)),
+    color: props.series?.[i]?.color ?? colorAt(i),
   }))
 })
 
@@ -81,7 +83,7 @@ const tooltip = computed(() => {
     x: rowEl.offsetLeft + (rowEl.offsetWidth * end) / 100,
     y: rowEl.offsetTop + rowEl.offsetHeight / 2,
     title: row.label,
-    rows: row.segments.map((s) => ({ label: seriesList.value[s.i].name, value: fmt(s.value), color: s.color })),
+    rows: row.segments.map((s) => ({ label: seriesList.value[s.i].name, value: fmt(s.value), color: s.color, kind: 'rect' as const })),
   }
 })
 
@@ -92,12 +94,16 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
 <template>
   <figure
     class="r-chart r-bar-list"
-    :class="{ 'is-grown': grown, 'is-focused': focus.active.value !== null, 'r-bar-list--gradient': gradient }"
+    :class="{ 'is-grown': grown, 'is-focused': focus.active.value !== null }"
     tabindex="0"
     :aria-describedby="`${uid}-hint`"
     @keydown="focus.onKeydown"
     @blur="focus.onBlur"
   >
+    <ChartLegend
+      v-if="legend && seriesList.length > 1"
+      :items="seriesList.map((s) => ({ name: s.name, color: s.color, kind: 'rect' as const }))"
+    />
     <div ref="plot" class="r-bar-list__plot" role="img" :aria-label="label" @pointerleave="focus.onPointer(null)">
       <div
         v-for="(row, r) in rows"
@@ -140,12 +146,6 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
       />
     </div>
 
-    <ul v-if="legend && seriesList.length > 1" class="r-chart__legend r-bar-list__legend" aria-hidden="true">
-      <li v-for="s in seriesList" :key="s.name">
-        <span class="r-bar-list__legend-dot" :style="{ background: s.color }" />
-        {{ s.name }}
-      </li>
-    </ul>
 
     <div class="r-sr-only">
       <table>
@@ -175,7 +175,7 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 14px 14px;
+  gap: 10px 14px;
 }
 
 .r-bar-list__row,
@@ -185,12 +185,16 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
 
 .r-bar-list__label {
   grid-column: 1;
-  max-width: 160px;
+  max-width: 180px;
   overflow: hidden;
   color: var(--r-text-secondary);
   font-size: var(--r-text-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.r-bar-list__row.is-active .r-bar-list__label {
+  color: var(--r-text);
 }
 
 .r-bar-list__track {
@@ -201,27 +205,19 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
   isolation: isolate;
 }
 
+/* Square segments; neighbours are split by a 2px surface gap, never a stroke. */
 .r-bar-list__segment {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-radius: 0 7px 7px 0;
   background: var(--r-seg);
   transition:
-    width var(--r-duration-slower) var(--r-ease-out),
+    width var(--r-duration-slow) var(--r-ease-out),
     opacity var(--r-duration-fast) var(--r-ease-out);
 }
-.r-bar-list__segment.is-first {
-  z-index: 1;
-  border-radius: 7px;
-}
-.r-bar-list--gradient .r-bar-list__segment.is-first {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--r-seg) 45%, var(--r-bg-surface)), var(--r-seg));
-}
+
 .r-bar-list__segment:not(.is-first) {
-  margin-left: -7px;
-  padding-left: 7px;
-  box-sizing: content-box;
+  border-left: 2px solid var(--r-chart-surface);
 }
 
 .r-bar-list.is-focused .r-bar-list__row:not(.is-active) .r-bar-list__segment {
@@ -230,8 +226,10 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
 
 .r-bar-list__value {
   grid-column: 3;
+  min-width: 3ch;
   color: var(--r-text);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-weight: var(--r-weight-semibold);
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -241,12 +239,13 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
 .r-bar-list__lines {
   position: absolute;
   z-index: -1;
-  top: -8px;
-  bottom: -8px;
+  top: -6px;
+  bottom: -6px;
   left: 0;
   right: 0;
   pointer-events: none;
 }
+
 .r-bar-list__lines i {
   position: absolute;
   top: 0;
@@ -255,30 +254,28 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
   background: var(--r-chart-grid);
 }
 
+.r-bar-list__lines i:first-child {
+  background: var(--r-chart-axis);
+}
+
 .r-bar-list__ticks {
   position: relative;
   grid-column: 2;
   height: 14px;
-  color: var(--r-chart-axis);
-  font-size: var(--r-text-2xs);
+  color: var(--r-chart-label);
+  font-family: var(--r-font-mono);
+  font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
+
 .r-bar-list__ticks span {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
   white-space: nowrap;
 }
+
 .r-bar-list__ticks span:first-child {
   transform: none;
-}
-
-.r-bar-list__legend {
-  margin: 16px 0 0;
-}
-.r-bar-list__legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
 }
 </style>

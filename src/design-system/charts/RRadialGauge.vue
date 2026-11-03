@@ -23,7 +23,7 @@ const props = withDefaults(
     format?: (value: number) => string
     label: string
   }>(),
-  { bars: 30, legend: true },
+  { bars: 48, legend: true },
 )
 
 const uid = useId()
@@ -35,14 +35,15 @@ const R_OUTER = 150
 const R_INNER = 94
 
 const fmt = (v: number) => (props.format ? props.format(v) : formatNumber(v))
-const DEFAULTS = ['var(--r-chart-1)', 'var(--r-chart-1-soft)', 'var(--r-chart-grid)']
+const DEFAULTS = ['var(--r-chart-1)', 'var(--r-chart-2)', 'var(--r-chart-3)']
 const items = computed(() =>
   props.segments.map((s, i) => ({ ...s, color: s.color ?? DEFAULTS[i] ?? colorAt(i) })),
 )
 const sum = computed(() => props.segments.reduce((total, s) => total + Math.max(0, s.value), 0))
 const scale = computed(() => Math.max(props.max ?? sum.value, 1e-9))
 
-const thickness = computed(() => Math.min(14, (((R_OUTER + R_INNER) / 2) * Math.PI) / props.bars * 0.62))
+// Thin square ticks, like the scale of an instrument; at most 6px wide.
+const thickness = computed(() => Math.min(6, ((((R_OUTER + R_INNER) / 2) * Math.PI) / props.bars) * 0.5))
 
 const ticks = computed(() => {
   const n = props.bars
@@ -57,10 +58,7 @@ const ticks = computed(() => {
     const at = ((i + 0.5) / n) * scale.value
     const segment = bounds.findIndex((end) => at <= end)
     const s = segment >= 0 ? items.value[segment] : null
-    // Within a segment the bars lighten a touch toward its end, like light across a surface.
-    const start = segment > 0 ? bounds[segment - 1] : 0
-    const local = s ? (at - start) / Math.max(1e-9, s.value) : 0
-    const color = s ? `color-mix(in oklab, ${s.color} ${Math.round(100 - local * 22)}%, white)` : 'var(--r-chart-track)'
+    const color = s ? s.color : 'var(--r-chart-track)'
     const cos = Math.cos(angle)
     const sin = Math.sin(angle)
     return {
@@ -102,6 +100,9 @@ const center = computed(() => {
   >
     <div class="r-gauge__arc">
       <svg :viewBox="`0 0 ${W} ${H}`" role="img" :aria-label="label" @pointerleave="hovered = null">
+        <path class="r-gauge__scale" :d="`M${CX - R_INNER + 10},${CY} A${R_INNER - 10},${R_INNER - 10} 0 0 1 ${CX + R_INNER - 10},${CY}`" />
+        <text class="r-chart__text" :x="CX - R_OUTER" :y="CY + 14">0</text>
+        <text class="r-chart__text" :x="CX + R_OUTER" :y="CY + 14" text-anchor="end">{{ fmt(scale) }}</text>
         <line
           v-for="(t, i) in ticks"
           :key="i"
@@ -131,6 +132,7 @@ const center = computed(() => {
       >
         <span class="r-gauge__dot" :style="{ background: s.color }" />
         {{ s.label }}
+        <span class="r-gauge__legend-value">{{ fmt(s.value) }}</span>
       </li>
     </ul>
     <div class="r-sr-only">
@@ -170,9 +172,15 @@ const center = computed(() => {
   overflow: visible;
 }
 
+.r-gauge__scale {
+  fill: none;
+  stroke: var(--r-chart-axis);
+  stroke-width: 1;
+}
+
 .r-gauge__bar {
-  stroke-linecap: round;
-  animation: r-gauge-in var(--r-duration-slower) var(--r-ease-out) both;
+  stroke-linecap: butt;
+  animation: r-gauge-in var(--r-duration-slow) var(--r-ease-out) both;
   transition: stroke var(--r-duration-fast) var(--r-ease-out);
 }
 /* The other segments fall back to the track colour, so even a pale segment stands out. */
@@ -208,9 +216,8 @@ const center = computed(() => {
   color: var(--r-text);
   font-size: clamp(22px, 8.6cqw, 38px);
   font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
   line-height: 1.1;
-  letter-spacing: var(--r-tracking-tighter);
+  letter-spacing: var(--r-tracking-display);
 }
 .r-gauge__arc {
   container-type: inline-size;
@@ -218,7 +225,11 @@ const center = computed(() => {
 
 .r-gauge__caption {
   color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-3xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-caps);
+  text-transform: uppercase;
 }
 
 .r-gauge__legend {
@@ -226,8 +237,15 @@ const center = computed(() => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px 16px;
-  color: var(--r-text-tertiary);
+  color: var(--r-text-secondary);
   font-size: var(--r-text-xs);
+}
+
+.r-gauge__legend-value {
+  color: var(--r-text);
+  font-family: var(--r-font-mono);
+  font-weight: var(--r-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
 .r-gauge__legend li {
   display: inline-flex;
@@ -241,8 +259,7 @@ const center = computed(() => {
 }
 
 .r-gauge__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 9px;
+  height: 9px;
 }
 </style>

@@ -1,107 +1,254 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useId } from 'vue'
-import { useChartFocus } from './utils'
-import { formatNumber } from '../composables/format'
+import { computed, ref, useId } from 'vue'
+import ChartTooltip from './ChartTooltip.vue'
+import ChartLegend from './ChartLegend.vue'
+import { chartWidth, colorAt, crisp, linearScale, niceDomain, useChartFocus } from './utils'
+import { useElementSize } from '../composables/dom'
+import { formatCompact, formatNumber } from '../composables/format'
+import type { ChartReference, ChartSeries } from '../types'
 
 const props = withDefaults(
   defineProps<{
     labels: string[]
-    values: number[]
+    /** One series. Ignored when `series` is given. */
+    values?: number[]
+    /** Several series, stacked in each column with a 2px surface gap between segments. */
+    series?: ChartSeries[]
+    /** Top of the scale. Defaults to 100 when every value fits (percentages), else a tidy maximum. */
     max?: number
     /** A short tick per column (or one for all) marking the goal. */
     targets?: number[] | number
-    /** The column drawn in full colour; the rest are soft. Leave unset for all solid. */
+    /** The column drawn in full colour; the others turn context grey (emphasis). */
     highlight?: number | null
+    /** Colour of a single series. */
     color?: string
-    /** Text colour inside a full-colour column. Near-black reads on light and saturated colours; pass #fff for dark ones. */
+    /** Kept for 0.1 compatibility; labels now sit above the columns in ink. */
     labelColor?: string
     height?: number
+    /** Values printed on the column caps. Defaults to on when there are 12 columns or fewer. */
+    showValues?: boolean
+    references?: ChartReference[]
+    yUnit?: string
+    hideYAxis?: boolean
     format?: (value: number) => string
+    axisFormat?: (value: number) => string
     label: string
   }>(),
-  { max: 100, color: 'var(--r-chart-4)', labelColor: '#0c0e12', height: 220, highlight: null },
+  { color: 'var(--r-chart-1)', height: 220, highlight: null, showValues: undefined },
 )
 
+const root = ref<HTMLElement | null>(null)
+const { width: measured } = useElementSize(root)
+const width = chartWidth(measured)
 const uid = useId()
-const fmt = (v: number) => (props.format ? props.format(v) : `${formatNumber(v, { maximumFractionDigits: 1 })}%`)
+
+const stacks = computed<ChartSeries[]>(() =>
+  props.series?.length ? props.series : [{ name: 'Value', values: props.values ?? [], color: props.color }],
+)
+const multi = computed(() => (props.series?.length ?? 0) > 1)
+const totals = computed(() =>
+  props.labels.map((_, i) => stacks.value.reduce((sum, s) => sum + Math.max(0, s.values[i] ?? 0), 0)),
+)
+const allFit = computed(() => totals.value.every((t) => t <= 100) && !props.series?.length)
+
+const fmt = (v: number) =>
+  props.format ? props.format(v) : allFit.value && props.max == null ? `${formatNumber(v, { maximumFractionDigits: 1 })}%` : formatNumber(v)
+const axisFmt = (v: number) =>
+  props.axisFormat ? props.axisFormat(v) : allFit.value && props.max == null ? `${v}%` : formatCompact(v)
 
 const targetAt = (i: number) => (Array.isArray(props.targets) ? props.targets[i] : props.targets)
 
-// The label sits at the top of the column; when the target tick would cross it, it moves to the bottom.
-const labelZone = computed(() => (34 / Math.max(1, props.height - 30)) * 100)
+const domain = computed(() => {
+  const refs = (props.references ?? []).map((r) => r.value)
+  const targets = props.labels.map((_, i) => targetAt(i) ?? 0)
+  const hi = props.max ?? (allFit.value ? 100 : Math.max(1, ...totals.value, ...targets, ...refs))
+  return props.max != null || allFit.value ? { min: 0, max: hi, ticks: niceDomain(0, hi, 4).ticks.filter((t) => t <= hi) } : niceDomain(0, hi, 4)
+})
+
+const values = computed(() => props.showValues ?? props.labels.length <= 12)
+
+const margin = computed(() => ({
+  top: values.value || props.yUnit ? 22 : 8,
+  right: 4,
+  bottom: 26,
+  left: props.hideYAxis ? 4 : 48,
+}))
+
+const geometry = computed(() => {
+  const m = margin.value
+  const plotW = Math.max(1, width.value - m.left - m.right)
+  const plotH = Math.max(1, props.height - m.top - m.bottom)
+  const n = Math.max(1, props.labels.length)
+  const band = plotW / n
+  const barW = Math.max(4, Math.min(24, band * 0.56))
+  const y = linearScale(domain.value.min, domain.value.max, m.top + plotH, m.top)
+  return { plotW, plotH, band, barW, y, top: m.top, bottom: m.top + plotH, left: m.left, right: m.left + plotW }
+})
 
 const columns = computed(() =>
-  props.values.map((value, i) => {
-    const pct = Math.min(1, Math.max(0, value / props.max))
+  props.labels.map((label, i) => {
+    const { band, barW, y, left, bottom } = geometry.value
+    const cx = left + band * i + band / 2
+    const dim = props.highlight != null && props.highlight !== i
+    let base = 0
+    const segments = stacks.value.map((s, k) => {
+      const v = Math.max(0, s.values[i] ?? 0)
+      const y0 = y(base)
+      const y1 = y(base + v)
+      base += v
+      // 2px surface gap between stacked segments: trim each segment's top edge.
+      const gap = k < stacks.value.length - 1 && v > 0 ? 0 : 0
+      return {
+        key: `${s.name}`,
+        x: cx - barW / 2,
+        y: y1 + (k > 0 ? 0 : 0),
+        w: barW,
+        h: Math.max(0, y0 - y1 - (k > 0 && v > 0 ? 2 : 0) - gap),
+        color: dim ? 'var(--r-chart-context)' : colorAt(k, s.color ?? (multi.value ? undefined : props.color)),
+      }
+    })
     const target = targetAt(i)
-    const height = pct * 100
-    const targetPct = target == null ? null : Math.min(1, Math.max(0, target / props.max)) * 100
     return {
-      label: props.labels[i],
-      value,
-      height,
-      target: targetPct,
-      solid: props.highlight == null || props.highlight === i,
-      labelLow: targetPct != null && targetPct <= height && targetPct >= height - labelZone.value,
+      label,
+      cx,
+      total: totals.value[i],
+      top: y(totals.value[i]),
+      bottom,
+      segments,
+      target: target == null ? null : { y: y(target), w: Math.min(band - 4, barW + 12), value: target },
     }
   }),
 )
 
+const yTicks = computed(() => domain.value.ticks.map((v) => ({ v, y: geometry.value.y(v) })))
+
+const xEvery = computed(() => Math.max(1, Math.ceil(44 / geometry.value.band)))
+
+const refs = computed(() =>
+  (props.references ?? []).map((r) => {
+    const text = r.label ?? `${r.kind ?? 'target'} ${fmt(r.value)}`
+    return { ...r, y: geometry.value.y(r.value), text, w: text.length * 6.2 + 8 }
+  }),
+)
+
 const focus = useChartFocus(
-  () => props.values.length,
+  () => props.labels.length,
   (i) => {
     const t = targetAt(i)
-    return `${props.labels[i]}: ${fmt(props.values[i])}${t == null ? '' : `, target ${fmt(t)}`}`
+    const parts = multi.value
+      ? stacks.value.map((s) => `${s.name} ${fmt(s.values[i] ?? 0)}`).join(', ')
+      : fmt(totals.value[i])
+    return `${props.labels[i]}: ${parts}${t == null ? '' : `, target ${fmt(t)}`}`
   },
 )
 
-const grown = ref(false)
-onMounted(() => requestAnimationFrame(() => (grown.value = true)))
+function onPointerMove(event: PointerEvent) {
+  const box = (event.currentTarget as SVGElement).getBoundingClientRect()
+  const px = event.clientX - box.left - geometry.value.left
+  const i = Math.floor(px / geometry.value.band)
+  focus.onPointer(i >= 0 && i < props.labels.length ? i : null)
+}
+
+const tip = computed(() => {
+  const i = focus.active.value
+  if (i === null) return null
+  const c = columns.value[i]
+  const rows = multi.value
+    ? stacks.value.map((s, k) => ({ label: s.name, value: fmt(s.values[i] ?? 0), color: colorAt(k, s.color), kind: 'rect' as const }))
+    : [{ label: 'Value', value: fmt(c.total), color: c.segments[0]?.color, kind: 'rect' as const }]
+  if (c.target) rows.push({ label: 'Target', value: fmt(c.target.value), color: 'var(--r-chart-ink)', kind: 'rect' as const })
+  return { x: c.cx, y: Math.min(c.top, c.target?.y ?? c.top), title: c.label, rows }
+})
+
+const legendItems = computed(() =>
+  multi.value ? stacks.value.map((s, k) => ({ name: s.name, color: colorAt(k, s.color), kind: 'rect' as const })) : [],
+)
 </script>
 
 <template>
   <figure
+    ref="root"
     class="r-chart r-columns"
-    :class="{ 'is-grown': grown }"
     tabindex="0"
     :aria-describedby="`${uid}-hint`"
     @keydown="focus.onKeydown"
     @blur="focus.onBlur"
   >
-    <div class="r-columns__plot" role="img" :aria-label="label" :style="{ height: `${height}px` }">
-      <div
-        v-for="(c, i) in columns"
-        :key="i"
-        class="r-columns__column"
-        :class="{ 'is-active': focus.active.value === i }"
-        @pointerenter="focus.onPointer(i)"
+    <ChartLegend v-if="legendItems.length" :items="legendItems" />
+    <div class="r-chart__plot">
+      <svg
+        :width="width"
+        :height="height"
+        :viewBox="`0 0 ${width} ${height}`"
+        role="img"
+        :aria-label="label"
+        @pointermove="onPointerMove"
         @pointerleave="focus.onPointer(null)"
       >
-        <div class="r-columns__track">
-          <div
-            class="r-columns__bar"
-            :class="{ 'is-solid': c.solid }"
-            :style="{
-              height: grown ? `${c.height}%` : '0%',
-              '--r-col': color,
-              '--r-col-text': labelColor,
-              transitionDelay: `${i * 70}ms`,
-            }"
+        <g class="r-chart__grid">
+          <line v-for="t in yTicks" :key="t.v" :x1="geometry.left" :x2="geometry.right" :y1="crisp(t.y)" :y2="crisp(t.y)" />
+        </g>
+        <g class="r-chart__axis">
+          <template v-if="!hideYAxis">
+            <text v-if="yUnit" class="r-chart__unit" :x="geometry.left - 8" :y="geometry.top - 12" text-anchor="end">{{ yUnit }}</text>
+            <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">
+              {{ axisFmt(t.v) }}
+            </text>
+          </template>
+          <template v-for="(c, i) in columns" :key="`x${i}`">
+            <text v-if="i % xEvery === 0" :x="c.cx" :y="height - 6" text-anchor="middle" :class="{ 'is-active': focus.active.value === i }">
+              {{ c.label }}
+            </text>
+          </template>
+        </g>
+
+        <g
+          v-for="(c, i) in columns"
+          :key="`c${i}`"
+          class="r-columns__column"
+          :class="{ 'is-active': focus.active.value === i, 'is-dim': focus.active.value !== null && focus.active.value !== i }"
+        >
+          <rect v-for="s in c.segments" :key="s.key" :x="s.x" :y="s.y" :width="s.w" :height="s.h" :style="{ fill: s.color }" />
+          <g v-if="c.target" class="r-columns__target">
+            <line :x1="c.cx - c.target.w / 2" :x2="c.cx + c.target.w / 2" :y1="c.target.y" :y2="c.target.y" />
+          </g>
+          <text
+            v-if="values"
+            class="r-chart__value"
+            :class="{ 'r-chart__value--quiet': highlight != null && highlight !== i }"
+            :x="c.cx"
+            :y="Math.min(c.top, c.target ? c.target.y : c.top) - 6"
+            text-anchor="middle"
           >
-            <span class="r-columns__value" :class="{ 'is-low': c.labelLow }">{{ fmt(c.value) }}</span>
-          </div>
-          <span v-if="c.target != null" class="r-columns__target" :style="{ bottom: `${c.target}%` }" />
-        </div>
-        <span class="r-columns__label">{{ c.label }}</span>
-      </div>
+            {{ fmt(c.total) }}
+          </text>
+        </g>
+
+        <line class="r-chart__baseline" :x1="geometry.left" :x2="geometry.right" :y1="crisp(geometry.bottom)" :y2="crisp(geometry.bottom)" />
+
+        <g v-for="r in refs" :key="`r${r.value}`" class="r-chart__ref" :class="`r-chart__ref--${r.kind ?? 'target'}`">
+          <line :x1="geometry.left" :x2="geometry.right" :y1="crisp(r.y)" :y2="crisp(r.y)" />
+          <rect :x="geometry.right - r.w" :y="r.y - 15" :width="r.w" height="12" />
+          <text :x="geometry.right - 4" :y="r.y - 6" text-anchor="end">{{ r.text }}</text>
+        </g>
+      </svg>
+      <ChartTooltip v-if="tip" :x="tip.x" :y="tip.y" :bounds="{ width, height }" :title="tip.title" :rows="tip.rows" placement="top" />
     </div>
     <div class="r-sr-only">
       <table>
         <caption>{{ label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Label</th>
+            <th v-for="s in stacks" :key="s.name" scope="col">{{ s.name }}</th>
+            <th v-if="targets != null" scope="col">Target</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr v-for="(c, i) in columns" :key="i">
-            <th scope="row">{{ c.label }}</th>
-            <td>{{ fmt(c.value) }}</td>
+          <tr v-for="(l, i) in labels" :key="i">
+            <th scope="row">{{ l }}</th>
+            <td v-for="s in stacks" :key="s.name">{{ fmt(s.values[i] ?? 0) }}</td>
+            <td v-if="targets != null">{{ targetAt(i) == null ? '—' : fmt(targetAt(i) as number) }}</td>
           </tr>
         </tbody>
       </table>
@@ -112,101 +259,20 @@ onMounted(() => requestAnimationFrame(() => (grown.value = true)))
 </template>
 
 <style>
-.r-columns__plot {
-  display: flex;
-  gap: 8px;
+.r-columns__column rect {
+  transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
 
-.r-columns__column {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-  container-type: inline-size;
+.r-columns__column.is-dim rect {
+  opacity: 0.55;
 }
 
-.r-columns__track {
-  position: relative;
-  flex: 1;
-  overflow: hidden;
-  border-radius: var(--r-radius-lg);
-  background-color: color-mix(in srgb, var(--r-chart-track) 60%, transparent);
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--r-chart-grid) 0 1px,
-    transparent 1px 9px
-  );
+.r-columns__target line {
+  stroke: var(--r-chart-ink);
+  stroke-width: 2;
 }
 
-.r-columns__bar {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-radius: var(--r-radius-lg);
-  background: color-mix(in srgb, var(--r-col) 26%, var(--r-bg-surface));
-  transition: height var(--r-duration-slower) var(--r-ease-out);
-}
-.r-columns__bar.is-solid {
-  background: var(--r-col);
-}
-
-.r-columns__value {
-  position: absolute;
-  top: 10px;
-  left: 12px;
-  color: var(--r-text);
-  font-size: var(--r-text-sm);
-  font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
-}
-.r-columns__value.is-low {
-  top: auto;
-  bottom: 10px;
-}
-
-/* Dark ink on a saturated bar reads in both themes; labelColor changes it for dark colours. */
-.r-columns__bar.is-solid .r-columns__value {
-  color: var(--r-col-text);
-}
-
-/* Narrow columns: centre a smaller label so it never runs into the edge. */
-@container (max-width: 64px) {
-  .r-columns__value {
-    right: 0;
-    left: 0;
-    font-size: var(--r-text-2xs);
-    text-align: center;
-  }
-  .r-columns__track,
-  .r-columns__bar {
-    border-radius: var(--r-radius-md);
-  }
-}
-
-.r-columns__target {
-  position: absolute;
-  left: 50%;
-  width: 34%;
-  height: 2px;
-  margin-bottom: -1px;
-  border-radius: 2px;
-  background: var(--r-text);
-  transform: translateX(-50%);
-}
-
-.r-columns__label {
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-  text-align: center;
-  transition: color var(--r-duration-fast) var(--r-ease-out);
-}
-
-.r-columns__column.is-active .r-columns__label {
-  color: var(--r-text);
-}
-.r-columns__column.is-active .r-columns__track {
-  box-shadow: inset 0 0 0 1.5px var(--r-border-strong);
+.r-columns .r-chart__axis text.is-active {
+  fill: var(--r-text);
 }
 </style>

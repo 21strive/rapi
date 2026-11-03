@@ -19,12 +19,14 @@ const props = withDefaults(
     yTicks?: number
     /** Faint dots above each stack, so the grid reads as a whole. */
     showEmpty?: boolean
+    /** `dot` = round LEDs (default) · `pixel` = square pixels, like a TE display. */
+    shape?: 'dot' | 'pixel'
     format?: (value: number) => string
     axisFormat?: (value: number) => string
     /** Accessible name. */
     label: string
   }>(),
-  { height: 280, yTicks: 4, showEmpty: true },
+  { height: 280, yTicks: 4, showEmpty: true, shape: 'dot' },
 )
 
 const root = ref<HTMLElement | null>(null)
@@ -35,7 +37,7 @@ const hintId = useId()
 const fmt = (v: number) => (props.format ? props.format(v) : formatNumber(v))
 const axisFmt = (v: number) => (props.axisFormat ? props.axisFormat(v) : formatCompact(v))
 
-const M = { top: 10, right: 4, bottom: 30, left: 44 }
+const M = { top: 10, right: 4, bottom: 26, left: 48 }
 
 const totals = computed(() => props.labels.map((_, c) => props.series.reduce((sum, s) => sum + (s.values[c] ?? 0), 0)))
 const domain = computed(() => niceDomain(0, props.max ?? Math.max(1, ...totals.value) * 1.04, props.yTicks))
@@ -160,12 +162,12 @@ const tooltip = computed(() => {
         />
       </g>
       <g class="r-chart__axis">
-        <text v-for="t in yTicks" :key="`y${t.v}`" :x="0" :y="t.y" dy="0.32em">{{ axisFmt(t.v) }}</text>
-        <text v-for="t in xTicks" :key="`x${t.x}`" :x="t.x" :y="height - 8" text-anchor="middle">{{ t.text }}</text>
+        <text v-for="t in yTicks" :key="`y${t.v}`" :x="M.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ axisFmt(t.v) }}</text>
+        <text v-for="t in xTicks" :key="`x${t.x}`" :x="t.x" :y="height - 6" text-anchor="middle">{{ t.text }}</text>
       </g>
       <line
         v-if="tooltip"
-        class="r-dot-matrix__cursor"
+        class="r-chart__crosshair"
         :x1="tooltip.x"
         :x2="tooltip.x"
         :y1="M.top"
@@ -177,16 +179,31 @@ const tooltip = computed(() => {
         class="r-dot-matrix__column"
         :class="{ 'is-active': focus.active.value === c }"
       >
-        <circle
-          v-for="dot in column.dots"
-          :key="dot.row"
-          class="r-dot-matrix__dot"
-          :class="{ 'is-empty': dot.empty }"
-          :cx="dot.cx"
-          :cy="dot.cy"
-          :r="column.radius"
-          :style="{ fill: dot.fill, animationDelay: `${dot.row * 22 + c * 6}ms` }"
-        />
+        <template v-if="shape === 'pixel'">
+          <rect
+            v-for="dot in column.dots"
+            :key="dot.row"
+            class="r-dot-matrix__dot"
+            :class="{ 'is-empty': dot.empty }"
+            :x="dot.cx - column.radius"
+            :y="dot.cy - column.radius"
+            :width="column.radius * 2"
+            :height="column.radius * 2"
+            :style="{ fill: dot.fill, animationDelay: `${dot.row * 14 + c * 4}ms` }"
+          />
+        </template>
+        <template v-else>
+          <circle
+            v-for="dot in column.dots"
+            :key="dot.row"
+            class="r-dot-matrix__dot"
+            :class="{ 'is-empty': dot.empty }"
+            :cx="dot.cx"
+            :cy="dot.cy"
+            :r="column.radius"
+            :style="{ fill: dot.fill, animationDelay: `${dot.row * 14 + c * 4}ms` }"
+          />
+        </template>
       </g>
     </svg>
 
@@ -222,44 +239,8 @@ const tooltip = computed(() => {
 </template>
 
 <style>
-.r-chart {
-  position: relative;
-  min-width: 0;
-  margin: 0;
-  border-radius: var(--r-radius-md);
-}
-
-.r-chart > svg {
-  overflow: visible;
-  touch-action: pan-y;
-}
-
-.r-chart:focus-visible {
-  outline-offset: 6px;
-}
-
-.r-chart__grid line {
-  stroke: var(--r-chart-grid);
-  stroke-dasharray: 3 4;
-  shape-rendering: crispEdges;
-}
-
-.r-chart__axis text {
-  fill: var(--r-chart-axis);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.r-dot-matrix__cursor {
-  stroke: var(--r-chart-axis);
-  stroke-dasharray: 2 3;
-  opacity: 0.7;
-}
-
 .r-dot-matrix__dot {
-  animation: r-dot-in var(--r-duration-slower) var(--r-ease-out) both;
-  transform-box: fill-box;
-  transform-origin: center;
+  animation: r-dot-in var(--r-duration-slow) var(--r-ease-out) both;
   transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
 
@@ -267,10 +248,10 @@ const tooltip = computed(() => {
   opacity: 0.45;
 }
 
+/* LEDs switch on; they do not grow. */
 @keyframes r-dot-in {
   from {
     opacity: 0;
-    transform: scale(0.4);
   }
 }
 

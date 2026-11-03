@@ -1,6 +1,9 @@
 import { computed, ref, type Ref } from 'vue'
 
-/** The chart palette, in order. Series without a colour take the next one. */
+/**
+ * The categorical palette, in its validated order. Series without a colour take the next slot.
+ * Never cycle past eight: fold the tail into "Other" or use small multiples instead.
+ */
 export const CHART_COLORS = [
   'var(--r-chart-1)',
   'var(--r-chart-2)',
@@ -8,14 +11,36 @@ export const CHART_COLORS = [
   'var(--r-chart-4)',
   'var(--r-chart-5)',
   'var(--r-chart-6)',
+  'var(--r-chart-7)',
+  'var(--r-chart-8)',
 ]
 
-export const colorAt = (index: number, explicit?: string) => explicit ?? CHART_COLORS[index % CHART_COLORS.length]
+export const colorAt = (index: number, explicit?: string) =>
+  explicit ?? CHART_COLORS[Math.min(index, CHART_COLORS.length - 1)]
+
+/** Sequential cobalt steps, light → dark in light mode (and flipped in dark mode by the tokens). */
+export const SEQ_COLORS = Array.from({ length: 9 }, (_, i) => `var(--r-seq-${i})`)
+
+/** Status levels map to the reserved status tokens. Always ship them with a label. */
+export const STATUS_COLORS = {
+  good: 'var(--r-status-good)',
+  warning: 'var(--r-status-warning)',
+  serious: 'var(--r-status-serious)',
+  critical: 'var(--r-status-critical)',
+} as const
+
+/** "−1.2" with a true minus sign, "+1.2" with a plus. */
+export function signed(value: string | number, negative: boolean) {
+  const text = String(value).replace(/^[-−+]/, '')
+  return `${negative ? '−' : '+'}${text}`
+}
 
 export interface TooltipRow {
   label: string
   value: string
   color?: string
+  /** Key shape: a short line for lines (default), a square for bars and cells. */
+  kind?: 'line' | 'rect' | 'dot'
 }
 
 export const round = (value: number, places = 2) => {
@@ -55,6 +80,19 @@ export type Point = [number, number]
 export function linearPath(points: Point[]): string {
   return points.map(([x, y], i) => `${i ? 'L' : 'M'}${round(x)},${round(y)}`).join('')
 }
+
+/** Step after: the value holds until the next sample, like a telemetry trace or a rate card. */
+export function stepPath(points: Point[]): string {
+  if (!points.length) return ''
+  let d = `M${round(points[0][0])},${round(points[0][1])}`
+  for (let i = 1; i < points.length; i++) {
+    d += `H${round(points[i][0])}V${round(points[i][1])}`
+  }
+  return d
+}
+
+/** Snap a coordinate to the pixel grid so 1px lines stay crisp. */
+export const crisp = (v: number) => Math.round(v) + 0.5
 
 /**
  * Monotone cubic interpolation (Fritsch–Carlson): smooth, but never overshoots the data,

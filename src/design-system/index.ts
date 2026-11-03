@@ -15,6 +15,7 @@ import '@fontsource-variable/geist-mono'
 import './tokens/tokens.css'
 import './tokens/compat.css'
 import './tokens/base.css'
+import './charts/chart.css'
 
 import type { App, Plugin } from 'vue'
 

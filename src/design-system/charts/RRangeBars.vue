@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useId } from 'vue'
 import ChartTooltip from './ChartTooltip.vue'
-import { chartWidth, linearScale, useChartFocus } from './utils'
+import { chartWidth, crisp, linearScale, niceDomain, useChartFocus } from './utils'
 import { useElementSize } from '../composables/dom'
 import { formatNumber } from '../composables/format'
 
@@ -10,7 +10,7 @@ const props = withDefaults(
     labels: string[]
     /** [min, max] per label. */
     ranges: [number, number][]
-    /** Draws a dashed line with a pill label, e.g. "Avg. 57". */
+    /** A dashed line with a tag, e.g. "AVG 57". */
     average?: number
     averageLabel?: string
     color?: string
@@ -32,21 +32,22 @@ const uid = useId()
 const fmt = (v: number) => (props.format ? props.format(v) : formatNumber(v))
 const withUnit = (text: string) => (props.unit ? `${text} ${props.unit}` : text)
 
-const margin = computed(() => ({ top: 12, right: 4, bottom: 28, left: props.average != null ? 70 : 4 }))
+const margin = computed(() => ({ top: props.unit ? 22 : 12, right: props.average != null ? 62 : 4, bottom: 26, left: 48 }))
 
-const geometry = computed(() => {
-  const m = margin.value
+const domain = computed(() => {
   const all = props.ranges.flat()
   const span = Math.max(1, Math.max(...all) - Math.min(...all))
-  const lo = props.min ?? Math.min(...all) - span * 0.12
-  const hi = props.max ?? Math.max(...all) + span * 0.08
-  const plotW = Math.max(1, width.value - m.left - m.right)
-  const plotH = Math.max(1, props.height - m.top - m.bottom)
+  return niceDomain(props.min ?? Math.min(...all) - span * 0.1, props.max ?? Math.max(...all) + span * 0.06, 4)
+})
+
+const geometry = computed(() => {
+  const plotW = Math.max(1, width.value - margin.value.left - margin.value.right)
+  const plotH = Math.max(1, props.height - margin.value.top - margin.value.bottom)
   const n = Math.max(1, props.labels.length)
   const colW = plotW / n
-  const barW = Math.min(30, Math.max(8, colW * 0.42))
-  const y = linearScale(lo, hi, m.top + plotH, m.top)
-  return { plotW, plotH, colW, barW, y, bottom: m.top + plotH }
+  const barW = Math.min(12, Math.max(4, colW * 0.3))
+  const y = linearScale(domain.value.min, domain.value.max, margin.value.top + plotH, margin.value.top)
+  return { plotW, plotH, colW, barW, y, top: margin.value.top, bottom: margin.value.top + plotH, left: margin.value.left, right: margin.value.left + plotW }
 })
 
 const bars = computed(() =>
@@ -55,12 +56,19 @@ const bars = computed(() =>
     const cx = margin.value.left + colW * (i + 0.5)
     const top = y(Math.max(a, b))
     const bottom = y(Math.min(a, b))
-    const h = Math.max(barW, bottom - top)
-    return { cx, x: cx - barW / 2, y: bottom - h, w: barW, h, min: Math.min(a, b), max: Math.max(a, b) }
+    const h = Math.max(2, bottom - top)
+    return { cx, x: cx - barW / 2, y: top, w: barW, h, min: Math.min(a, b), max: Math.max(a, b) }
   }),
 )
 
-const averageText = computed(() => props.averageLabel ?? (props.average != null ? `Avg. ${fmt(props.average)}` : ''))
+const yTicks = computed(() => domain.value.ticks.map((v) => ({ v, y: geometry.value.y(v) })))
+const xEvery = computed(() => Math.max(1, Math.ceil(40 / geometry.value.colW)))
+
+const averageTag = computed(() => {
+  if (props.average == null) return null
+  const text = (props.averageLabel ?? `Avg ${fmt(props.average)}`).toUpperCase()
+  return { text, w: text.length * 6.4 + 10, y: geometry.value.y(props.average) }
+})
 
 const focus = useChartFocus(
   () => props.labels.length,
@@ -79,9 +87,12 @@ const tooltip = computed(() => {
   const bar = bars.value[i]
   return {
     x: bar.cx,
-    y: bar.y + bar.h / 2,
+    y: bar.y,
     title: props.labels[i],
-    rows: [{ label: 'Range', value: withUnit(`${fmt(bar.min)}–${fmt(bar.max)}`) }],
+    rows: [
+      { label: 'Max', value: withUnit(fmt(bar.max)), color: props.color, kind: 'rect' as const },
+      { label: 'Min', value: withUnit(fmt(bar.min)), color: props.color, kind: 'rect' as const },
+    ],
   }
 })
 </script>
@@ -96,72 +107,58 @@ const tooltip = computed(() => {
     @keydown="focus.onKeydown"
     @blur="focus.onBlur"
   >
-    <svg
-      :width="width"
-      :height="height"
-      :viewBox="`0 0 ${width} ${height}`"
-      role="img"
-      :aria-label="label"
-      @pointermove="onPointerMove"
-      @pointerleave="focus.onPointer(null)"
-    >
-      <defs>
-        <linearGradient :id="`${uid}-bar`" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" :style="{ stopColor: color }" />
-          <stop offset="100%" :style="{ stopColor: `color-mix(in srgb, ${color} 52%, var(--r-bg-surface))` }" />
-        </linearGradient>
-      </defs>
-      <g class="r-range-bars__columns">
-        <line
-          v-for="i in labels.length + 1"
-          :key="i"
-          :x1="Math.round(margin.left + geometry.colW * (i - 1)) + 0.5"
-          :x2="Math.round(margin.left + geometry.colW * (i - 1)) + 0.5"
-          :y1="margin.top"
-          :y2="height - 6"
-        />
-      </g>
-      <g class="r-chart__axis">
-        <text v-for="(l, i) in labels" :key="i" :x="margin.left + geometry.colW * i + 8" :y="height - 8">{{ l }}</text>
-      </g>
-      <line
-        v-if="average != null"
-        class="r-range-bars__average"
-        :x1="margin.left - 4"
-        :x2="width - margin.right"
-        :y1="geometry.y(average)"
-        :y2="geometry.y(average)"
-      />
-      <rect
-        v-for="(bar, i) in bars"
-        :key="i"
-        class="r-range-bars__bar"
-        :class="{ 'is-active': focus.active.value === i }"
-        :x="bar.x"
-        :y="bar.y"
-        :width="bar.w"
-        :height="bar.h"
-        :rx="bar.w / 2"
-        :fill="`url(#${uid}-bar)`"
-        :style="{ animationDelay: `${i * 40}ms` }"
-      />
-      <g v-if="average != null" class="r-range-bars__pill">
-        <rect x="2" :y="geometry.y(average) - 12" :width="margin.left - 16" height="24" rx="7" />
-        <path
-          :d="`M${margin.left - 15},${geometry.y(average) - 6} L${margin.left - 9},${geometry.y(average)} L${margin.left - 15},${geometry.y(average) + 6} Z`"
-        />
-        <text :x="2 + (margin.left - 16) / 2" :y="geometry.y(average)" dy="0.34em" text-anchor="middle">{{ averageText }}</text>
-      </g>
-    </svg>
+    <div class="r-chart__plot">
+      <svg
+        :width="width"
+        :height="height"
+        :viewBox="`0 0 ${width} ${height}`"
+        role="img"
+        :aria-label="label"
+        @pointermove="onPointerMove"
+        @pointerleave="focus.onPointer(null)"
+      >
+        <g class="r-chart__grid">
+          <line v-for="t in yTicks" :key="t.v" :x1="geometry.left" :x2="geometry.right" :y1="crisp(t.y)" :y2="crisp(t.y)" />
+        </g>
+        <g class="r-chart__axis">
+          <text v-if="unit" class="r-chart__unit" :x="geometry.left - 8" :y="geometry.top - 12" text-anchor="end">{{ unit }}</text>
+          <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ fmt(t.v) }}</text>
+          <template v-for="(l, i) in labels" :key="i">
+            <text v-if="i % xEvery === 0" :x="bars[i].cx" :y="height - 6" text-anchor="middle">{{ l }}</text>
+          </template>
+        </g>
+        <line class="r-chart__baseline" :x1="geometry.left" :x2="geometry.right" :y1="crisp(geometry.bottom)" :y2="crisp(geometry.bottom)" />
 
-    <ChartTooltip
-      v-if="tooltip"
-      :x="tooltip.x"
-      :y="tooltip.y"
-      :bounds="{ width, height }"
-      :title="tooltip.title"
-      :rows="tooltip.rows"
-    />
+        <g
+          v-for="(bar, i) in bars"
+          :key="i"
+          class="r-range-bars__bar"
+          :class="{ 'is-active': focus.active.value === i }"
+        >
+          <rect :x="bar.x" :y="bar.y" :width="bar.w" :height="bar.h" :style="{ fill: color }" />
+          <line class="r-range-bars__cap" :x1="bar.x - 3" :x2="bar.x + bar.w + 3" :y1="crisp(bar.y)" :y2="crisp(bar.y)" />
+          <line class="r-range-bars__cap" :x1="bar.x - 3" :x2="bar.x + bar.w + 3" :y1="crisp(bar.y + bar.h) - 1" :y2="crisp(bar.y + bar.h) - 1" />
+        </g>
+
+        <g v-if="averageTag" class="r-chart__ref r-chart__ref--average">
+          <line :x1="geometry.left" :x2="geometry.right" :y1="crisp(averageTag.y)" :y2="crisp(averageTag.y)" />
+          <g class="r-chart__flag">
+            <rect :x="geometry.right + 2" :y="averageTag.y - 7.5" :width="averageTag.w" height="15" />
+            <text :x="geometry.right + 2 + averageTag.w / 2" :y="averageTag.y" dy="0.34em" text-anchor="middle">{{ averageTag.text }}</text>
+          </g>
+        </g>
+      </svg>
+
+      <ChartTooltip
+        v-if="tooltip"
+        :x="tooltip.x"
+        :y="tooltip.y"
+        :bounds="{ width, height }"
+        :title="tooltip.title"
+        :rows="tooltip.rows"
+        placement="top"
+      />
+    </div>
 
     <div class="r-sr-only">
       <table>
@@ -176,8 +173,8 @@ const tooltip = computed(() => {
         <tbody>
           <tr v-for="(l, i) in labels" :key="i">
             <th scope="row">{{ l }}</th>
-            <td>{{ fmt(bars[i].min) }}</td>
-            <td>{{ fmt(bars[i].max) }}</td>
+            <td>{{ withUnit(fmt(bars[i].min)) }}</td>
+            <td>{{ withUnit(fmt(bars[i].max)) }}</td>
           </tr>
         </tbody>
       </table>
@@ -188,48 +185,17 @@ const tooltip = computed(() => {
 </template>
 
 <style>
-.r-range-bars__columns line {
-  stroke: var(--r-chart-grid);
-  shape-rendering: crispEdges;
-}
-
-.r-range-bars__average {
-  stroke: var(--r-chart-axis);
-  stroke-dasharray: 3 4;
-  opacity: 0.7;
-}
-
 .r-range-bars__bar {
-  animation: r-range-in var(--r-duration-slower) var(--r-ease-out) both;
-  transform-box: fill-box;
-  transform-origin: center;
   transition: opacity var(--r-duration-fast) var(--r-ease-out);
 }
+
 .r-range-bars.is-focused .r-range-bars__bar:not(.is-active) {
   opacity: 0.4;
 }
 
-@keyframes r-range-in {
-  from {
-    opacity: 0;
-    transform: scaleY(0.3);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .r-range-bars__bar {
-    animation: none;
-  }
-}
-
-.r-range-bars__pill rect,
-.r-range-bars__pill path {
-  fill: var(--r-ink);
-}
-.r-range-bars__pill text {
-  fill: var(--r-on-ink);
-  font-size: 12px;
-  font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
+.r-range-bars__cap {
+  stroke: var(--r-chart-ink);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
 }
 </style>

@@ -1,23 +1,21 @@
 <script setup lang="ts">
-import { ArrowRight, ArrowUpRight, MoreHorizontal } from 'lucide-vue-next'
 import {
-  RAvatar,
   RBarList,
-  RButton,
-  RCard,
-  RChip,
+  RBulletChart,
+  RCandlestickChart,
   RColumnChart,
+  RDial,
   RDotMatrixChart,
+  RGanttChart,
   RHeatmap,
-  RIconButton,
   RLineChart,
+  RRadarScope,
   RRadialGauge,
   RRangeBars,
+  RScatterChart,
   RSparkline,
-  RStat,
-  RTrend,
+  RWaterfallChart,
   formatCompact,
-  formatCurrency,
   formatNumber,
 } from '@/design-system'
 import DocPage from '../components/DocPage.vue'
@@ -27,301 +25,149 @@ import CodeBlock from '../components/CodeBlock.vue'
 import PropsTable from '../components/PropsTable.vue'
 import DoDont from '../components/DoDont.vue'
 import type { PropRow } from '../types'
+import * as d from './charts-data'
 
-/* A tiny seeded wave so the sample data looks lived-in but never changes between reloads. */
-const wave = (n: number, base: number, amp: number, seed: number) =>
-  Array.from({ length: n }, (_, i) =>
-    Math.round(base + amp * (0.6 * Math.sin(i / 2.1 + seed) + 0.3 * Math.sin(i / 0.9 + seed * 2) + 0.1 * Math.cos(i * 1.7))),
-  )
+const idr = (v: number) => `${formatNumber(v, { maximumFractionDigits: 1 })}`
+const minutes = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
 
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-/* ── Dot matrix · Syncrowave sales summary ────────────────────────────────── */
-const halfMonths = months.flatMap((m) => [`1–15 ${m}`, `16–${m === 'Feb' ? 28 : 30} ${m}`])
-const halfMonthTicks = months.flatMap((m) => [m, ''])
-const sales = [28, 34, 31, 42, 39, 47, 36, 44, 52, 58, 61, 70, 48, 41, 46, 53, 38, 44, 57, 63, 49, 55, 60, 66].map((v) => v * 1000)
-const insight = [8, 12, 10, 14, 9, 13, 11, 10, 16, 12, 18, 22, 14, 10, 12, 15, 9, 11, 14, 19, 12, 16, 18, 20].map((v) => v * 1000)
-const salesSeries = [
-  { name: 'Sales', values: sales },
-  { name: 'Insight', values: insight, color: 'var(--r-chart-1-soft)' },
+const palette = [
+  { slot: 1, name: 'Cobalt' },
+  { slot: 2, name: 'Orange' },
+  { slot: 3, name: 'Teal' },
+  { slot: 4, name: 'Amber' },
+  { slot: 5, name: 'Magenta' },
+  { slot: 6, name: 'Green' },
+  { slot: 7, name: 'Periwinkle' },
+  { slot: 8, name: 'Red' },
 ]
-const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const signups = [{ name: 'Sign-ups', values: [42, 58, 51, 66, 73, 38, 31], color: 'var(--r-chart-4)' }]
-const customers = [
-  { name: 'New', values: [18, 24, 21, 30, 34, 16, 12] },
-  { name: 'Returning', values: [26, 31, 29, 35, 41, 22, 19], color: 'var(--r-chart-1-soft)' },
-]
-
-const dotCode = `<RDotMatrixChart
-  :labels="['1–15 Jan', '16–31 Jan', /* … */]"
-  :ticks="['Jan', '', 'Feb', '', /* … */]"
-  :series="[
-    { name: 'Sales', values: sales },
-    { name: 'Insight', values: insight, color: 'var(--r-chart-1-soft)' },
-  ]"
-  label="Sales and insight, twice a month"
-/>`
-
-const dotProps: PropRow[] = [
-  { name: 'labels', type: 'string[]', description: 'One per column. Used in the tooltip and the hidden data table.' },
-  { name: 'ticks', type: 'string[]', description: 'Axis text per column; empty strings are skipped. Defaults to the labels, thinned to fit.' },
-  { name: 'series', type: 'ChartSeries[]', description: '{ name, values, color? }. Stacked from the bottom up; each dot is the same amount.' },
-  { name: 'height', type: 'number', default: '280', description: 'Total height in px. Dots stay round and as large as the columns allow.' },
-  { name: 'max', type: 'number', description: 'Top of the scale. Defaults to a tidy number above the tallest stack.' },
-  { name: 'yTicks', type: 'number', default: '4', description: 'Roughly how many gridlines.' },
-  { name: 'showEmpty', type: 'boolean', default: 'true', description: 'Faint dots above each stack, so the grid reads as a whole.' },
-  { name: 'format', type: '(v: number) => string', description: 'Formats values in the tooltip and table.' },
-  { name: 'axisFormat', type: '(v: number) => string', description: 'Formats the y axis. Defaults to compact numbers (25K).' },
-  { name: 'label', type: 'string', description: 'Accessible name. Required.' },
-]
-
-/* ── Line · Makaryo cashflow, banking statistics ──────────────────────────── */
-const days = Array.from({ length: 30 }, (_, i) => `${i + 1} May`)
-const revenues = wave(30, 11200, 3600, 0.4)
-const expenditures = wave(30, 6400, 1900, 2.1)
-const budgetSeries = [
-  { name: 'Revenues', values: revenues },
-  { name: 'Expenditures', values: expenditures, color: 'var(--r-chart-3)', area: false },
-]
-const statistics = [{ name: 'Visits', values: [412, 486, 451, 398, 727, 604, 538] }]
-const balanceMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
-const balance = [{ name: 'Balance', values: [14200, 15100, 14650, 16900, 16300, 17850, 18900, 19453], color: 'var(--r-chart-1)' }]
 
 const lineCode = `<RLineChart
-  :labels="days"
-  :series="[
-    { name: 'Revenues', values: revenues },
-    { name: 'Expenditures', values: expenditures, color: 'var(--r-chart-3)', area: false },
-  ]"
-  :highlight="17"
-  :format="(v) => formatCurrency(v)"
-  legend
-  label="Revenues and expenditures in May"
+  :labels="weeks"
+  :series="[{ name: 'Net liquidity', values: liquidity }]"
+  :forecast-from="12"
+  :now="12"
+  :references="[{ value: 360, label: 'Min buffer 360', kind: 'threshold' }]"
+  y-unit="IDR bn"
+  label="Net liquidity by week, IDR billions, with a six-week forecast"
 />`
 
 const lineProps: PropRow[] = [
   { name: 'labels', type: 'string[]', description: 'One per point, left to right.' },
-  { name: 'series', type: 'LineSeries[]', description: '{ name, values, color?, area?, dashed? }. null values leave a gap in the line.' },
-  { name: 'height', type: 'number', default: '240', description: 'Total height in px.' },
-  { name: 'area', type: 'boolean', default: 'true', description: 'Soft gradient under the first series. A series can override it with its own area flag.' },
-  { name: 'curve', type: "'monotone' | 'linear'", default: "'monotone'", description: 'Monotone is smooth but never overshoots, so a peak in the line is a peak in the data.' },
-  { name: 'yTicks', type: 'number', default: '4', description: 'Roughly how many gridlines.' },
-  { name: 'min / max', type: 'number', description: 'Fix the scale. By default it starts at 0 (or below, for negative data).' },
-  { name: 'highlight', type: 'number | null', default: 'null', description: 'Index to mark with a soft bar and a value pill, like today or the best day.' },
-  { name: 'hideYAxis', type: 'boolean', default: 'false', description: 'Drop the y labels in compact cards.' },
-  { name: 'legend', type: 'boolean', default: 'false', description: 'Series names above the plot.' },
-  { name: 'format / axisFormat', type: '(v: number) => string', description: 'Tooltip and axis formatting.' },
+  { name: 'series', type: '{ name, values, color?, area?, dashed? }[]', description: 'null values leave a gap in the line.' },
+  { name: 'curve', type: "'linear' | 'step' | 'monotone'", default: "'linear'", description: 'Straight segments by default. Step holds a value until the next sample; monotone smooths without overshooting.' },
+  { name: 'forecastFrom', type: 'number', description: 'Index after which lines are dashed and the plot is hatched.' },
+  { name: 'now', type: 'number', description: 'Index of the current moment, drawn as the orange NOW line.' },
+  { name: 'references', type: 'ChartReference[]', description: 'Dashed targets, thresholds and averages, labelled at the right.' },
+  { name: 'highlight', type: 'number', description: 'Index to mark with a value tag.' },
+  { name: 'endLabels', type: 'boolean', default: 'false', description: 'Value at the end of each line, four series at most.' },
+  { name: 'yUnit', type: 'string', description: 'Unit printed above the y axis in mono caps.' },
   { name: 'label', type: 'string', description: 'Accessible name. Required.' },
 ]
-
-/* ── Sparkline · Coinex ───────────────────────────────────────────────────── */
-const coins = [
-  { name: 'Bitcoin', ticker: 'BTC', price: 1523, change: 3.6, values: [30, 32, 31, 35, 34, 38, 37, 41, 40, 44] },
-  { name: 'Ethereum', ticker: 'ETH', price: 510, change: -1.2, values: [44, 41, 42, 39, 40, 37, 38, 35, 36, 34] },
-  { name: 'Tezos', ticker: 'XTZ', price: 210, change: 0.8, values: [20, 21, 19, 22, 21, 23, 22, 22, 24, 23] },
-]
-const watchlist = [
-  { name: 'Solana', ticker: 'SOL', price: 142.3, change: 5.1, values: [10, 12, 11, 15, 14, 17, 18, 21] },
-  { name: 'Cardano', ticker: 'ADA', price: 0.46, change: -2.4, values: [20, 19, 20, 17, 18, 16, 15, 15] },
-  { name: 'Polkadot', ticker: 'DOT', price: 6.82, change: 1.3, values: [14, 13, 15, 14, 15, 16, 15, 17] },
-  { name: 'Chainlink', ticker: 'LINK', price: 14.05, change: -0.6, values: [16, 17, 16, 15, 16, 15, 16, 15] },
-]
-
-const sparkCode = `<RSparkline :values="[30, 32, 31, 35, 34, 38, 37, 41]" label="Bitcoin, last 7 days" />
-<RSparkline :values="prices" :width="96" color="var(--r-chart-1)" :area="false" />`
-
-const sparkProps: PropRow[] = [
-  { name: 'values', type: 'number[]', description: 'The series. The scale fits the data, so small moves stay visible.' },
-  { name: 'color', type: "'auto' | string", default: "'auto'", description: 'auto is green when the series ends higher than it starts, red when lower.' },
-  { name: 'height', type: 'number', default: '32', description: 'Height in px.' },
-  { name: 'width', type: 'number', description: 'Fixed width in px. Leave it out to fill the container.' },
-  { name: 'area', type: 'boolean', default: 'true', description: 'Soft gradient under the line.' },
-  { name: 'strokeWidth', type: 'number', default: '1.75', description: 'Line weight. It stays crisp at any width.' },
-  { name: 'label', type: 'string', description: 'Accessible name. Defaults to “Trend from … to …”.' },
-]
-
-/* ── Radial gauge · Syncrowave sales category ─────────────────────────────── */
-const categories = [
-  { label: 'Ecommerce', value: 4820 },
-  { label: 'Brand ambassador', value: 2394 },
-  { label: 'Direct buy', value: 1000 },
-]
-const storage = [
-  { label: 'Photos', value: 42, color: 'var(--r-chart-2)' },
-  { label: 'Documents', value: 18, color: 'var(--r-chart-5)' },
-  { label: 'Other', value: 9, color: 'var(--r-chart-6)' },
-]
-
-const gaugeCode = `<RRadialGauge
-  :segments="[
-    { label: 'Ecommerce', value: 4820 },
-    { label: 'Brand ambassador', value: 2394 },
-    { label: 'Direct buy', value: 1000 },
-  ]"
-  caption="Product sales"
-  label="Product sales by category"
-/>`
-
-const gaugeProps: PropRow[] = [
-  { name: 'segments', type: '{ label, value, color? }[]', description: 'Parts of the whole, in order around the arc. Defaults: brand, soft brand, grey.' },
-  { name: 'max', type: 'number', description: 'Full scale. Leave it out for a full arc; set it to show what is left, like storage.' },
-  { name: 'value', type: 'number | string', description: 'The big number in the middle. Defaults to the sum.' },
-  { name: 'caption', type: 'string', description: 'Small text under the number.' },
-  { name: 'bars', type: 'number', default: '30', description: 'Number of radial bars.' },
-  { name: 'legend', type: 'boolean', default: 'true', description: 'Segment names under the arc. Hovering one highlights its bars and shows its value in the middle.' },
-  { name: 'format', type: '(v: number) => string', description: 'Formats the numbers.' },
-  { name: 'label', type: 'string', description: 'Accessible name. Required.' },
-]
-
-/* ── Heatmap · orders by time, attendance ─────────────────────────────────── */
-const hours = ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM']
-const orders = hours.map((_, r) =>
-  weekDays.map((_, c) => {
-    const lunch = r === 2 ? 34 : r === 3 ? 22 : 0
-    const evening = r >= 5 ? 18 : 0
-    const weekend = c >= 5 ? 16 : 0
-    return Math.round(12 + lunch + evening + weekend + 8 * Math.sin(r * 1.3 + c * 0.9))
-  }),
-)
-const slots = ['11.00', '10.00', '09.30', '09.00', '08.30']
-const workDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-const attendance = [
-  [6, 5, 6, 7, 6],
-  [14, 8, 9, 31, 12],
-  [16, 15, 12, 34, 30],
-  [33, 10, 14, 36, 35],
-  [38, 36, 37, 40, 39],
-]
-
-const heatmapCode = `<RHeatmap
-  :rows="['8 AM', '10 AM', '12 PM', '2 PM']"
-  :cols="['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
-  :values="orders"
-  :format="(v) => \`\${v} orders\`"
-  label="Orders by time of day"
-/>`
-
-const heatmapProps: PropRow[] = [
-  { name: 'rows / cols', type: 'string[]', description: 'Labels down the side and along the bottom.' },
-  { name: 'values', type: 'number[][]', description: 'values[row][col].' },
-  { name: 'color', type: 'string', default: "'var(--r-chart-1)'", description: 'Colour at full intensity. Lower values mix toward the track colour.' },
-  { name: 'min / max', type: 'number', description: 'Fix the colour scale. Defaults to the data range.' },
-  { name: 'cellHeight', type: 'number', default: '30', description: 'Row height in px; columns share the width.' },
-  { name: 'gap / radius', type: 'number', default: '4 / 6', description: 'Space between cells and their corner radius.' },
-  { name: 'legend', type: 'boolean', default: 'true', description: 'A Less → More scale under the grid.' },
-  { name: 'format', type: '(v: number) => string', description: 'Formats the tooltip value.' },
-  { name: 'label', type: 'string', description: 'Accessible name. Required.' },
-]
-
-/* ── Range bars · heart rate ──────────────────────────────────────────────── */
-const heartDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-const heartRanges: [number, number][] = [
-  [48, 112],
-  [40, 189],
-  [52, 74],
-  [58, 128],
-  [42, 176],
-  [55, 90],
-  [47, 118],
-]
-const temperatures: [number, number][] = [
-  [24, 31],
-  [23, 30],
-  [25, 33],
-  [24, 32],
-  [22, 28],
-  [23, 29],
-  [24, 31],
-]
-
-const rangeCode = `<RRangeBars
-  :labels="['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']"
-  :ranges="[[48, 112], [40, 189], [52, 74], [58, 128], [42, 176], [55, 90], [47, 118]]"
-  :average="57"
-  color="var(--r-danger)"
-  unit="bpm"
-  label="Heart rate range per day"
-/>`
-
-const rangeProps: PropRow[] = [
-  { name: 'labels', type: 'string[]', description: 'One per column.' },
-  { name: 'ranges', type: '[min, max][]', description: 'Lowest and highest value per label.' },
-  { name: 'average', type: 'number', description: 'Draws a dashed line with an ink pill on the left.' },
-  { name: 'averageLabel', type: 'string', description: 'Text for the pill. Defaults to “Avg. 57”.' },
-  { name: 'color', type: 'string', default: "'var(--r-chart-1)'", description: 'Bar colour; it fades toward the bottom of each bar.' },
-  { name: 'height', type: 'number', default: '240', description: 'Total height in px.' },
-  { name: 'min / max', type: 'number', description: 'Fix the scale. Defaults to the data range with a little room.' },
-  { name: 'unit', type: 'string', description: 'Added to values in the tooltip, e.g. "bpm".' },
-  { name: 'format', type: '(v: number) => string', description: 'Formats the numbers.' },
-  { name: 'label', type: 'string', description: 'Accessible name. Required.' },
-]
-
-/* ── Bar list · energy activity, countries ───────────────────────────────── */
-const energy = [
-  { label: 'Q1', values: [1150, 480] },
-  { label: 'Q2', values: [2050, 820] },
-  { label: 'Q3', values: [1690, 820] },
-  { label: 'Q4', values: [2280, 960] },
-]
-const energySeries = [
-  { name: 'Active calories', color: 'var(--r-chart-2)' },
-  { name: 'Resting calories', color: 'color-mix(in srgb, var(--r-chart-2) 34%, var(--r-bg-surface))' },
-]
-const countries = [
-  { label: 'Indonesia', values: 7269 },
-  { label: 'United States', values: 4812 },
-  { label: 'Germany', values: 2931 },
-  { label: 'Japan', values: 2110 },
-  { label: 'Brazil', values: 1544 },
-]
-
-const barCode = `<RBarList
-  :items="[
-    { label: 'Q1', values: [1150, 480] },
-    { label: 'Q2', values: [2050, 820] },
-  ]"
-  :series="[{ name: 'Active calories' }, { name: 'Resting calories' }]"
-  axis
-  legend
-  :show-values="false"
-  label="Average energy per quarter"
-/>`
-
-const barProps: PropRow[] = [
-  { name: 'items', type: '{ label, values }[]', description: 'values is a number for a plain bar, or one number per series for a stacked bar.' },
-  { name: 'series', type: '{ name, color? }[]', description: 'Names and colours of the stacked parts. Defaults: brand, then soft brand.' },
-  { name: 'max', type: 'number', description: 'Full scale. Defaults to the longest bar (or a tidy number with an axis).' },
-  { name: 'axis', type: 'boolean', default: 'false', description: 'Value axis and gridlines under the bars.' },
-  { name: 'showValues', type: 'boolean', default: 'true', description: 'The total at the end of each row.' },
-  { name: 'legend', type: 'boolean', default: 'false', description: 'Series names under the chart, when there is more than one.' },
-  { name: 'gradient', type: 'boolean', default: 'true', description: 'Soft left-to-right gradient on the first series.' },
-  { name: 'barHeight', type: 'number', default: '28', description: 'Bar thickness in px.' },
-  { name: 'format', type: '(v: number) => string', description: 'Formats the values.' },
-  { name: 'label', type: 'string', description: 'Accessible name. Required.' },
-]
-
-/* ── Columns · banking analytics ──────────────────────────────────────────── */
-const goals = [62, 74, 58, 81, 88, 46, 35]
 
 const columnCode = `<RColumnChart
-  :labels="['Mon', 'Tue', 'Wed']"
-  :values="[64, 52, 46]"
-  :targets="[70, 56, 50]"
-  :highlight="0"
-  label="Share of budget spent per day"
+  :labels="days"
+  :values="settled"
+  :targets="targets"
+  :format="(v) => formatNumber(v, { maximumFractionDigits: 1 })"
+  y-unit="IDR bn"
+  label="Settled volume by day against target, IDR billions"
 />`
 
 const columnProps: PropRow[] = [
   { name: 'labels', type: 'string[]', description: 'One per column.' },
-  { name: 'values', type: 'number[]', description: 'Column values, read against max.' },
-  { name: 'max', type: 'number', default: '100', description: 'Full height. The default suits percentages.' },
-  { name: 'targets', type: 'number[] | number', description: 'A short tick per column (or one value for all) marking the goal.' },
-  { name: 'highlight', type: 'number | null', default: 'null', description: 'The column drawn in full colour; the rest go soft. Leave it out for all solid.' },
-  { name: 'color', type: 'string', default: "'var(--r-chart-4)'", description: 'Column colour.' },
-  { name: 'labelColor', type: 'string', default: "'#0c0e12'", description: 'Text inside the full-colour column. Near-black suits light and saturated colours; pass #fff for dark ones like the brand blue.' },
-  { name: 'height', type: 'number', default: '220', description: 'Height of the plot in px.' },
-  { name: 'format', type: '(v: number) => string', description: 'Formats the label inside each column. Defaults to a percentage.' },
-  { name: 'label', type: 'string', description: 'Accessible name. Required.' },
+  { name: 'values', type: 'number[]', description: 'A single series.' },
+  { name: 'series', type: 'ChartSeries[]', description: 'Several series, stacked with a 2px surface gap.' },
+  { name: 'targets', type: 'number | number[]', description: 'Ink tick per column, or one value for all.' },
+  { name: 'highlight', type: 'number', description: 'The one column in colour; the rest turn grey.' },
+  { name: 'references', type: 'ChartReference[]', description: 'Dashed horizontal lines.' },
+  { name: 'showValues', type: 'boolean', default: '≤ 12 columns', description: 'Values on the column caps.' },
+  { name: 'max', type: 'number', description: '100 when every value fits (percentages), otherwise a tidy maximum.' },
+]
+
+const bulletCode = `<RBulletChart
+  :rows="[
+    { label: 'Revenue', sublabel: 'IDR bn', value: 182.4, target: 200, ranges: [140, 180, 220], previous: 166.2 },
+    { label: 'Net new accounts', sublabel: 'thousands', value: 48.2, target: 45, ranges: [30, 42, 55] },
+  ]"
+  label="Quarter results against targets"
+/>`
+
+const bulletProps: PropRow[] = [
+  { name: 'rows', type: 'BulletRow[]', description: '{ label, value, target?, ranges?, previous?, sublabel? }. Ranges are the upper edges of the grey bands.' },
+  { name: 'max', type: 'number', description: 'Shared maximum. By default each row scales to its own last band.' },
+  { name: 'tone', type: "'brand' | 'ink'", default: "'brand'", description: 'Colour of the measure bar.' },
+  { name: 'format', type: '(v: number) => string', description: 'Values, ticks and the table.' },
+]
+
+const waterfallCode = `<RWaterfallChart
+  :steps="[
+    { label: 'Opening', value: 48.2, kind: 'total' },
+    { label: 'Collections', value: 31.4 },
+    { label: 'Payroll', value: -14.8 },
+    { label: 'Closing', value: 0, kind: 'total' },
+  ]"
+  label="Operating cash flow in October, IDR billions"
+/>`
+
+const candleCode = `<RCandlestickChart :data="candles" label="STRV, 5-minute candles" />`
+
+const scatterCode = `<RScatterChart
+  :series="exposure"
+  x-label="PD %"
+  y-label="Exposure USD M"
+  :y-references="[{ value: 150, label: 'Single-name limit', kind: 'threshold' }]"
+  label-points
+  label="Exposure against probability of default by segment"
+/>`
+
+const heatCode = `<RHeatmap :rows="weekdays" :cols="hours" :values="signIns" label="Sign-ins by weekday and hour" />`
+
+const ganttCode = `<RGanttChart
+  :rows="passes"
+  :domain="[360, 840]"
+  :ticks="[360, 420, 480 /* … */]"
+  :format-tick="(m) => toClock(m)"
+  :now="581"
+  label="Ground-station passes today, UTC"
+/>`
+
+const ganttProps: PropRow[] = [
+  { name: 'rows', type: 'GanttRow[]', description: '{ id, label, meta?, items: { start, end, label?, tone?, milestone?, hatch? }[] }.' },
+  { name: 'domain', type: '[number, number]', description: 'Start and end of the axis, in the same unit as the items.' },
+  { name: 'ticks / formatTick', type: 'number[] / (v) => string', description: 'Where the axis is labelled and how.' },
+  { name: 'now', type: 'number', description: 'The orange NOW line.' },
+  { name: 'rowHeight / labelWidth', type: 'number', default: '32 / 160', description: 'Layout.' },
+]
+
+const dialCode = `<RDial
+  :value="31240"
+  :min="0"
+  :max="40000"
+  :major-step="10000"
+  unit="RPM"
+  :zones="[
+    { from: 32000, to: 36000, level: 'warning' },
+    { from: 36000, to: 40000, level: 'critical' },
+  ]"
+  :format="(v) => formatCompact(v)"
+  label="Turbopump speed"
+/>`
+
+const dialProps: PropRow[] = [
+  { name: 'value / min / max', type: 'number', default: '— / 0 / 100', description: 'The reading and the scale.' },
+  { name: 'zones', type: 'DialZone[]', description: '{ from, to, level } with level good | warning | serious | critical. The current zone is named under the readout.' },
+  { name: 'majorStep', type: 'number', description: 'Labelled tick every N units; minor ticks split each into five.' },
+  { name: 'variant', type: "'needle' | 'arc'", default: "'needle'", description: 'A needle, or a cobalt arc filled up to the value.' },
+  { name: 'unit / size', type: 'string / number', default: '— / 200', description: 'Unit after the readout; width in px.' },
+]
+
+const radarCode = `<RRadarScope :contacts="tracks" :range="100" unit="NM" label="Air picture, 100 nautical miles" />`
+
+const radarProps: PropRow[] = [
+  { name: 'contacts', type: 'RadarContact[]', description: '{ id, bearing, range, kind?, heading?, label? }. Kind sets shape, colour and the word in the table.' },
+  { name: 'range / rings / unit', type: 'number / number / string', default: "100 / 4 / 'NM'", description: 'Scale of the scope.' },
+  { name: 'sweep', type: 'boolean', default: 'true', description: 'Rotating sweep line, still under reduced motion.' },
+  { name: 'selected', type: 'string', description: 'Id of the selected track. Emits select on click or Enter.' },
 ]
 </script>
 
@@ -329,561 +175,650 @@ const columnProps: PropRow[] = [
   <DocPage
     eyebrow="Data"
     title="Charts"
-    lead="Eight hand-drawn SVG charts, one for each visual the references kept coming back to. They size themselves to their container, take every colour from the tokens, show a tooltip on hover, and can be read with the arrow keys or as a hidden table."
+    lead="Fifteen charts drawn as plain SVG from the tokens. They read like engineering plots: solid hairline grids, mono ticks, square marks, and colour only where it carries meaning."
   >
-    <p class="doc-p">
-      Click into any chart (or Tab to it) and use the arrow keys to step through the values; screen readers hear each one
-      as you go. Every chart needs a <code class="doc-c">label</code>, which becomes its accessible name.
-    </p>
-
-    <!-- Dot matrix --------------------------------------------------------- -->
     <DocSection
-      id="dot-matrix"
-      title="Dot matrix"
-      description="Stacked columns made of dots, from the Syncrowave sales summary. Every dot is the same amount, so totals read like a tally. Faint empty dots finish the grid."
+      id="method"
+      title="How the charts work"
+      description="Every chart follows the same rules, so a dashboard reads as one instrument panel."
     >
-      <Demo surface="plain" padding="md">
-        <RCard class="charts-wide" title="Sales summary">
-          <template #actions>
-            <RChip caret size="sm">This year</RChip>
-            <RChip caret size="sm">Summary</RChip>
-            <RIconButton label="More options" size="sm"><MoreHorizontal /></RIconButton>
-          </template>
-          <ul class="charts-legend" aria-hidden="true">
-            <li><span class="charts-legend__dot" style="background: var(--r-chart-1)" /> Sales</li>
-            <li><span class="charts-legend__dot" style="background: var(--r-chart-1-soft)" /> Insight</li>
-          </ul>
-          <RDotMatrixChart
-            :labels="halfMonths"
-            :ticks="halfMonthTicks"
-            :series="salesSeries"
-            :height="300"
-            label="Sales and insight, twice a month"
-          />
-        </RCard>
-      </Demo>
-
-      <div class="doc-grid doc-grid--2">
-        <Demo title="Without empty dots" surface="plain">
-          <RCard class="charts-wide" title="Sign-ups this week" padding="sm">
-            <RDotMatrixChart :labels="weekDays" :series="signups" :height="180" :show-empty="false" label="Sign-ups per day this week" />
-          </RCard>
-        </Demo>
-        <Demo title="Two series, compact" surface="plain">
-          <RCard class="charts-wide" title="Customers this week" padding="sm">
-            <RDotMatrixChart :labels="weekDays" :series="customers" :height="180" label="New and returning customers per day this week" />
-          </RCard>
-        </Demo>
+      <div class="charts-rules r-grid-ruled">
+        <div class="charts-rule">
+          <p class="r-eyebrow">Identity</p>
+          <div class="charts-swatches">
+            <span v-for="p in palette" :key="p.slot" class="charts-swatch">
+              <span class="charts-swatch__chip" :style="{ background: `var(--r-chart-${p.slot})` }" />
+              <span class="r-index">{{ String(p.slot).padStart(2, '0') }}</span>
+              {{ p.name }}
+            </span>
+          </div>
+          <p class="charts-rule__text">
+            Eight slots in a fixed order, checked for colour-vision separation in both themes. A series keeps its slot when
+            filters hide others. Past eight, fold the tail into Other.
+          </p>
+        </div>
+        <div class="charts-rule">
+          <p class="r-eyebrow">Magnitude · polarity</p>
+          <div class="charts-ramp">
+            <span v-for="i in 9" :key="i" :style="{ background: `var(--r-seq-${i - 1})` }" />
+          </div>
+          <div class="charts-ramp">
+            <span style="background: var(--r-div-neg)" />
+            <span style="background: var(--r-div-neg-soft)" />
+            <span style="background: var(--r-div-mid)" />
+            <span style="background: var(--r-div-pos-soft)" />
+            <span style="background: var(--r-div-pos)" />
+          </div>
+          <p class="charts-rule__text">
+            One hue for how much: the cobalt ramp. Two for which side: orange and cobalt through a grey that reads as nothing.
+          </p>
+        </div>
+        <div class="charts-rule">
+          <p class="r-eyebrow">State · now</p>
+          <div class="charts-states">
+            <span><i style="background: var(--r-status-good)" />Good</span>
+            <span><i style="background: var(--r-status-warning)" />Warning</span>
+            <span><i style="background: var(--r-status-serious)" />Serious</span>
+            <span><i style="background: var(--r-status-critical)" />Critical</span>
+            <span><i class="is-now" />Now</span>
+          </div>
+          <p class="charts-rule__text">
+            Status colours are reserved and always come with a word. The one orange line on a chart is the present moment.
+          </p>
+        </div>
+        <div class="charts-rule">
+          <p class="r-eyebrow">Reading without colour</p>
+          <p class="charts-rule__text">
+            Every chart takes a <code class="doc-c">label</code>, carries a hidden data table, and can be explored with the
+            arrow keys. Tab into one and try it. Dashes always mean a target, a threshold or a forecast, never just a grid.
+          </p>
+        </div>
       </div>
-
-      <CodeBlock :code="dotCode" />
-      <PropsTable :rows="dotProps" caption="RDotMatrixChart props" />
-      <DoDont
-        do="Use it for counts over time where the rough total matters more than the exact value."
-        dont="Don't stack more than two or three series. Past that the colours blur into noise."
-      />
     </DocSection>
 
-    <!-- Line --------------------------------------------------------------- -->
+    <!-- Line -->
     <DocSection
       id="line"
       title="Line"
-      description="Smooth lines over a soft gradient, like the Makaryo cashflow and the Prody budget. Hover anywhere to get a crosshair with every series at that point; a highlight marks one point with a value pill."
+      description="Change over time. Straight segments by default, steps for sampled values. A forecast is dashed over hatching; the orange line is now."
     >
       <Demo surface="plain">
-        <RCard class="charts-wide" title="Consolidated budget" subtitle="May, daily">
-          <template #actions>
-            <RIconButton label="Open budget report" size="sm"><ArrowUpRight /></RIconButton>
-          </template>
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Treasury · W32–W50</p>
+              <h3 class="charts-frame__title">Net liquidity</h3>
+            </div>
+            <span class="r-label">IDR bn · weekly close</span>
+          </header>
           <RLineChart
-            :labels="days"
-            :series="budgetSeries"
-            :highlight="17"
+            :labels="d.weeks"
+            :series="[{ name: 'Net liquidity', values: d.liquidity }]"
+            :forecast-from="12"
+            :now="12"
+            :references="[{ value: d.liquidityBuffer, label: `Min buffer ${d.liquidityBuffer}`, kind: 'threshold' }]"
+            :format="idr"
+            y-unit="IDR bn"
             :height="260"
-            :format="(v: number) => formatCurrency(v)"
-            :axis-format="(v: number) => `$${formatCompact(v)}`"
-            legend
-            label="Revenues and expenditures in May"
+            label="Net liquidity by week, IDR billions, with a six-week forecast"
           />
-        </RCard>
+        </div>
       </Demo>
-
-      <div class="doc-grid doc-grid--2">
-        <Demo title="On a flame card" note="Tokens are re-pointed, so the line, pill and grid turn white." surface="plain">
-          <RCard variant="flame" class="charts-wide" title="Statistics">
-            <template #actions>
-              <RIconButton label="Open statistics" variant="soft" size="sm"><ArrowUpRight /></RIconButton>
-            </template>
-            <RStat :value="184.44" prefix="$" :decimals="2" size="lg" />
-            <RLineChart
-              :labels="weekDays"
-              :series="statistics"
-              :highlight="4"
-              :height="170"
-              :min="300"
-              :area="false"
-              hide-y-axis
-              label="Visits per day this week"
-            />
-          </RCard>
-        </Demo>
-        <Demo title="Small, no axis" note="A balance card like the one in Kevin Dukkon's financial dashboard." surface="plain">
-          <RCard class="charts-wide" title="Available balance">
-            <RStat :value="19453.43" prefix="$" :decimals="2" muted-decimals size="lg" :trend="3" trend-label="vs last month" />
-            <RLineChart
-              :labels="balanceMonths"
-              :series="balance"
-              :height="150"
-              :min="12000"
-              hide-y-axis
-              :format="(v: number) => formatCurrency(v)"
-              label="Available balance by month"
-            />
-          </RCard>
-        </Demo>
-      </div>
-
+      <Demo title="Step curve, end labels, threshold" surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">API · last 24 h</p>
+              <h3 class="charts-frame__title">p95 latency by region</h3>
+            </div>
+            <span class="r-label">ms</span>
+          </header>
+          <RLineChart
+            :labels="d.hours"
+            :series="d.latency"
+            curve="step"
+            end-labels
+            :references="[{ value: 300, label: 'SLO 300 ms', kind: 'threshold' }]"
+            :height="240"
+            label="p95 latency by region over the last 24 hours, in milliseconds"
+          />
+        </div>
+      </Demo>
       <CodeBlock :code="lineCode" />
       <PropsTable :rows="lineProps" caption="RLineChart props" />
       <DoDont
-        do="Highlight the one point people should look at first, like today or the record day."
-        dont="Don't fill the area under every series. One gradient is a backdrop; three are a fog."
+        do="Dash only what is not measured yet: forecasts, targets, thresholds. Keep the measured line solid."
+        dont="Don't smooth sampled data with the monotone curve. It invents values between samples."
       />
     </DocSection>
 
-    <!-- Sparkline ---------------------------------------------------------- -->
+    <!-- Columns -->
     <DocSection
-      id="sparkline"
-      title="Sparkline"
-      description="A tiny line with no axes, next to a number. From the Coinex portfolio cards. With color set to auto it turns green when the series ends higher and red when it ends lower."
+      id="columns"
+      title="Columns"
+      description="Comparing amounts across a few categories or periods. Square ends, 24px at most, a 2px surface gap between stacked parts, and an ink tick for the target."
     >
-      <Demo surface="plain">
-        <div class="charts-coins">
-          <RCard v-for="coin in coins" :key="coin.ticker" padding="sm" class="charts-coin">
-            <div class="charts-coin__head">
-              <RAvatar :name="coin.name" size="md" decorative />
+      <div class="doc-grid doc-grid--2">
+        <Demo title="Against a target" surface="plain">
+          <div class="charts-frame">
+            <header class="charts-frame__head">
               <div>
-                <p class="charts-coin__ticker">{{ coin.ticker }}</p>
-                <p class="charts-coin__name">{{ coin.name }}</p>
+                <p class="r-eyebrow">Settlement</p>
+                <h3 class="charts-frame__title">Settled this week</h3>
               </div>
-            </div>
-            <div class="charts-coin__price">
-              {{ formatCurrency(coin.price, 'USD', { minimumFractionDigits: 2 }) }}
-              <RTrend :value="coin.change" size="sm" />
-            </div>
-            <RSparkline :values="coin.values" :height="44" :label="`${coin.name}, last 10 days`" />
-          </RCard>
-        </div>
-      </Demo>
-
-      <Demo title="In a list" note="Fixed width, so the column lines up." surface="plain">
-        <RCard class="charts-wide" title="Watchlist" padding="sm">
-          <ul class="charts-watch">
-            <li v-for="coin in watchlist" :key="coin.ticker">
-              <span class="charts-watch__name">
-                <strong>{{ coin.ticker }}</strong>
-                {{ coin.name }}
-              </span>
-              <RSparkline :values="coin.values" :width="96" :height="28" :label="`${coin.name}, last 8 days`" />
-              <span class="charts-watch__price">{{ formatCurrency(coin.price, 'USD', { minimumFractionDigits: 2 }) }}</span>
-              <RTrend :value="coin.change" variant="plain" />
-            </li>
-          </ul>
-        </RCard>
-      </Demo>
-
-      <CodeBlock :code="sparkCode" />
-      <PropsTable :rows="sparkProps" caption="RSparkline props" />
-      <DoDont
-        do="Put the number it describes right next to it. A sparkline shows the shape; the number gives the value."
-        dont="Don't use auto colour for things where up is bad, like costs or response time. Pass a neutral colour instead."
-      />
-    </DocSection>
-
-    <!-- Radial gauge ------------------------------------------------------- -->
-    <DocSection
-      id="radial-gauge"
-      title="Radial gauge"
-      description="A half circle of rounded radial bars, from the Syncrowave sales category card. The bars fill in order, each segment in its own colour, with the total in the middle. Hover a segment to see its own value."
-    >
-      <div class="doc-grid doc-grid--2">
-        <Demo title="Full arc" note="The segments add up to the whole." surface="plain">
-          <RCard class="charts-wide" title="Sales category">
-            <template #actions>
-              <RIconButton label="Open sales report" size="sm"><ArrowUpRight /></RIconButton>
-            </template>
-            <RRadialGauge :segments="categories" caption="Product sales" label="Product sales by category" />
-            <div class="charts-pill">
-              <RTrend :value="12.2" />
-              <span>You sold 2,921 items compared to last month</span>
-            </div>
-          </RCard>
-        </Demo>
-        <Demo title="Partly filled" note="Set max to show what is left." surface="plain">
-          <RCard class="charts-wide" title="Storage">
-            <RRadialGauge
-              :segments="storage"
-              :max="100"
-              value="69 GB"
-              caption="of 100 GB used"
-              :bars="36"
-              :format="(v: number) => `${v} GB`"
-              label="Storage used by type"
+            </header>
+            <RColumnChart
+              :labels="d.days"
+              :values="d.settled"
+              :targets="d.settledTargets"
+              :format="idr"
+              y-unit="IDR bn"
+              label="Settled volume by day against target, IDR billions"
             />
-          </RCard>
+          </div>
+        </Demo>
+        <Demo title="Stacked, with status colours" surface="plain">
+          <div class="charts-frame">
+            <header class="charts-frame__head">
+              <div>
+                <p class="r-eyebrow">Edge · today</p>
+                <h3 class="charts-frame__title">Responses by status</h3>
+              </div>
+            </header>
+            <RColumnChart
+              :labels="d.statusHours"
+              :series="d.statusCodes"
+              :show-values="false"
+              y-unit="K req"
+              label="Responses by status class every two hours, thousands of requests"
+            />
+          </div>
         </Demo>
       </div>
-
-      <CodeBlock :code="gaugeCode" />
-      <PropsTable :rows="gaugeProps" caption="RRadialGauge props" />
-      <DoDont
-        do="Use it for a few parts of one whole, with the whole as the headline."
-        dont="Don't compare values between two gauges. Bars on a shared axis do that far better."
-      />
+      <CodeBlock :code="columnCode" />
+      <PropsTable :rows="columnProps" caption="RColumnChart props" />
     </DocSection>
 
-    <!-- Heatmap ------------------------------------------------------------ -->
-    <DocSection
-      id="heatmap"
-      title="Heatmap"
-      description="Rows by columns, with intensity mixed from the chart colour into the track colour. From Fireart's orders by time and the Makaryo attendance report. Arrow keys move between cells."
-    >
-      <div class="doc-grid doc-grid--2">
-        <Demo surface="plain">
-          <RCard class="charts-wide" title="Orders by time" subtitle="Last 4 weeks">
-            <RHeatmap
-              :rows="hours"
-              :cols="weekDays"
-              :values="orders"
-              :format="(v: number) => `${v} orders`"
-              label="Orders by time of day and weekday"
-            />
-          </RCard>
-        </Demo>
-        <Demo surface="plain">
-          <RCard class="charts-wide" title="Attendance report" subtitle="Real-time arrivals this week">
-            <RHeatmap
-              :rows="slots"
-              :cols="workDays"
-              :values="attendance"
-              :cell-height="36"
-              :radius="4"
-              :format="(v: number) => `${v} people`"
-              label="Arrivals by time and weekday"
-            />
-          </RCard>
-        </Demo>
-      </div>
-
-      <CodeBlock :code="heatmapCode" />
-      <PropsTable :rows="heatmapProps" caption="RHeatmap props" />
-      <DoDont
-        do="Use it to find the busy and quiet times in a week, when the pattern matters more than any one number."
-        dont="Don't rely on colour alone for exact values. The tooltip and the table carry the numbers."
-      />
-    </DocSection>
-
-    <!-- Range bars --------------------------------------------------------- -->
-    <DocSection
-      id="range-bars"
-      title="Range bars"
-      description="Lowest to highest per day as one rounded bar, from the heart rate card in Chart Cards. A dashed line with an ink pill marks the average."
-    >
-      <div class="doc-grid doc-grid--2">
-        <Demo title="With an average" surface="plain">
-          <RCard class="charts-wide" title="Heart rate">
-            <template #actions>
-              <RButton variant="outline" size="sm">
-                Full stats
-                <template #trailing><ArrowRight /></template>
-              </RButton>
-            </template>
-            <div>
-              <RStat value="40–189" unit="bpm" size="lg" />
-              <p class="charts-caption">10–17 Sep 2025</p>
-            </div>
-            <RRangeBars
-              :labels="heartDays"
-              :ranges="heartRanges"
-              :average="57"
-              color="var(--r-danger)"
-              unit="bpm"
-              :height="220"
-              label="Heart rate range per day"
-            />
-            <ul class="charts-readings">
-              <li><span>Today (14:00)</span><strong>125</strong></li>
-              <li><span>Today (13:00)</span><strong>110</strong></li>
-            </ul>
-          </RCard>
-        </Demo>
-        <Demo title="Another unit" surface="plain">
-          <RCard class="charts-wide" title="Temperature" subtitle="Jakarta, this week">
-            <RRangeBars
-              :labels="weekDays"
-              :ranges="temperatures"
-              :average="27"
-              average-label="Avg. 27°"
-              color="var(--r-chart-3)"
-              unit="°C"
-              :height="200"
-              label="Daily low and high temperature"
-            />
-          </RCard>
-        </Demo>
-      </div>
-
-      <CodeBlock :code="rangeCode" />
-      <PropsTable :rows="rangeProps" caption="RRangeBars props" />
-      <DoDont
-        do="Use it when the spread matters: heart rate, temperatures, response times, prices in a day."
-        dont="Don't use it for a single value per day. A column or a line is clearer."
-      />
-    </DocSection>
-
-    <!-- Bar list ----------------------------------------------------------- -->
+    <!-- Bar list -->
     <DocSection
       id="bar-list"
       title="Bar list"
-      description="Horizontal bars with the label on the left, single or stacked. From the energy activity card and Fireart's active users by country. Labels stay readable at any length because they are text, not SVG."
+      description="A ranked list: names on the left, thin bars, values in mono on the right. The honest answer to most pie-chart requests."
     >
-      <div class="doc-grid doc-grid--2">
-        <Demo surface="plain">
-          <RCard class="charts-wide" title="Avg. energy activity">
-            <template #actions>
-              <RChip caret size="sm">Per day</RChip>
-            </template>
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
             <div>
-              <RStat :value="2589" unit="kcal" size="lg" />
-              <p class="charts-caption">Avg. per day</p>
+              <p class="r-eyebrow">Edge · 24 h</p>
+              <h3 class="charts-frame__title">Top paths by requests</h3>
             </div>
-            <RBarList
-              :items="energy"
-              :series="energySeries"
-              axis
-              legend
-              :show-values="false"
-              :format="(v: number) => `${formatNumber(v)} kcal`"
-              label="Average active and resting calories per quarter"
-            />
-          </RCard>
-        </Demo>
-        <Demo surface="plain">
-          <RCard class="charts-wide" title="Active users by country" subtitle="Last 30 days">
-            <RBarList :items="countries" :bar-height="10" label="Active users by country" />
-          </RCard>
-        </Demo>
-      </div>
+          </header>
+          <RBarList :items="d.topPaths" axis :format="formatCompact" label="Top API paths by requests in the last 24 hours" />
+        </div>
+      </Demo>
+    </DocSection>
 
-      <CodeBlock :code="barCode" />
-      <PropsTable :rows="barProps" caption="RBarList props" />
+    <!-- Bullet -->
+    <DocSection
+      id="bullet"
+      title="Bullet"
+      description="Stephen Few's bullet graph: the measure in cobalt, the target as an ink tick, grey bands for poor, fair and good. Many KPIs in the space of one gauge."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Q4 2026</p>
+              <h3 class="charts-frame__title">Results against targets</h3>
+            </div>
+            <span class="r-label">Thin bar · Q3</span>
+          </header>
+          <RBulletChart :rows="d.quarter" label="Quarter results against targets" />
+        </div>
+      </Demo>
+      <CodeBlock :code="bulletCode" />
+      <PropsTable :rows="bulletProps" caption="RBulletChart props" />
       <DoDont
-        do="Sort plain bar lists from largest to smallest so the ranking reads top to bottom."
-        dont="Don't use it for time. Time runs left to right; use columns or a line."
+        do="Use bullets for a row of KPIs that each have a target. They compare well down a column."
+        dont="Don't use a dial or a donut for a value with a target; it takes four times the space and reads worse."
       />
     </DocSection>
 
-    <!-- Columns ------------------------------------------------------------ -->
+    <!-- Waterfall -->
     <DocSection
-      id="column"
-      title="Columns"
-      description="Wide columns over a hatched track with a target tick, from the banking analytics card. The track shows the full scale, so a short column still reads as part of a whole."
+      id="waterfall"
+      title="Waterfall"
+      description="How you got from one total to another. Increases in cobalt, decreases in orange, totals in ink, joined by hairline connectors."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Cash · October</p>
+              <h3 class="charts-frame__title">Operating cash flow</h3>
+            </div>
+            <span class="r-label">IDR bn</span>
+          </header>
+          <RWaterfallChart :steps="d.cashflow" :format="idr" label="Operating cash flow in October, IDR billions" />
+        </div>
+      </Demo>
+      <CodeBlock :code="waterfallCode" />
+    </DocSection>
+
+    <!-- Candles -->
+    <DocSection
+      id="candles"
+      title="Candlestick"
+      description="Open, high, low and close per period, volume on its own strip underneath. Up is cobalt and down is orange, the diverging pair, so it survives colour blindness. The price axis sits on the right, as traders expect."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame" data-theme="dark">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">STRV · 5 min</p>
+              <h3 class="charts-frame__title">21 Strive</h3>
+            </div>
+            <span class="r-label">USD</span>
+          </header>
+          <RCandlestickChart :data="d.candles" :height="340" label="STRV, 5-minute candles with volume" />
+        </div>
+      </Demo>
+      <CodeBlock :code="candleCode" />
+    </DocSection>
+
+    <!-- Scatter -->
+    <DocSection
+      id="scatter"
+      title="Scatter"
+      description="Two measures per item. Up to three series, because past three the colours stop being distinguishable from every other colour. Hover finds the nearest point within 24px."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Credit risk</p>
+              <h3 class="charts-frame__title">Exposure against probability of default</h3>
+            </div>
+          </header>
+          <RScatterChart
+            :series="d.exposure"
+            x-label="PD %"
+            y-label="Exposure USD M"
+            :y-references="[{ value: 150, label: 'Single-name limit', kind: 'threshold' }]"
+            label-points
+            :format-x="(v) => `${v}%`"
+            :height="320"
+            label="Exposure in USD millions against probability of default by segment"
+          />
+        </div>
+      </Demo>
+      <CodeBlock :code="scatterCode" />
+    </DocSection>
+
+    <!-- Heatmap -->
+    <DocSection
+      id="heatmap"
+      title="Heatmap"
+      description="Magnitude over two dimensions, in six steps of the cobalt ramp. Zero gets its own grey so nothing reads as a little."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Identity · last 4 weeks</p>
+              <h3 class="charts-frame__title">Sign-ins by weekday and hour</h3>
+            </div>
+            <span class="r-label">WIB</span>
+          </header>
+          <RHeatmap :rows="d.heatRows" :cols="d.heatCols" :values="d.heat" label="Sign-ins by weekday and two-hour block" />
+        </div>
+      </Demo>
+      <CodeBlock :code="heatCode" />
+    </DocSection>
+
+    <!-- Gantt -->
+    <DocSection
+      id="gantt"
+      title="Gantt"
+      description="Things on a timeline: satellite passes, bookings, deploy windows. Hatching marks the planned and the tentative, a diamond marks a moment, the orange line is now."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Ground segment · 12 Nov 2026</p>
+              <h3 class="charts-frame__title">Passes today</h3>
+            </div>
+            <span class="r-label">UTC</span>
+          </header>
+          <RGanttChart
+            :rows="d.passes"
+            :domain="d.passDomain"
+            :ticks="d.passTicks"
+            :format-tick="minutes"
+            :now="d.passNow"
+            :row-height="40"
+            label="Ground-station passes today, UTC"
+          />
+        </div>
+      </Demo>
+      <CodeBlock :code="ganttCode" />
+      <PropsTable :rows="ganttProps" caption="RGanttChart props" />
+    </DocSection>
+
+    <!-- Dial -->
+    <DocSection
+      id="dial"
+      title="Dial"
+      description="One reading against a scale with limits, like an instrument. Status zones sit on the outer ring and the current zone is named under the readout."
+    >
+      <Demo surface="plain">
+        <div class="charts-dials">
+          <RDial
+            :value="31240"
+            :min="0"
+            :max="40000"
+            :major-step="10000"
+            unit="RPM"
+            :zones="[
+              { from: 32000, to: 36000, level: 'warning' },
+              { from: 36000, to: 40000, level: 'critical' },
+            ]"
+            :format="(v) => formatCompact(v)"
+            label="Turbopump speed"
+          />
+          <RDial
+            :value="76"
+            variant="arc"
+            unit="%"
+            :zones="[{ from: 0, to: 15, level: 'critical' }, { from: 15, to: 30, level: 'warning' }]"
+            label="Battery charge"
+          />
+          <RDial
+            :value="3.2"
+            :min="0"
+            :max="8"
+            :major-step="2"
+            unit="bar"
+            :zones="[{ from: 6, to: 7, level: 'serious' }, { from: 7, to: 8, level: 'critical' }]"
+            :format="(v) => formatNumber(v, { maximumFractionDigits: 1 })"
+            label="Line pressure"
+          />
+        </div>
+      </Demo>
+      <CodeBlock :code="dialCode" />
+      <PropsTable :rows="dialProps" caption="RDial props" />
+    </DocSection>
+
+    <!-- Radar -->
+    <DocSection
+      id="radar"
+      title="Radar scope"
+      description="Positions by bearing and range. Each kind has its own shape as well as its own colour (friendly circle, hostile diamond, unknown open square, neutral square), and every track is labelled."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame charts-frame--center" data-theme="dark">
+          <RRadarScope :contacts="d.tracks" :size="420" label="Air picture, 100 nautical miles" />
+        </div>
+      </Demo>
+      <CodeBlock :code="radarCode" />
+      <PropsTable :rows="radarProps" caption="RRadarScope props" />
+    </DocSection>
+
+    <!-- Range bars -->
+    <DocSection
+      id="range-bars"
+      title="Range bars"
+      description="A spread per period, from low to high, with ink caps at both ends and an average as a dashed reference."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">API · daily</p>
+              <h3 class="charts-frame__title">Response time, p5 to p95</h3>
+            </div>
+          </header>
+          <RRangeBars :labels="d.rangeDays" :ranges="d.responseRanges" :average="168" unit="ms" label="Daily response time spread, p5 to p95, in milliseconds" />
+        </div>
+      </Demo>
+    </DocSection>
+
+    <!-- Radial gauge -->
+    <DocSection
+      id="radial-gauge"
+      title="Tick ring"
+      description="A whole split into a few parts, drawn as the ticks of an instrument scale. Keep it to three parts; for more, use a bar list."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame charts-frame--narrow">
+          <header class="charts-frame__head">
+            <div>
+              <p class="r-eyebrow">Storage</p>
+              <h3 class="charts-frame__title">Capacity by tier</h3>
+            </div>
+            <span class="r-label">TB</span>
+          </header>
+          <RRadialGauge :segments="d.storage" :max="400" caption="TB used of 400" label="Storage used by tier, terabytes" />
+        </div>
+      </Demo>
+    </DocSection>
+
+    <!-- Dot matrix -->
+    <DocSection
+      id="dot-matrix"
+      title="Dot matrix"
+      description="Counts as a tally of LEDs, the Teenage Engineering twist. Each dot is the same amount. Set shape to pixel for square pixels."
     >
       <div class="doc-grid doc-grid--2">
-        <Demo title="Highlight and targets" surface="plain">
-          <RCard class="charts-wide" title="Analytics">
-            <template #actions>
-              <RIconButton label="Open analytics" variant="soft" size="sm"><ArrowUpRight /></RIconButton>
-            </template>
-            <RStat :value="242.63" prefix="$" :decimals="2" size="lg" />
-            <RColumnChart
-              :labels="['Mon', 'Tue', 'Wed']"
-              :values="[64, 52, 46]"
-              :targets="[70, 56, 50]"
-              :highlight="0"
-              label="Share of the weekly budget spent per day"
-            />
-          </RCard>
+        <Demo title="Dots" surface="plain">
+          <div class="charts-frame">
+            <RDotMatrixChart :labels="d.shipWeeks" :series="d.shipments" :height="220" label="Domestic and export shipments per week" />
+          </div>
         </Demo>
-        <Demo title="A week against one goal" surface="plain">
-          <RCard class="charts-wide" title="Daily goal" subtitle="Target 80%">
-            <RColumnChart
-              :labels="weekDays"
-              :values="goals"
-              :targets="80"
-              :highlight="4"
-              color="var(--r-chart-1)"
-              label-color="var(--r-on-brand)"
-              :height="200"
-              label="Daily goal completion this week"
-            />
-          </RCard>
+        <Demo title="Pixels" surface="plain">
+          <div class="charts-frame" data-theme="dark">
+            <RDotMatrixChart :labels="d.shipWeeks" :series="d.shipments" :height="220" shape="pixel" label="Domestic and export shipments per week, pixel style" />
+          </div>
         </Demo>
       </div>
+    </DocSection>
 
-      <CodeBlock :code="columnCode" />
-      <PropsTable :rows="columnProps" caption="RColumnChart props" />
-      <DoDont
-        do="Keep it to a handful of columns, and highlight the one that matters now."
-        dont="Don't drop the track or the targets to fit more columns. Without them it's just a bar chart."
-      />
+    <!-- Sparkline -->
+    <DocSection
+      id="sparkline"
+      title="Sparkline"
+      description="A trend in a table cell. No axes; the colour follows the direction, and invert flips it when lower is better."
+    >
+      <Demo surface="plain">
+        <div class="charts-frame charts-watch">
+          <div v-for="w in d.watchlist" :key="w.symbol" class="charts-watch__row">
+            <span class="charts-watch__sym">{{ w.symbol }}</span>
+            <span class="charts-watch__name">{{ w.name }}</span>
+            <RSparkline :values="w.values" :width="120" :label="`${w.name}, last 24 hours`" />
+            <span class="charts-watch__price">{{ formatNumber(w.price, { maximumFractionDigits: 2 }) }}</span>
+            <span class="charts-watch__chg" :class="w.change < 0 ? 'is-down' : 'is-up'">
+              {{ w.change < 0 ? '−' : '+' }}{{ Math.abs(w.change).toFixed(2) }}%
+            </span>
+          </div>
+        </div>
+      </Demo>
     </DocSection>
   </DocPage>
 </template>
 
 <style>
-.charts-wide {
+.charts-frame {
+  padding: 16px 20px 18px;
+  border: 1px solid var(--r-border);
+  background: var(--r-bg-surface);
+  color: var(--r-text);
   width: 100%;
 }
 
-/* Cards with a row of filter chips: let the chips drop below the title on a phone. */
-.charts-wide > .r-card__header {
-  flex-wrap: wrap;
+.charts-frame--center {
+  display: flex;
+  justify-content: center;
 }
 
-.charts-legend {
+.charts-frame--narrow {
+  max-width: 420px;
+}
+
+.charts-frame__head {
   display: flex;
-  gap: 16px;
-  margin-top: -6px;
-  color: var(--r-text-tertiary);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.charts-frame__title {
+  margin-top: 4px;
+  font-size: var(--r-text-lg);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-tight);
+}
+
+.charts-rules {
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+
+.charts-rule {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px 18px;
+}
+
+.charts-rule__text {
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-sm);
+  line-height: 1.5;
+}
+
+.charts-swatches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
   font-size: var(--r-text-xs);
 }
-.charts-legend li {
+
+.charts-swatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.charts-swatch__chip {
+  width: 12px;
+  height: 12px;
+}
+
+.charts-ramp {
+  display: flex;
+  gap: 2px;
+}
+
+.charts-ramp span {
+  flex: 1;
+  height: 14px;
+}
+
+.charts-states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.charts-states span {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.charts-legend__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+
+.charts-states i {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-radius-round);
 }
 
-.charts-caption {
-  margin-top: 4px;
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-sm);
-  font-variant-numeric: tabular-nums;
+.charts-states i.is-now {
+  width: 2px;
+  height: 12px;
+  border-radius: 0;
+  background: var(--r-chart-now);
 }
 
-.charts-pill {
+.charts-dials {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  align-self: center;
-  max-width: 100%;
-  padding: 6px 14px 6px 6px;
-  border: 1px solid var(--r-border-subtle);
-  border-radius: var(--r-radius-full);
-  color: var(--r-text-secondary);
-  font-size: var(--r-text-xs);
-}
-
-.charts-coins {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 24px;
   width: 100%;
-}
-
-.charts-coin {
-  gap: 12px !important;
-}
-
-.charts-coin__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.charts-coin__ticker {
-  font-size: var(--r-text-sm);
-  font-weight: var(--r-weight-semibold);
-}
-
-.charts-coin__name {
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-xs);
-}
-
-.charts-coin__price {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--r-text-xl);
-  font-weight: var(--r-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--r-tracking-tight);
+  padding: 8px 0;
 }
 
 .charts-watch {
   display: flex;
   flex-direction: column;
+  padding: 0;
 }
 
-.charts-watch li {
+.charts-watch__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px 92px 56px;
+  grid-template-columns: 56px 1fr 120px 96px 72px;
   align-items: center;
   gap: 16px;
-  min-height: 52px;
+  height: 44px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--r-border-subtle);
-  font-size: var(--r-text-sm);
 }
-.charts-watch li:last-child {
+
+.charts-watch__row:last-child {
   border-bottom: 0;
 }
 
-.charts-watch__name {
-  overflow: hidden;
-  color: var(--r-text-tertiary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.charts-watch__name strong {
-  margin-right: 6px;
-  color: var(--r-text);
+.charts-watch__sym {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-weight: var(--r-weight-semibold);
+  letter-spacing: 0.04em;
 }
 
-.charts-watch__price {
-  font-weight: var(--r-weight-medium);
+.charts-watch__name {
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-sm);
+}
+
+.charts-watch__price,
+.charts-watch__chg {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-xs);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
-.charts-watch .r-trend {
-  justify-content: flex-end;
+.charts-watch__chg.is-up {
+  color: var(--r-success-text);
 }
 
-@media (max-width: 520px) {
-  .charts-watch li {
-    grid-template-columns: minmax(0, 1fr) 72px auto;
-    gap: 10px;
+.charts-watch__chg.is-down {
+  color: var(--r-danger-text);
+}
+
+@media (max-width: 640px) {
+  .charts-watch__row {
+    grid-template-columns: 48px 1fr 72px;
   }
-  .charts-watch li .r-trend {
+  .charts-watch__name,
+  .charts-watch__chg {
     display: none;
   }
-  .charts-watch li .r-sparkline {
-    width: 72px !important;
-  }
-}
-
-.charts-readings {
-  display: flex;
-  flex-direction: column;
-}
-.charts-readings li {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-top: 1px solid var(--r-border-subtle);
-  color: var(--r-text-tertiary);
-  font-size: var(--r-text-md);
-}
-.charts-readings strong {
-  color: var(--r-text);
-  font-weight: var(--r-weight-medium);
-  font-variant-numeric: tabular-nums;
 }
 </style>
