@@ -14,7 +14,7 @@ const marks = [
   { brand: 'rapi', variant: 'lockup', name: 'Rapi lockup', use: 'The design language: these docs, the library, talks about the system.' },
   { brand: 'rapi', variant: 'mark', name: 'Rapi mark', use: 'The docs favicon and small corners where Rapi is already written.' },
   { brand: 'pakem', variant: 'lockup', name: 'Pakem lockup', use: 'The backend standard: its docs site and anything that speaks for it.' },
-  { brand: 'pakem', variant: 'mark', name: 'Pakem mark', use: 'The Pakem favicon. Its p is the r closed into a bowl and cut at the family diagonal.' },
+  { brand: 'pakem', variant: 'mark', name: 'Pakem mark', use: 'The Pakem favicon. Its p is the 1 of the logogram mirrored: the flag points right, the diagonal on top.' },
 ] as const
 const grounds = [
   { id: 'light', label: 'Light' },

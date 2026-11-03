@@ -291,7 +291,7 @@ watch(page, () => scrollActiveIntoView())
               <RKbd>esc</RKbd>
               Close
             </span>
-            <span class="r-command__hint" :class="{ 'is-muted': !page }">
+            <span v-if="page" class="r-command__hint">
               <RKbd><ArrowLeft /></RKbd>
               Back
             </span>
@@ -326,6 +326,14 @@ watch(page, () => scrollActiveIntoView())
   background: var(--r-bg-raised);
   box-shadow: var(--r-shadow-lg);
   color: var(--r-text);
+}
+
+/* The panel is as tall as its content up to max-height, so the list's flex basis falls back to its
+   content: only the list may shrink, never the rows around it. */
+.r-command__crumb,
+.r-command__search,
+.r-command__footer {
+  flex-shrink: 0;
 }
 
 .r-command__crumb {
@@ -517,10 +525,6 @@ watch(page, () => scrollActiveIntoView())
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: opacity var(--r-duration-fast) var(--r-ease-out);
-}
-.r-command__hint.is-muted {
-  opacity: 0.4;
 }
 
 .r-command__keys {
