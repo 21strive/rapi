@@ -292,6 +292,9 @@ function skipToContent() {
   .docs-topbar__brand {
     display: inline-flex;
   }
+  .docs-topbar__brand {
+    align-self: center;
+  }
   .docs-search {
     width: auto;
     margin-left: auto;

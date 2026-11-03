@@ -3,41 +3,25 @@ withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
 </script>
 
 <template>
-  <span class="rapi-logo">
-    <svg class="rapi-logo__mark" viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="9" />
-      <path d="M10.5 22V10h6a3.8 3.8 0 0 1 0 7.6h-6m5.8 0 5 4.4" />
-    </svg>
-    <span v-if="!compact" class="rapi-logo__word">Rapi</span>
-  </span>
+  <!--
+    The 21 Strive family lockup: the r logogram plus "rapi" in Geist Regular, drawn as outlines
+    so no extra font loads. The viewBox is the logogram (100 units tall); the descender of the p
+    hangs below it, so the logo lines up by its logogram like the old square mark did.
+  -->
+  <svg v-if="compact" class="rapi-logo" viewBox="0 0 100.8 100" width="28.22" height="28" role="img" aria-label="Rapi">
+    <path d="M0 0L100.8 0L46.5 50L46.5 100L0 100Z" />
+  </svg>
+  <svg v-else class="rapi-logo" viewBox="0 0 240.45 100" width="67.33" height="28" role="img" aria-label="Rapi">
+    <path d="M0 0L0 100L46.5 100L46.5 50L100.8 0ZM193.19 110.56L199.11 110.56L199.11 95.08Q199.72 96.19 200.62 97.11Q202.35 98.87 204.85 99.86Q207.35 100.85 210.24 100.85Q215.8 100.85 219.36 98.1Q222.91 95.35 224.64 90.92Q226.36 86.48 226.36 81.34Q226.36 76.2 224.64 71.76Q222.91 67.32 219.36 64.58Q215.8 61.83 210.24 61.83Q205.94 61.83 202.67 63.98Q200.2 65.6 198.79 68.36L198.69 62.68L193.19 62.68ZM164.74 100.85Q167.91 100.85 170.73 99.75Q173.55 98.66 175.45 96.73Q176.6 95.55 177.24 94.21Q177.4 95.72 177.84 96.8Q178.55 98.52 180.13 99.33Q181.72 100.14 184.25 100.14Q184.95 100.14 185.59 100.11Q186.22 100.07 186.5 100L186.5 94.79L185.03 94.79Q183.97 94.79 183.51 94.26Q183.05 93.73 183.05 92.46L183.05 77.04Q183.05 69.93 179.25 65.88Q175.45 61.83 168.26 61.83Q161.93 61.83 157.88 65.11Q153.83 68.38 152.77 73.66L159.04 74.15Q159.88 70.92 162.14 69.19Q164.39 67.46 168.26 67.46Q172.7 67.46 174.92 69.79Q177.14 72.11 177.14 76.83L163.9 79.3Q157.77 80.42 154.95 83.17Q152.14 85.92 152.14 90.7Q152.14 95.49 155.55 98.17Q158.97 100.85 164.74 100.85ZM209.67 95.21Q206.43 95.21 204.04 93.66Q201.65 92.11 200.38 89.01Q199.11 85.92 199.11 81.34Q199.11 76.76 200.41 73.66Q201.72 70.56 204.07 69.01Q206.43 67.46 209.67 67.46Q214.53 67.46 217.35 71.13Q220.17 74.79 220.17 81.34Q220.17 87.89 217.35 91.55Q214.53 95.21 209.67 95.21ZM130.8 100L136.72 100L136.72 77.46Q136.72 74.37 137.67 72.36Q138.62 70.35 140.48 69.33Q142.35 68.31 145.17 68.31L148.76 68.31L148.76 62.68L145.1 62.68Q141.15 62.68 138.79 64.89Q137.06 66.53 136.22 69.55L136.01 62.68L130.8 62.68ZM234.39 100L240.31 100L240.31 62.68L234.39 62.68ZM165.31 95.63Q162.07 95.63 160.2 94.19Q158.34 92.75 158.34 90.14Q158.34 87.82 159.78 86.37Q161.22 84.93 165.03 84.23L177.14 81.97L177.14 84.65Q177.14 87.75 175.73 90.25Q174.32 92.75 171.68 94.19Q169.04 95.63 165.31 95.63ZM234.25 56.83L240.45 56.83L240.45 49.93L234.25 49.93Z" />
+  </svg>
 </template>
 
 <style>
 .rapi-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  display: block;
+  flex: none;
+  overflow: visible;
   color: var(--r-text);
-}
-
-.rapi-logo__mark {
-  width: 28px;
-  height: 28px;
-}
-.rapi-logo__mark rect {
-  fill: var(--r-ink);
-}
-.rapi-logo__mark path {
-  fill: none;
-  stroke: var(--r-on-ink);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.rapi-logo__word {
-  font-size: 19px;
-  font-weight: var(--r-weight-semibold);
-  letter-spacing: var(--r-tracking-tight);
+  fill: currentColor;
 }
 </style>
