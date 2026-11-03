@@ -324,9 +324,11 @@ const hasKicker = computed(() => !!(props.index || props.eyebrow))
   border-color: var(--r-signal);
   background: var(--r-signal);
   color-scheme: light;
+  /* Black on International Orange is 5.5:1 at full strength and fails once it is tinted, so every
+     level of text stays solid black here and the hierarchy comes from size and weight. */
   --r-text: var(--r-on-signal);
-  --r-text-secondary: color-mix(in srgb, var(--r-on-signal) 80%, transparent);
-  --r-text-tertiary: color-mix(in srgb, var(--r-on-signal) 66%, transparent);
+  --r-text-secondary: var(--r-on-signal);
+  --r-text-tertiary: var(--r-on-signal);
   --r-text-disabled: color-mix(in srgb, var(--r-on-signal) 40%, transparent);
   --r-border-subtle: color-mix(in srgb, var(--r-on-signal) 14%, transparent);
   --r-border: color-mix(in srgb, var(--r-on-signal) 24%, transparent);

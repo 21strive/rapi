@@ -93,7 +93,7 @@ const ariaLabel = computed(
 </script>
 
 <template>
-  <figure class="r-chart r-dial" :style="{ width: `${size}px` }" role="img" :aria-label="ariaLabel">
+  <div class="r-chart r-dial" :style="{ width: `${size}px` }" role="img" :aria-label="ariaLabel">
     <svg :viewBox="`0 0 ${S} ${S * 0.86}`" :width="size" :height="size * 0.86" aria-hidden="true">
       <path v-if="variant === 'arc'" class="r-dial__track" :d="trackArc" />
       <path v-if="variant === 'arc'" class="r-dial__value" :d="valueArc" />
@@ -119,14 +119,14 @@ const ariaLabel = computed(
         <circle :cx="C" :cy="C" r="4" />
       </g>
     </svg>
-    <figcaption class="r-dial__readout">
+    <div class="r-dial__readout">
       <span class="r-dial__value-text">
         {{ fmt(value) }}<span v-if="unit" class="r-dial__unit">{{ unit }}</span>
       </span>
       <span class="r-dial__label">{{ label }}</span>
       <span v-if="activeZone" class="r-dial__zone-label" :style="{ '--zone': STATUS_COLORS[activeZone.level] }">{{ activeZone.level }}</span>
-    </figcaption>
-  </figure>
+    </div>
+  </div>
 </template>
 
 <style>
