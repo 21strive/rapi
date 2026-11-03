@@ -23,6 +23,8 @@ export interface Sample {
   summary: string
   /** The theme the screen was designed in. The toolbar can still switch it. */
   theme: 'light' | 'dark'
+  /** The screen handles ⌘K itself (its own command palette). */
+  ownsModK?: boolean
   load: () => Promise<{ default: Component }>
 }
 
@@ -255,6 +257,7 @@ export const samples: Sample[] = [
   },
   {
     id: 'issues',
+    ownsModK: true,
     index: '25',
     title: "Issue tracker",
     group: 'Developer platform',

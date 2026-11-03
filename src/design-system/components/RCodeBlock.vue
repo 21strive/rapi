@@ -15,8 +15,10 @@ const props = withDefaults(
     /** Scroll vertically past this height, e.g. "320px". */
     maxHeight?: string
     wrap?: boolean
-    /** Lines (1-based) to highlight with a brand rule. */
+    /** Lines (1-based) to highlight with a rule in the tone colour. */
     highlight?: number[]
+    /** brand (default) for "look here", danger for the failing line of a log, warning, success. */
+    highlightTone?: 'brand' | 'danger' | 'warning' | 'success' | 'signal'
   }>(),
   { copyable: true },
 )
@@ -61,7 +63,10 @@ onBeforeUnmount(() => clearTimeout(timer))
 </script>
 
 <template>
-  <div class="r-code" :class="{ 'is-wrap': wrap, 'has-numbers': lineNumbers, 'has-strip': hasStrip }">
+  <div
+    class="r-code"
+    :class="[`r-tone-${highlightTone ?? 'brand'}`, { 'is-wrap': wrap, 'has-numbers': lineNumbers, 'has-strip': hasStrip }]"
+  >
     <div v-if="hasStrip" class="r-code__strip">
       <span class="r-code__heading">
         <span v-if="title" class="r-code__title">{{ title }}</span>
@@ -241,8 +246,8 @@ onBeforeUnmount(() => clearTimeout(timer))
 }
 
 .r-code__line.is-highlighted {
-  background: var(--r-brand-soft);
-  box-shadow: inset 2px 0 0 var(--r-brand);
+  background: var(--tone-soft, var(--r-brand-soft));
+  box-shadow: inset 2px 0 0 var(--tone-lamp, var(--r-brand));
 }
 
 .r-code__number {
@@ -255,7 +260,7 @@ onBeforeUnmount(() => clearTimeout(timer))
   user-select: none;
 }
 .r-code__line.is-highlighted .r-code__number {
-  color: var(--r-brand-text);
+  color: var(--tone-text, var(--r-brand-text));
 }
 
 .r-code__text {

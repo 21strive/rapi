@@ -34,7 +34,7 @@ const routes: RouteRecordRaw[] = [
   ...samples.map<RouteRecordRaw>((sample) => ({
     path: `/samples/${sample.id}`,
     component: sample.load,
-    meta: { title: sample.title, bare: true, sample: sample.id },
+    meta: { title: sample.title, bare: true, sample: sample.id, ownsModK: sample.ownsModK },
   })),
   { path: '/references', component: () => import('./pages/ReferencesPage.vue'), meta: { title: 'References' } },
   { path: '/:pathMatch(.*)*', redirect: '/' },
