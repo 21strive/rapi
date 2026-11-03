@@ -16,6 +16,9 @@ const props = withDefaults(
     sweep?: boolean
     size?: number
     selected?: string
+    /** A ring to watch, in scope units: drawn dashed in the critical colour with its range. */
+    alertRing?: number
+    alertLabel?: string
   }>(),
   { range: 100, rings: 4, unit: 'NM', sweep: true, size: 360 },
 )
@@ -67,6 +70,7 @@ const items = computed(() =>
     const lead = c.heading == null ? null : polar(c.heading, 18)
     return {
       ...c,
+      beyond: c.range > props.range,
       x: p.x,
       y: p.y,
       color: kind.color,
@@ -115,6 +119,10 @@ const highlighted = computed(() => {
         <line :x1="C" :y1="C - R" :x2="C" :y2="C + R" />
         <line :x1="C - R" :y1="C" :x2="C + R" :y2="C" />
       </g>
+      <g v-if="alertRing != null && alertRing <= range" class="r-radar__alert">
+        <circle :cx="C" :cy="C" :r="(alertRing / range) * R" />
+        <text :x="C" :y="C - (alertRing / range) * R - 5" text-anchor="middle">{{ alertLabel ?? `${alertRing} ${unit}` }}</text>
+      </g>
       <g class="r-chart__axis">
         <text v-for="ring in ringList" :key="`l${ring.r}`" :x="ring.lx" :y="ring.ly">{{ ring.label }}</text>
         <text class="r-chart__unit" :x="C + 4" :y="C - 6">{{ unit }}</text>
@@ -145,7 +153,7 @@ const highlighted = computed(() => {
         v-for="(c, i) in items"
         :key="c.id"
         class="r-radar__contact"
-        :class="[`is-${c.kind ?? 'unknown'}`, { 'is-selected': highlighted === c.id }]"
+        :class="[`is-${c.kind ?? 'unknown'}`, { 'is-selected': highlighted === c.id, 'is-beyond': c.beyond }]"
         @pointerenter="focus.onPointer(i)"
         @pointerleave="focus.onPointer(null)"
         @click="emit('select', c.id)"
@@ -195,7 +203,7 @@ const highlighted = computed(() => {
             <th scope="row">{{ c.label ?? c.id }}</th>
             <td>{{ c.word }}</td>
             <td>{{ String(Math.round(c.bearing)).padStart(3, '0') }}°</td>
-            <td>{{ c.range }}</td>
+            <td>{{ c.range }}{{ c.beyond ? ' (beyond scope)' : '' }}</td>
             <td>{{ c.heading == null ? '—' : `${String(Math.round(c.heading)).padStart(3, '0')}°` }}</td>
           </tr>
         </tbody>
@@ -267,6 +275,27 @@ const highlighted = computed(() => {
 
 .r-radar__contact {
   cursor: pointer;
+}
+
+/* Beyond the outer ring: pinned to the edge and faded, still labelled. */
+.r-radar__contact.is-beyond {
+  opacity: 0.45;
+}
+
+.r-radar__alert circle {
+  fill: none;
+  stroke: var(--r-status-critical);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+
+.r-radar__alert text {
+  fill: var(--r-danger-text);
+  font-family: var(--r-font-mono);
+  font-size: 9.5px;
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .r-radar__mark {

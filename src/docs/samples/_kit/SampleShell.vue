@@ -38,27 +38,29 @@ defineSlots<{
 
 <template>
   <div class="sample-shell" :style="{ '--shell-sidebar': `${sidebarWidth}px` }">
-    <div class="sample-shell__strip">
+    <!-- Landmarks: the strip is the banner, the sidebar is complementary, the header bar and the
+         content share <main>, so everything on the screen sits inside a landmark. -->
+    <header class="sample-shell__strip">
       <div class="sample-shell__strip-start">
         <RLogo v-if="mark !== 'none'" :brand="mark" variant="mark" :size="11" label="" />
         <span class="sample-shell__product">{{ product }}</span>
         <slot name="strip" />
       </div>
       <div class="sample-shell__strip-end"><slot name="meta" /></div>
-    </div>
+    </header>
     <div class="sample-shell__frame" :class="{ 'has-sidebar': !!$slots.sidebar }">
       <aside v-if="$slots.sidebar" class="sample-shell__sidebar"><slot name="sidebar" /></aside>
-      <div class="sample-shell__main">
-        <header v-if="title || $slots.header || $slots.actions" class="sample-shell__header">
+      <main class="sample-shell__main">
+        <div v-if="title || $slots.header || $slots.actions" class="sample-shell__header">
           <div class="sample-shell__header-start">
             <slot name="header"><h1 class="sample-shell__title">{{ title }}</h1></slot>
           </div>
           <div class="sample-shell__header-end"><slot name="actions" /></div>
-        </header>
-        <main class="sample-shell__content" :class="`sample-shell__content--${padding}`">
+        </div>
+        <div class="sample-shell__content" :class="`sample-shell__content--${padding}`">
           <slot />
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   </div>
 </template>
@@ -98,10 +100,21 @@ defineSlots<{
   align-items: center;
   gap: 12px;
   min-width: 0;
+  overflow: hidden;
+}
+
+/* On narrow screens the strip clips its tail instead of widening the page. */
+.sample-shell__strip-start {
+  flex: 1 1 auto;
 }
 
 .sample-shell__strip-end {
+  flex: 0 1 auto;
   color: var(--r-text-tertiary);
+}
+
+.sample-shell__product {
+  flex: none;
 }
 
 .sample-shell__frame {

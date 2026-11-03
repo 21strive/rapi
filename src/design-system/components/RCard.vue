@@ -179,6 +179,7 @@ const hasKicker = computed(() => !!(props.index || props.eyebrow))
 }
 
 .r-card__eyebrow {
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   color: var(--r-text-secondary);
@@ -224,10 +225,15 @@ const hasKicker = computed(() => !!(props.index || props.eyebrow))
   white-space: nowrap;
 }
 
-/* Actions may be taller than the title line; they overhang it by 4px instead of pushing it down. */
+/* On the kicker line the meta gives way before it pushes the card wider: both it and the eyebrow
+   shrink and end in an ellipsis. */
 .r-card__kicker > .r-card__meta {
+  flex: 0 1 auto;
+  min-width: 0;
   margin-left: auto;
   padding-left: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .r-card__actions {

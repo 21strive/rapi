@@ -191,7 +191,7 @@ const legendItems = computed(() =>
         </g>
         <g class="r-chart__axis">
           <template v-if="!hideYAxis">
-            <text v-if="yUnit" class="r-chart__unit" :x="geometry.left - 8" :y="geometry.top - 12" text-anchor="end">{{ yUnit }}</text>
+            <text v-if="yUnit" class="r-chart__unit" :x="0" :y="geometry.top - 12">{{ yUnit }}</text>
             <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">
               {{ axisFmt(t.v) }}
             </text>

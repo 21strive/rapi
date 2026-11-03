@@ -39,14 +39,21 @@ const flat = computed(() => props.values.flat())
 const lo = computed(() => props.min ?? Math.min(...flat.value))
 const hi = computed(() => props.max ?? Math.max(...flat.value))
 
-const M = { top: 2, right: 0, bottom: 22, left: 52 }
+// The label gutter fits the longest row label (Geist Mono 10px ≈ 6.2px a character).
+const M = computed(() => ({
+  top: 2,
+  right: 0,
+  bottom: 22,
+  left: Math.min(180, Math.max(36, Math.max(0, ...props.rows.map((r) => r.length)) * 6.2 + 14)),
+}))
 
 const geometry = computed(() => {
-  const plotW = Math.max(1, width.value - M.left - M.right)
+  const plotW = Math.max(1, width.value - M.value.left - M.value.right)
   const nCols = Math.max(1, props.cols.length)
   const cellW = (plotW - props.gap * (nCols - 1)) / nCols
-  const height = M.top + props.rows.length * (props.cellHeight + props.gap) - props.gap + M.bottom
-  return { cellW, height }
+  const height = M.value.top + props.rows.length * (props.cellHeight + props.gap) - props.gap + M.value.bottom
+  const colEvery = Math.max(1, Math.ceil(26 / Math.max(1, cellW + props.gap)))
+  return { cellW, height, colEvery }
 })
 
 // Stepped scale: n classes spread over --r-seq-1…8; --r-seq-0 is reserved for zero.
@@ -80,8 +87,8 @@ const cells = computed(() =>
         r,
         c,
         value,
-        x: M.left + c * (geometry.value.cellW + props.gap),
-        y: M.top + r * (props.cellHeight + props.gap),
+        x: M.value.left + c * (geometry.value.cellW + props.gap),
+        y: M.value.top + r * (props.cellHeight + props.gap),
         fill: mix(value),
       }
     }),
@@ -159,6 +166,7 @@ const announce = computed(() => (keyboard.value && tooltip.value ? `${tooltip.va
         </text>
         <text
           v-for="(col, c) in cols"
+          v-show="c % geometry.colEvery === 0"
           :key="`c${c}`"
           :x="M.left + c * (geometry.cellW + gap) + geometry.cellW / 2"
           :y="geometry.height - 6"

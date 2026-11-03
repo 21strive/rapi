@@ -121,7 +121,7 @@ const tooltip = computed(() => {
           <line v-for="t in yTicks" :key="t.v" :x1="geometry.left" :x2="geometry.right" :y1="crisp(t.y)" :y2="crisp(t.y)" />
         </g>
         <g class="r-chart__axis">
-          <text v-if="unit" class="r-chart__unit" :x="geometry.left - 8" :y="geometry.top - 12" text-anchor="end">{{ unit }}</text>
+          <text v-if="unit" class="r-chart__unit" :x="0" :y="geometry.top - 12">{{ unit }}</text>
           <text v-for="t in yTicks" :key="`y${t.v}`" :x="geometry.left - 8" :y="t.y" dy="0.32em" text-anchor="end">{{ fmt(t.v) }}</text>
           <template v-for="(l, i) in labels" :key="i">
             <text v-if="i % xEvery === 0" :x="bars[i].cx" :y="height - 6" text-anchor="middle">{{ l }}</text>

@@ -159,7 +159,8 @@ const legendItems = computed(() =>
 
         <g v-for="r in xRefs" :key="`rx${r.value}`" class="r-chart__ref" :class="`r-chart__ref--${r.kind ?? 'threshold'}`">
           <line :x1="crisp(r.x)" :x2="crisp(r.x)" :y1="geometry.top" :y2="geometry.bottom" />
-          <text :x="r.x + 4" :y="geometry.top + 8">{{ r.label ?? fx(r.value) }}</text>
+          <rect :x="r.x + 2" :y="geometry.top - 15" :width="(r.label ?? fx(r.value)).length * 6.2 + 6" height="12" />
+          <text :x="r.x + 5" :y="geometry.top - 6">{{ r.label ?? fx(r.value) }}</text>
         </g>
         <g v-for="r in yRefs" :key="`ry${r.value}`" class="r-chart__ref" :class="`r-chart__ref--${r.kind ?? 'threshold'}`">
           <line :x1="geometry.left" :x2="geometry.right" :y1="crisp(r.y)" :y2="crisp(r.y)" />
@@ -180,7 +181,17 @@ const legendItems = computed(() =>
         </g>
         <g v-if="labelPoints">
           <template v-for="(p, i) in points" :key="`t${i}`">
-            <text v-if="p.label" class="r-chart__value r-chart__value--quiet" :x="p.cx + 8" :y="p.cy" dy="0.34em">{{ p.label }}</text>
+            <!-- Labels sit right of the point, or left of it near the right edge so they never clip. -->
+            <text
+              v-if="p.label"
+              class="r-chart__value r-chart__value--quiet"
+              :x="p.cx + (p.cx + p.label.length * 6.4 + 8 > geometry.right ? -8 : 8)"
+              :y="p.cy"
+              dy="0.34em"
+              :text-anchor="p.cx + p.label.length * 6.4 + 8 > geometry.right ? 'end' : 'start'"
+            >
+              {{ p.label }}
+            </text>
           </template>
         </g>
       </svg>

@@ -18,7 +18,9 @@ export function identityColors(indexOrName: number | string): { background: stri
 export function initialsOf(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean)
   if (!words.length) return '?'
+  // One word ("Ops", "Siti") gives its first two letters, so a single name still reads as a monogram.
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
   const first = words[0][0] ?? ''
-  const last = words.length > 1 ? (words[words.length - 1][0] ?? '') : ''
+  const last = words[words.length - 1][0] ?? ''
   return (first + last).toUpperCase()
 }
