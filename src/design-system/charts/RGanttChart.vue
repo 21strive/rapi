@@ -34,7 +34,7 @@ const ft = (v: number) => (props.formatTick ? props.formatTick(v) : String(Math.
 const AXIS_H = 26
 
 const TONES: Record<NonNullable<GanttItem['tone']>, { fill: string; text: string }> = {
-  brand: { fill: 'var(--r-brand)', text: 'var(--r-on-brand)' },
+  brand: { fill: 'var(--r-brand-fill)', text: 'var(--r-on-brand)' },
   context: { fill: 'var(--r-chart-context)', text: 'var(--r-text)' },
   signal: { fill: 'var(--r-signal)', text: 'var(--r-on-signal)' },
   success: { fill: 'var(--r-success)', text: 'var(--r-on-success)' },

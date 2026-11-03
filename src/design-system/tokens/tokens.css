@@ -250,6 +250,9 @@
   --r-brand-text: var(--r-cobalt-700);
   --r-brand-border: var(--r-cobalt-200);
   --r-brand-secondary: var(--r-cobalt-400);
+  /* Fill behind white text (solid buttons and badges). In light it is the brand itself. */
+  --r-brand-fill: var(--r-cobalt-700);
+  --r-brand-fill-hover: var(--r-cobalt-800);
   --r-on-brand: #ffffff;
 
   /* Signal · International Orange. Live, now, the one thing that needs eyes. Black labels. */
@@ -391,9 +394,14 @@
   --r-ink-hover: #ffffff;
   --r-on-ink: var(--r-neutral-900);
 
-  --r-brand: var(--r-cobalt-600); /* white label 6.4:1 */
-  --r-brand-hover: var(--r-cobalt-500);
-  --r-brand-pressed: var(--r-cobalt-700);
+  /* Marks and lines (radio dots, slider fills, selected rules) need 3:1 on every dark surface:
+     cobalt-500 is 4.2:1 on the surface and 3.6:1 on hover. White text needs 4.5:1, so solid fills
+     behind labels use cobalt-600 (6.4:1) through --r-brand-fill. */
+  --r-brand: var(--r-cobalt-500);
+  --r-brand-hover: var(--r-cobalt-400);
+  --r-brand-pressed: var(--r-cobalt-600);
+  --r-brand-fill: var(--r-cobalt-600);
+  --r-brand-fill-hover: var(--r-cobalt-700);
   --r-brand-soft: color-mix(in srgb, var(--r-cobalt-500) 15%, transparent);
   --r-brand-soft-hover: color-mix(in srgb, var(--r-cobalt-500) 24%, transparent);
   --r-brand-text: var(--r-cobalt-300);

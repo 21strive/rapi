@@ -88,7 +88,7 @@ a {
 }
 
 ::selection {
-  background: var(--r-brand);
+  background: var(--r-brand-fill);
   color: var(--r-on-brand);
 }
 
@@ -238,8 +238,8 @@ a {
 }
 
 .r-tone-brand {
-  --tone-solid: var(--r-brand);
-  --tone-solid-hover: var(--r-brand-hover);
+  --tone-solid: var(--r-brand-fill);
+  --tone-solid-hover: var(--r-brand-fill-hover);
   --tone-on-solid: var(--r-on-brand);
   --tone-soft: var(--r-brand-soft);
   --tone-soft-hover: var(--r-brand-soft-hover);
