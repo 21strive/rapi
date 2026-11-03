@@ -13,7 +13,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/components/navigation', component: () => import('./pages/NavigationPage.vue'), meta: { title: 'Navigation' } },
   { path: '/components/overlays', component: () => import('./pages/OverlaysPage.vue'), meta: { title: 'Overlays' } },
   { path: '/charts', component: () => import('./pages/ChartsPage.vue'), meta: { title: 'Charts' } },
-  { path: '/examples', component: () => import('./pages/ExamplesPage.vue'), meta: { title: 'Examples' } },
+  { path: '/examples', redirect: '/samples' },
+  // Work-in-progress preview of the 0.2 components before they move into their category pages.
+  { path: '/lab', component: () => import('./pages/LabPage.vue'), meta: { title: 'Lab' } },
   {
     path: '/examples/sales',
     component: () => import('./examples/SalesOverview.vue'),
