@@ -273,7 +273,7 @@ const toneCss = `.my-pill {
     >
       <ColorRamp
         :steps="ramp('brand')"
-        :title="`--r-brand-* · now ${brandNames[brand]}`"
+        :title="`--r-brand-* · now ${brandNames.blue}`"
         note="Switch the brand in the top bar and this ramp changes with it."
         highlight="--r-brand-500"
       />
