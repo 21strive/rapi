@@ -31,6 +31,11 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Weekly schedule', bare: true },
   },
   { path: '/samples', component: () => import('./pages/SamplesPage.vue'), meta: { title: 'Samples' } },
+  {
+    path: '/moodboard',
+    component: () => import('./moodboard/MoodboardPage.vue'),
+    meta: { title: 'Moodboard', bare: true, ownToolbar: true },
+  },
   ...samples.map<RouteRecordRaw>((sample) => ({
     path: `/samples/${sample.id}`,
     component: sample.load,
@@ -43,8 +48,10 @@ const routes: RouteRecordRaw[] = [
 export const router = createRouter({
   history: createWebHashHistory(),
   routes,
-  scrollBehavior(to, _from, saved) {
+  scrollBehavior(to, from, saved) {
     if (saved) return saved
+    // Only the query changed (a filter, a toggle): stay where the reader is.
+    if (to.path === from.path && to.hash === from.hash && from.matched.length) return false
     if (to.hash) return { el: to.hash, top: 88, behavior: 'smooth' }
     return { top: 0 }
   },
@@ -63,5 +70,7 @@ declare module 'vue-router' {
     ownsModK?: boolean
     /** Id of the sample screen this route shows. */
     sample?: string
+    /** The page draws its own toolbar, so the floating docs toolbar stays away. */
+    ownToolbar?: boolean
   }
 }

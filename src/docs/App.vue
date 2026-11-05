@@ -30,7 +30,7 @@ watchEffect(() => {
 <template>
   <template v-if="bare">
     <RouterView />
-    <ExampleToolbar />
+    <ExampleToolbar v-if="!route.meta.ownToolbar" />
   </template>
   <DocsShell v-else>
     <RouterView />
