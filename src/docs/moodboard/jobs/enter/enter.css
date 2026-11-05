@@ -1,0 +1,189 @@
+/*
+ * The Enter chapter's shared look. Custom fields follow the Rapi Forms rules exactly as RInput
+ * draws them: square, a strong 1px rule, a 2px cobalt ring on focus, errors in danger text with an
+ * icon. Every class is prefixed en- so nothing leaks into other chapters.
+ */
+
+/* On a cobalt tile the grey control rule would sit on cobalt; use the panel's own light rule. */
+.r-card--brand .en-root {
+  --r-border-control: color-mix(in srgb, var(--r-on-brand) 62%, transparent);
+}
+
+.en-title {
+  font-size: var(--r-text-md);
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-snug);
+  line-height: 1.3;
+}
+
+.en-note {
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-xs);
+  line-height: 1.4;
+}
+
+/* The line under a field: a hint, an error, a confirmation. Status always carries an icon. */
+.en-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-xs);
+  line-height: 1.4;
+}
+.en-msg > svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+}
+.en-msg > span {
+  min-width: 0;
+}
+.en-msg--error {
+  color: var(--r-danger-text);
+}
+.en-msg--ok {
+  color: var(--r-success-text);
+}
+.en-msg--warn {
+  color: var(--r-warning-text);
+}
+
+/* A custom field box, the same anatomy as RInput. */
+.en-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--r-border-control);
+  border-radius: var(--r-radius-control);
+  background: var(--r-bg-surface);
+  color: var(--r-text);
+  transition:
+    border-color var(--r-duration-fast) var(--r-ease-out),
+    box-shadow var(--r-duration-fast) var(--r-ease-out);
+}
+.en-box:hover:not(:focus-within, .is-readonly) {
+  border-color: var(--r-text-secondary);
+}
+.en-box:focus-within {
+  box-shadow: var(--r-focus-ring);
+}
+.en-box.is-invalid,
+.en-box.is-invalid:hover:not(:focus-within) {
+  border-color: var(--r-danger);
+}
+.en-box.is-readonly {
+  border-color: var(--r-border);
+  background: var(--r-bg-muted);
+}
+
+/* The bare control inside a box. */
+.en-control {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-radius-control);
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.en-control:focus-visible {
+  outline: none;
+}
+.en-control::placeholder {
+  color: var(--r-text-tertiary);
+  opacity: 1;
+}
+
+/* A keypad key: square, ruled, mono legend. */
+.en-key {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--r-border-strong);
+  border-radius: var(--r-radius-control);
+  background: var(--r-bg-surface);
+  color: var(--r-text);
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-md);
+  font-weight: var(--r-weight-medium);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color var(--r-duration-instant) var(--r-ease-out);
+}
+.en-key:hover {
+  background: var(--r-bg-hover);
+}
+.en-key:active {
+  background: var(--r-bg-pressed);
+}
+.en-key:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--r-focus);
+  outline-offset: -1px;
+}
+.en-key:disabled {
+  color: var(--r-text-disabled);
+  cursor: default;
+}
+.en-key svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* A text button for the quiet second action ("Use the sample", "Change"). */
+.en-link {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--r-brand-text);
+  font: inherit;
+  font-size: var(--r-text-xs);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.en-link:hover {
+  color: var(--r-text);
+}
+.en-link:focus-visible {
+  outline: 2px solid var(--r-focus);
+  outline-offset: 2px;
+}
+
+/* The header row of a tile: the eyebrow gives way first; a lamp or a meta never truncates. */
+.en-root > .mk-row > .r-status {
+  flex: none;
+}
+
+/* Quiet figures at the right of a header: amounts keep their own case ("Rp", never "RP"). */
+.en-meta {
+  flex: none;
+  max-width: 60%;
+  overflow: hidden;
+  color: var(--r-text-tertiary);
+  font-size: var(--r-text-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

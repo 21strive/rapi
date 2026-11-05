@@ -1,0 +1,31 @@
+/*
+ * The compare specimens carry the library's `r-chart` class, so their hand-drawn marks pick up
+ * the same re-pointed chart tokens as a library chart on a dark or brand tile.
+ *
+ * Two things the frame doesn't re-point for us:
+ * – Charts draw 2px gaps, point rings and tag backs in --r-chart-surface. On a muted tile the panel
+ *   is one step off the surface, so the token follows the muted panel.
+ * – Selection is cobalt (--r-brand), which disappears on a brand tile; there it is the white of
+ *   the tile's text.
+ */
+.cmp {
+  --cmp-select: var(--r-brand);
+}
+
+.mood-tile--muted .cmp {
+  --r-chart-surface: var(--r-bg-muted);
+}
+
+.r-card--brand .cmp {
+  --cmp-select: var(--r-on-brand);
+}
+
+/* Less motion asked for: bars, rows and lines jump to their new places instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .cmp *,
+  .cmp *::before,
+  .cmp *::after {
+    transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+}
