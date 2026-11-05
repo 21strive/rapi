@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Command, Moon, Sun } from 'lucide-vue-next'
 import { RSegmented } from '@/design-system'
 import ThemeSwitch from './ThemeSwitch.vue'
@@ -14,7 +14,17 @@ const themeOptions = [
 ]
 
 const route = useRoute()
+const router = useRouter()
 const sample = computed(() => (route.meta.sample ? sampleById(route.meta.sample) : undefined))
+
+/* A Then → Now pair: the same job as a conventional screen and as its AI-first rewrite. */
+const eraOptions = [
+  { label: 'Then', value: 'then' },
+  { label: 'Now', value: 'now' },
+]
+function switchEra(value: string | number | undefined) {
+  if (sample.value?.pair && value !== sample.value.era) router.push(`/samples/${sample.value.pair}`)
+}
 </script>
 
 <template>
@@ -24,6 +34,17 @@ const sample = computed(() => (route.meta.sample ? sampleById(route.meta.sample)
       <span>Samples</span>
     </RouterLink>
     <span v-if="sample" class="example-toolbar__id">{{ sample.index }} · {{ sample.title }}</span>
+    <template v-if="sample?.pair && sample.era">
+      <span class="example-toolbar__divider" aria-hidden="true" />
+      <RSegmented
+        :model-value="sample.era"
+        :options="eraOptions"
+        size="sm"
+        variant="pill"
+        label="Then or now"
+        @update:model-value="switchEra"
+      />
+    </template>
     <span class="example-toolbar__divider" aria-hidden="true" />
     <RSegmented
       v-if="sample"
