@@ -48,6 +48,30 @@ const rails: Rail[] = [
   { name: 'Batch 0412', meta: '1,284 payments', tone: 'signal', status: 'Live', pulse: true },
 ]
 
+/* ── What gets a screen: the rule before the rules ──────────────────────────── */
+const tests = [
+  {
+    title: 'Seeing beats saying',
+    text: 'State, change and shape read in one look: readouts, lamps, live values, charts, who and what.',
+    jobs: 'Glance · Watch · Compare · Identify',
+  },
+  {
+    title: 'Touch beats describing',
+    text: 'A hand finds the value faster than a sentence: knobs, faders, and the few fields worth a field.',
+    jobs: 'Tune · Enter',
+  },
+  {
+    title: 'A person decides',
+    text: 'Commitments, proof and interruptions: approve, release, undo, verify, acknowledge.',
+    jobs: 'Decide · Verify · Respond',
+  },
+  {
+    title: 'Everything else is a conversation',
+    text: 'Filters, forms and settings become a sentence; the screen keeps only what needs a check.',
+    jobs: 'Ask',
+  },
+] as const
+
 /* ── Principles ─────────────────────────────────────────────────────────────── */
 const principles = [
   {
@@ -284,6 +308,25 @@ const changes = [
         </div>
       </div>
     </figure>
+
+    <DocSection
+      id="what-gets-a-screen"
+      title="What gets a screen"
+      description="We make UI to make things easier for people, not harder, so we only build the UI that matters. A language model can now carry most complex interactions as a conversation; a screen earns its place only when one of three things is true."
+    >
+      <div class="intro-tests r-grid-ruled">
+        <article v-for="(t, i) in tests" :key="t.title" class="intro-test">
+          <span class="r-index">{{ String(i + 1).padStart(2, '0') }}</span>
+          <h3 class="intro-test__title">{{ t.title }}</h3>
+          <p class="intro-test__text">{{ t.text }}</p>
+          <p class="intro-test__jobs r-label">{{ t.jobs }}</p>
+        </article>
+      </div>
+      <RouterLink to="/moodboard" class="intro-tests__link">
+        See a thousand of these moments on the moodboard
+        <ArrowUpRight :size="14" aria-hidden="true" />
+      </RouterLink>
+    </DocSection>
 
     <DocSection
       id="principles"
@@ -648,6 +691,66 @@ const changes = [
 }
 
 /* ── Principles ──────────────────────────────────────────────────────────── */
+.intro-tests.r-grid-ruled {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 560px) {
+  .intro-tests.r-grid-ruled {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .intro-tests.r-grid-ruled {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.intro-test {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 16px 18px;
+}
+
+.intro-test:last-child {
+  background: var(--r-bg-muted);
+}
+
+.intro-test__title {
+  margin-top: 4px;
+  font-size: var(--r-text-lg);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.25;
+  letter-spacing: var(--r-tracking-snug);
+}
+
+.intro-test__text {
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-sm);
+}
+
+.intro-test__jobs {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.intro-tests__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  color: var(--r-brand-text);
+  font-size: var(--r-text-sm);
+  font-weight: var(--r-weight-medium);
+  text-decoration: none;
+}
+.intro-tests__link:hover {
+  text-decoration: underline;
+}
+
 .intro-principles.r-grid-ruled {
   grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
 }
