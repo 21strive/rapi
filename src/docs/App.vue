@@ -19,6 +19,9 @@ watch(
   () => sample.value?.id,
   () => {
     if (sample.value) sampleTheme.value = sample.value.theme
+    // ?theme=dark|light opens a sample in the other theme (links, screenshots).
+    const asked = route.query.theme
+    if (sample.value && (asked === 'dark' || asked === 'light')) sampleTheme.value = asked
   },
   { immediate: true },
 )
@@ -30,7 +33,8 @@ watchEffect(() => {
 <template>
   <template v-if="bare">
     <RouterView />
-    <ExampleToolbar v-if="!route.meta.ownToolbar" />
+    <!-- ?chrome=0 leaves the floating toolbar out, for gallery thumbnails. -->
+    <ExampleToolbar v-if="!route.meta.ownToolbar && route.query.chrome !== '0'" />
   </template>
   <DocsShell v-else>
     <RouterView />

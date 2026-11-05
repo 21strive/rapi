@@ -3,6 +3,7 @@
  * tokens, and opens at /samples/<id>. Order here is the order in the gallery.
  */
 import type { Component } from 'vue'
+import type { JobId } from '../moodboard/types'
 
 export type SampleGroup =
   | 'Banking'
@@ -12,6 +13,14 @@ export type SampleGroup =
   | 'Developer platform'
   | 'Workspace'
   | 'Brand & editorial'
+
+/**
+ * How a screen fares against "What gets a screen" (DESIGN.md):
+ * `earns` every part of it is seeing, touching or deciding · `half` the state and the decisions
+ * earn their place, the navigation, filters and forms around them should be a conversation ·
+ * `conversation` a classic interface the principle replaces; it has an AI-first rewrite ("now").
+ */
+export type Verdict = 'earns' | 'half' | 'conversation'
 
 export interface Sample {
   id: string
@@ -26,6 +35,17 @@ export interface Sample {
   /** The screen handles ⌘K itself (its own command palette). */
   ownsModK?: boolean
   load: () => Promise<{ default: Component }>
+  verdict: Verdict
+  /** The jobs the screen does for a person, as on the moodboard. */
+  jobs: JobId[]
+  /** One sentence: why the verdict, what stays a screen and what becomes a conversation. */
+  note: string
+  /** `then` a conventional screen with an AI-first rewrite; `now` that rewrite. */
+  era?: 'then' | 'now'
+  /** The other half of a Then → Now pair. */
+  pair?: string
+  /** What the job costs a person on this screen, counted so a pair can be compared. */
+  cost?: { value: number; unit: string }[]
 }
 
 export const sampleGroups: SampleGroup[] = [
@@ -46,7 +66,13 @@ export const samples: Sample[] = [
     group: 'Banking',
     summary: "Cash position across accounts and currencies, a 13-week liquidity forecast with the forecast hatched, FX exposure against limits, and the payments due this week.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['glance', 'compare', 'decide'],
+    note: "The cash wall and the forecast earn their place; finding a payment or building a view becomes a question.",
+    era: 'then',
+    pair: 'treasury-now',
     load: () => import('./treasury/Treasury.vue'),
+    cost: [{ value: 2, unit: 'steps' }, { value: 5, unit: 'fields' }],
   },
   {
     id: 'trading-terminal',
@@ -55,6 +81,9 @@ export const samples: Sample[] = [
     group: 'Banking',
     summary: "Candles with volume for one instrument, order-book depth, positions with P&L, a watchlist of sparklines and an order ticket.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['watch', 'compare', 'decide'],
+    note: "Prices, depth and P&L move every second; the order ticket is the few fields worth a field.",
     load: () => import('./trading-terminal/TradingTerminal.vue'),
   },
   {
@@ -64,6 +93,9 @@ export const samples: Sample[] = [
     group: 'Banking',
     summary: "A double-entry journal, the day’s net flows as a waterfall, settlement batches by status and the unmatched items left to clear.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['verify', 'compare', 'decide'],
+    note: "The journal, the waterfall and the breaks stay; matching and filtering become a sentence.",
     load: () => import('./ledger/Ledger.vue'),
   },
   {
@@ -73,6 +105,9 @@ export const samples: Sample[] = [
     group: 'Banking',
     summary: "Card inventory, team spend against limits, merchant categories, and one card in detail with freeze and limit controls.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['tune', 'decide', 'glance'],
+    note: "Freeze and limits are hand controls; finding a card in the inventory is a question.",
     load: () => import('./card-controls/CardControls.vue'),
   },
   {
@@ -82,6 +117,9 @@ export const samples: Sample[] = [
     group: 'Banking',
     summary: "Exposure against probability of default, a rating-migration heatmap, concentration limits and the watchlist.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['compare', 'glance'],
+    note: "The heatmap and the scatter earn their place; slicing the book is a question.",
     load: () => import('./credit-risk/CreditRisk.vue'),
   },
   {
@@ -91,6 +129,9 @@ export const samples: Sample[] = [
     group: 'Banking',
     summary: "Three phone screens: balance and activity, a transfer with its review step, and the receipt.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['decide', 'verify'],
+    note: "The review and the receipt stay; the transfer form becomes a sentence like “kirim 250 ribu ke Rina”.",
     load: () => import('./mobile-banking/MobileBanking.vue'),
   },
   {
@@ -100,6 +141,9 @@ export const samples: Sample[] = [
     group: 'Security & defense',
     summary: "Alert queue by severity, event rate against its threshold, a technique heatmap, analyst load and live lamps.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['respond', 'watch', 'glance'],
+    note: "An alert floor is read in a look and answered with one press; nothing on it is a form.",
     load: () => import('./soc-console/SocConsole.vue'),
   },
   {
@@ -109,6 +153,9 @@ export const samples: Sample[] = [
     group: 'Security & defense',
     summary: "A role-by-permission matrix, privileged sessions, MFA coverage and the quarterly certification in progress.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['decide', 'verify'],
+    note: "Certifying access is a decision per line; the role-by-permission matrix becomes a question.",
     load: () => import('./access-review/AccessReview.vue'),
   },
   {
@@ -118,7 +165,13 @@ export const samples: Sample[] = [
     group: 'Security & defense',
     summary: "A filterable event log with mono timestamps and an event drawer showing the change as before and after.",
     theme: 'light',
+    verdict: 'conversation',
+    jobs: ['verify'],
+    note: "Facets and filters become a question; the event and its before-and-after stay.",
+    era: 'then',
+    pair: 'audit-log-now',
     load: () => import('./audit-log/AuditLog.vue'),
+    cost: [{ value: 5, unit: 'steps' }, { value: 3, unit: 'fields' }],
   },
   {
     id: 'radar-ops',
@@ -127,6 +180,9 @@ export const samples: Sample[] = [
     group: 'Security & defense',
     summary: "A radar scope with labelled tracks, the track table, sensor health and the engagement log.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['watch', 'identify', 'respond'],
+    note: "Tracks move; a scope shows bearing and range faster than any sentence could.",
     load: () => import('./radar-ops/RadarOps.vue'),
   },
   {
@@ -136,6 +192,9 @@ export const samples: Sample[] = [
     group: 'Security & defense',
     summary: "Findings by severity band, age against score, the asset table and patch deadlines as bullet graphs.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['compare', 'respond'],
+    note: "Severity bands and deadlines read in a look; triaging the asset table is a conversation.",
     load: () => import('./vulnerability/Vulnerability.vue'),
   },
   {
@@ -145,7 +204,13 @@ export const samples: Sample[] = [
     group: 'Security & defense',
     summary: "Rules with their match counts, blocked requests over time, top sources and a rule editor with a live preview.",
     theme: 'light',
+    verdict: 'conversation',
+    jobs: ['decide', 'verify'],
+    note: "The rule editor becomes a sentence; the live preview of what it would block stays as the check.",
+    era: 'then',
+    pair: 'firewall-now',
     load: () => import('./firewall/Firewall.vue'),
+    cost: [{ value: 1, unit: 'dialog' }, { value: 4, unit: 'fields' }, { value: 9, unit: 'expression terms' }],
   },
   {
     id: 'mission-control',
@@ -154,6 +219,9 @@ export const samples: Sample[] = [
     group: 'Aerospace & operations',
     summary: "A mission clock in pixel digits, altitude and velocity readouts, the flight-event timeline, trajectory and subsystem lamps.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['watch', 'glance'],
+    note: "Telemetry at launch is the plainest case of a live surface.",
     load: () => import('./mission-control/MissionControl.vue'),
   },
   {
@@ -163,6 +231,9 @@ export const samples: Sample[] = [
     group: 'Aerospace & operations',
     summary: "Fleet health, ground-station passes on a Gantt, battery and thermal sparklines, and link margin on a dial.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['watch', 'compare'],
+    note: "Passes, battery and link margin over time are shapes, not sentences.",
     load: () => import('./constellation/Constellation.vue'),
   },
   {
@@ -172,6 +243,9 @@ export const samples: Sample[] = [
     group: 'Aerospace & operations',
     summary: "Chamber pressure and thrust traces, turbopump dials, valve states, abort limits and the test sequence.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['watch', 'respond'],
+    note: "Traces against abort limits need eyes on them and one hand near the abort.",
     load: () => import('./static-fire/StaticFire.vue'),
   },
   {
@@ -181,6 +255,9 @@ export const samples: Sample[] = [
     group: 'Aerospace & operations',
     summary: "The antenna schedule, a sky plot of the next pass, signal-to-noise, the downlink queue and site weather.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['watch', 'glance'],
+    note: "A pass drawn on the sky and its signal as it happens.",
     load: () => import('./ground-station/GroundStation.vue'),
   },
   {
@@ -190,6 +267,9 @@ export const samples: Sample[] = [
     group: 'Aerospace & operations',
     summary: "Load against forecast, the generation mix, substation status, frequency on a dial and curtailment events.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['watch', 'compare', 'respond'],
+    note: "Load against forecast and frequency on a dial, read in a glance by the operator on shift.",
     load: () => import('./grid-ops/GridOps.vue'),
   },
   {
@@ -199,6 +279,9 @@ export const samples: Sample[] = [
     group: 'Aerospace & operations',
     summary: "The day’s routes on a Gantt, on-time performance, exceptions to handle and depot capacity.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['watch', 'respond'],
+    note: "Routes and exceptions are live surfaces; rescheduling a run is a sentence.",
     load: () => import('./fleet-ops/FleetOps.vue'),
   },
   {
@@ -208,6 +291,9 @@ export const samples: Sample[] = [
     group: 'Instruments',
     summary: "Companion app for a pocket recorder: channel knobs, LED level meters, the waveform, transport and pixel time code.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['tune', 'watch'],
+    note: "Levels are set by hand and by ear; knobs and meters are the interface.",
     load: () => import('./field-recorder/FieldRecorder.vue'),
   },
   {
@@ -217,6 +303,9 @@ export const samples: Sample[] = [
     group: 'Instruments',
     summary: "A 16-step pattern grid for eight tracks, tempo and swing knobs, the pattern bank and a pixel BPM readout.",
     theme: 'dark',
+    verdict: 'earns',
+    jobs: ['tune'],
+    note: "A rhythm is drawn on a grid faster than it could ever be described.",
     load: () => import('./sequencer/Sequencer.vue'),
   },
   {
@@ -226,6 +315,9 @@ export const samples: Sample[] = [
     group: 'Instruments',
     summary: "An air-quality station: CO₂, PM2.5 and VOC readouts, dials with limits, a 24-hour heatmap and the device fleet.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['glance', 'compare'],
+    note: "Air quality is a reading against a limit; a dial says it in one look.",
     load: () => import('./sensor-lab/SensorLab.vue'),
   },
   {
@@ -235,6 +327,9 @@ export const samples: Sample[] = [
     group: 'Developer platform',
     summary: "Requests and bandwidth, cache hit ratio, status codes by hour, top paths and countries, under one filter row.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['compare', 'watch'],
+    note: "The traffic charts stay; the filter row above them becomes a sentence.",
     load: () => import('./edge-analytics/EdgeAnalytics.vue'),
   },
   {
@@ -244,7 +339,13 @@ export const samples: Sample[] = [
     group: 'Developer platform',
     summary: "Zone records with proxy switches, type badges, search, an add-record row and propagation status.",
     theme: 'light',
+    verdict: 'conversation',
+    jobs: ['decide', 'verify'],
+    note: "Editing records becomes a sentence; the change to approve and its propagation stay.",
+    era: 'then',
+    pair: 'dns-now',
     load: () => import('./dns/Dns.vue'),
+    cost: [{ value: 3, unit: 'steps' }, { value: 6, unit: 'fields' }],
   },
   {
     id: 'deployments',
@@ -253,6 +354,9 @@ export const samples: Sample[] = [
     group: 'Developer platform',
     summary: "The build pipeline, its log, deployment history with status lamps and the environment spec.",
     theme: 'dark',
+    verdict: 'half',
+    jobs: ['watch', 'verify'],
+    note: "The pipeline and its log are live; configuring the environment is a conversation.",
     load: () => import('./deployments/Deployments.vue'),
   },
   {
@@ -263,6 +367,9 @@ export const samples: Sample[] = [
     summary: "Issues grouped by status with priority marks and keyboard hints, and one issue open with its activity.",
     theme: 'light',
     ownsModK: true,
+    verdict: 'half',
+    jobs: ['decide', 'glance'],
+    note: "Triage is one decision per row; filing, grouping and searching issues is a conversation.",
     load: () => import('./issues/Issues.vue'),
   },
   {
@@ -272,7 +379,13 @@ export const samples: Sample[] = [
     group: 'Developer platform',
     summary: "Keys with their scopes, requests per key, a create-key dialog and a quick-start snippet.",
     theme: 'light',
+    verdict: 'conversation',
+    jobs: ['decide', 'verify'],
+    note: "The create-key dialog becomes a request; the scopes to check and the secret shown once stay.",
+    era: 'then',
+    pair: 'api-keys-now',
     load: () => import('./api-keys/ApiKeys.vue'),
+    cost: [{ value: 2, unit: 'steps' }, { value: 17, unit: 'fields' }],
   },
   {
     id: 'status-page',
@@ -281,6 +394,9 @@ export const samples: Sample[] = [
     group: 'Developer platform',
     summary: "A public status page: components with 90-day uptime strips, incident history and subscribe.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['glance', 'verify'],
+    note: "Ninety days of uptime are a strip of squares the public checks without asking.",
     load: () => import('./status-page/StatusPage.vue'),
   },
   {
@@ -290,6 +406,9 @@ export const samples: Sample[] = [
     group: 'Workspace',
     summary: "Metered usage against plan quotas, invoice history, plan comparison and the payment method.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['glance', 'decide'],
+    note: "Usage against quota stays; comparing plans becomes a recommendation to approve.",
     load: () => import('./billing/Billing.vue'),
   },
   {
@@ -299,7 +418,13 @@ export const samples: Sample[] = [
     group: 'Workspace',
     summary: "General, members, security and danger-zone sections, using the whole form kit.",
     theme: 'light',
+    verdict: 'conversation',
+    jobs: ['decide', 'verify'],
+    note: "Four sections of forms become a conversation; the change to approve and its record stay.",
+    era: 'then',
+    pair: 'org-settings-now',
     load: () => import('./org-settings/OrgSettings.vue'),
+    cost: [{ value: 4, unit: 'sections' }, { value: 6, unit: 'fields' }, { value: 2, unit: 'saves' }],
   },
   {
     id: 'sign-in',
@@ -308,6 +433,9 @@ export const samples: Sample[] = [
     group: 'Workspace',
     summary: "Sign-in, one-time code and recovery codes, beside a cobalt panel with the 21 Strive supergraphic.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['enter', 'verify'],
+    note: "A one-time code and recovery codes are the few fields worth a field.",
     load: () => import('./sign-in/SignIn.vue'),
   },
   {
@@ -317,7 +445,13 @@ export const samples: Sample[] = [
     group: 'Workspace',
     summary: "A guided setup: vertical steps, forms, a plan choice and the summary before launch.",
     theme: 'light',
+    verdict: 'conversation',
+    jobs: ['decide'],
+    note: "Five steps of forms become a conversation; the summary to check and one launch stay.",
+    era: 'then',
+    pair: 'onboarding-now',
     load: () => import('./onboarding/Onboarding.vue'),
+    cost: [{ value: 5, unit: 'steps' }, { value: 25, unit: 'fields' }],
   },
   {
     id: 'booking-ops',
@@ -326,6 +460,9 @@ export const samples: Sample[] = [
     group: 'Workspace',
     summary: "Today’s bookings by resource on a Gantt, capacity by hour, the walk-in queue and revenue.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['watch', 'decide'],
+    note: "Today’s schedule and the walk-in queue are live; making a booking is a sentence.",
     load: () => import('./booking-ops/BookingOps.vue'),
   },
   {
@@ -335,6 +472,9 @@ export const samples: Sample[] = [
     group: 'Workspace',
     summary: "Platform balance, settlement batches, the KYC review queue with a document datasheet, and error groups.",
     theme: 'light',
+    verdict: 'half',
+    jobs: ['decide', 'verify'],
+    note: "The KYC queue is one decision per case; searching batches and errors is a question.",
     load: () => import('./settlements/Settlements.vue'),
   },
   {
@@ -344,6 +484,9 @@ export const samples: Sample[] = [
     group: 'Brand & editorial',
     summary: "The 21 Strive guidelines as slides made with Rapi: logo, construction, colour, type and collateral.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['identify'],
+    note: "The marks themselves, to be seen rather than described.",
     load: () => import('./brand-book/BrandBook.vue'),
   },
   {
@@ -353,6 +496,9 @@ export const samples: Sample[] = [
     group: 'Brand & editorial',
     summary: "A ruled-grid company site: hero over construction lines, products, figures, careers and footer.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['identify', 'glance'],
+    note: "A site is read; its pages stay.",
     load: () => import('./company-site/CompanySite.vue'),
   },
   {
@@ -362,7 +508,115 @@ export const samples: Sample[] = [
     group: 'Brand & editorial',
     summary: "A4 report spreads: editorial type, charts with footnotes and the year in key figures.",
     theme: 'light',
+    verdict: 'earns',
+    jobs: ['compare', 'glance'],
+    note: "A report is read like paper: figures, charts and footnotes.",
     load: () => import('./annual-report/AnnualReport.vue'),
+  },
+  {
+    id: 'treasury-now',
+    index: '01',
+    title: "Treasury",
+    group: 'Banking',
+    summary: "The treasury as a desk: Simpul watches the accounts and prepares the day; the screen keeps the cash wall, the payments waiting for a person and the record of what was done.",
+    theme: 'light',
+    load: () => import('./treasury-now/TreasuryNow.vue'),
+    verdict: 'earns',
+    jobs: ['glance', 'decide', 'verify', 'ask'],
+    note: "The conversation finds, explains and prepares; the screen keeps the state, the decisions and the proof.",
+    era: 'now',
+    pair: 'treasury',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'check' }, { value: 1, unit: 'confirm' }],
+  },
+  {
+    id: 'audit-log-now',
+    index: '09',
+    title: "Audit trail",
+    group: 'Security & defense',
+    summary: "Ask the trail a question, “who changed transfer limits this week?”, and get the events themselves, each with its before-and-after.",
+    theme: 'light',
+    load: () => import('./audit-log-now/AuditLogNow.vue'),
+    verdict: 'earns',
+    jobs: ['verify', 'ask'],
+    note: "A question replaces the facets; the events and their diffs stay as the proof.",
+    era: 'now',
+    pair: 'audit-log',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'check' }, { value: 1, unit: 'confirm' }],
+  },
+  {
+    id: 'firewall-now',
+    index: '12',
+    title: "Edge firewall",
+    group: 'Security & defense',
+    summary: "Say the rule, “block logins from outside Indonesia except the Singapore office”, check what it would have blocked in the last 24 hours, then turn it on.",
+    theme: 'light',
+    load: () => import('./firewall-now/FirewallNow.vue'),
+    verdict: 'earns',
+    jobs: ['decide', 'verify', 'ask'],
+    note: "A sentence replaces the rule editor; the preview of what it would block is the check.",
+    era: 'now',
+    pair: 'firewall',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'check' }, { value: 1, unit: 'confirm' }],
+  },
+  {
+    id: 'dns-now',
+    index: '23',
+    title: "DNS records",
+    group: 'Developer platform',
+    summary: "Say the change, “point shop at the new load balancer”, approve the record diff, then watch it propagate.",
+    theme: 'light',
+    load: () => import('./dns-now/DnsNow.vue'),
+    verdict: 'earns',
+    jobs: ['decide', 'verify', 'ask'],
+    note: "A sentence replaces the record editor; the diff to approve and the propagation stay.",
+    era: 'now',
+    pair: 'dns',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'check' }, { value: 1, unit: 'confirm' }],
+  },
+  {
+    id: 'api-keys-now',
+    index: '26',
+    title: "API keys",
+    group: 'Developer platform',
+    summary: "Ask for a key by what it is for, check the scopes it was given, copy the secret once, revoke in a word.",
+    theme: 'light',
+    load: () => import('./api-keys-now/ApiKeysNow.vue'),
+    verdict: 'earns',
+    jobs: ['decide', 'verify', 'ask'],
+    note: "A request replaces the create-key dialog; the scopes to check and the secret shown once stay.",
+    era: 'now',
+    pair: 'api-keys',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'check' }, { value: 2, unit: 'confirms' }],
+  },
+  {
+    id: 'org-settings-now',
+    index: '29',
+    title: "Organization settings",
+    group: 'Workspace',
+    summary: "Change the organisation by saying so; each change comes back as a diff to approve, and every change is on the record.",
+    theme: 'light',
+    load: () => import('./org-settings-now/OrgSettingsNow.vue'),
+    verdict: 'earns',
+    jobs: ['decide', 'verify', 'ask'],
+    note: "A conversation replaces four sections of forms; the change to approve and its record stay.",
+    era: 'now',
+    pair: 'org-settings',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'check' }, { value: 1, unit: 'confirm' }],
+  },
+  {
+    id: 'onboarding-now',
+    index: '31',
+    title: "Workspace setup",
+    group: 'Workspace',
+    summary: "Set up a workspace by describing it; the agent asks only what it cannot infer, keeps a running summary to check, and launches on one press.",
+    theme: 'light',
+    load: () => import('./onboarding-now/OnboardingNow.vue'),
+    verdict: 'earns',
+    jobs: ['decide', 'ask'],
+    note: "A conversation replaces five steps of forms; the summary to check and one launch stay.",
+    era: 'now',
+    pair: 'onboarding',
+    cost: [{ value: 1, unit: 'sentence' }, { value: 1, unit: 'answer' }, { value: 1, unit: 'check' }, { value: 1, unit: 'confirm' }],
   },
 ]
 
