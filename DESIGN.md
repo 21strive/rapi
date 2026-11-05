@@ -1,5 +1,9 @@
 # Rapi 0.2 — the design language of 21 Strive
 
+> **We make UI to make things easier for people, not harder.** A language model can now carry a
+> complex interaction as a conversation, so a screen earns its place only where seeing, touching or
+> deciding is faster than saying it.
+
 Rapi is the design language and the design system of 21 Strive. This file is the source of truth
 for how it looks and why. The docs site says the same things to readers; this file says them to
 whoever builds with it.
@@ -17,9 +21,9 @@ Nothing floats, nothing bounces, nothing is decorated. The data is the loudest t
 
 ## What gets a screen
 
-This comes before every other rule. We make UI to make things easier for people, not harder, so we
-only build the UI that matters. A language model can now carry most complex interactions as a
-conversation, which means a screen has to earn its place. It does when one of three things is true:
+This comes before every other rule, and the line at the top of this file says it whole: we make UI
+to make things easier for people, not harder, so we only build the UI that matters. A screen earns
+its place when one of three things is true:
 
 1. **Seeing beats saying.** State, change and shape are read in one look: readouts, lamps, live
    values, charts, the identity of a person, a place or an account.
@@ -34,7 +38,9 @@ understood, the draft to approve, the source, the one confirm. Before designing 
 of the three it is; if it is none, it is a conversation with a small surface for the check.
 
 The moodboard (`/moodboard` in the docs) sorts a thousand live Rapi components by these jobs:
-glance, decide, tune, watch, compare, ask, verify, respond, enter and identify.
+glance, decide, tune, watch, compare, ask, verify, respond, enter and identify. They are the words.
+The gallery (`/samples`) is the sentences: every screen is sorted by the same test, and the classic
+interfaces the rule replaces sit next to their AI-first rewrite (Then → Now), built as a desk.
 
 ## Principles
 
@@ -102,6 +108,16 @@ four corners of a panel), `.r-hatch` (45° hatching that means forecast, no data
   never behind dense data. Brand covers, empty states, sign-in panels, section heroes.
 - **Construction lines.** The mark's guide lines as hairlines (`RSupergraphic variant="construction"`)
   behind heroes and empty states.
+- **The desk.** The layout of an AI-first screen. The conversation is the spine: a column on the
+  left with its own scroll, square message blocks with mono heads (who, when), a composer with
+  suggestions, and inline checks (`DeskCheck`) where the agent shows what it understood, rows it
+  inferred marked with the selection rule. Around it, only surfaces that pass the test, in named
+  zones: **State** (what to glance at or watch), **Needs you** (one clear control per decision; the
+  primary commit is the one brand button in view; destructive commits are deliberate), and **Done
+  by <agent>** (`DeskTrail`: every action with time, who, detail and Revert; reverted lines stay,
+  struck through). A hand control or one of the few fields worth a field appears only where it is
+  faster than saying it. No navigation tree, settings sections, wizard steps or filter builders.
+  The parts live in `src/docs/samples/_kit/desk/`; Treasury, Then → Now, is the reference.
 - **Density.** Rows 32–40px in tables, controls 32px, 24px page padding on desktop, 16px on phones.
   Dense is fine; cramped is not: keep at least 12px inside a panel.
 
