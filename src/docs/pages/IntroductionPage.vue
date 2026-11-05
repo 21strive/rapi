@@ -202,13 +202,21 @@ const changes = [
 <template>
   <DocPage eyebrow="Rapi 0.2 · 21 Strive" title="Rapi">
     <template #lead>
-      The design language and design system of 21 Strive: the tokens, the Vue 3 components, the charts, and the rules
-      for putting them together. It is made for screens where people decide things from numbers, so the frame stays
-      square and quiet and the data gets the attention. <em>Rapi</em> is Indonesian for tidy.
+      <span class="intro-motive">We make UI to make things easier for people, not harder.</span>
+      A language model can now carry a complex interaction as a conversation, so a screen earns its place only where
+      seeing, touching or deciding is faster than saying it.
     </template>
     <template #aside>
       <RSpecList :items="facts" dense />
     </template>
+
+    <p class="intro-about">
+      Rapi is the design language and design system of 21 Strive: the tokens, the Vue 3 components, the charts, and the
+      rules for putting them together, for screens where people decide things from numbers. Its
+      <RouterLink to="/moodboard">moodboard</RouterLink> holds a thousand of the moments that earn a screen, and its
+      <RouterLink to="/samples">gallery</RouterLink> shows classic screens beside their AI-first rewrite.
+      <em>Rapi</em> is Indonesian for tidy.
+    </p>
 
     <!-- The language at a glance -->
     <figure class="intro-glance r-marks" aria-label="A treasury screen built from Rapi components">
@@ -691,6 +699,29 @@ const changes = [
 }
 
 /* ── Principles ──────────────────────────────────────────────────────────── */
+/* The ground motivation of Rapi: the first words a reader meets. */
+.intro-motive {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--r-text);
+  font-size: var(--r-text-2xl);
+  font-weight: var(--r-weight-semibold);
+  line-height: 1.2;
+  letter-spacing: var(--r-tracking-tight);
+  text-wrap: balance;
+}
+
+.intro-about {
+  max-width: 72ch;
+  margin-bottom: 32px;
+  color: var(--r-text-secondary);
+  font-size: var(--r-text-md);
+}
+
+.intro-about a {
+  color: var(--r-brand-text);
+}
+
 .intro-tests.r-grid-ruled {
   grid-template-columns: minmax(0, 1fr);
 }

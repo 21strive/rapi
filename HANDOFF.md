@@ -137,3 +137,36 @@ tiles per screen).
 **Working on it.** See `src/docs/moodboard/README.md` for adding a tile and the query flags
 (`?job=tune&all=1&bare=1&from=0&to=25` is what the screenshot checks use). Before handing in tiles,
 run `node scripts/moodboard/moodlint.mjs <job>` and `scripts/moodboard/moodshot.sh <job> 0 25 light`.
+
+## 6. Then → Now and the desk (2026-11-05)
+
+**Brief.** With the moodboard up, the founder saw a gap in motivation between the two halves of the
+docs: the Gallery was conventional UI, the moodboard AI-first. Asked how to handle the two
+extremes, the answer was one story instead of two: the moodboard is the vocabulary, the Gallery
+the sentences, and some sentences were written in the old grammar. Three moves, all done here, plus
+the sentence as the opening line of Rapi and of 21strive.com.
+
+**Decisions.**
+- Every sample in `samples/registry.ts` now carries a `verdict` against "What gets a screen"
+  (`earns`, `half`, `conversation`), the `jobs` it does (moodboard ids) and a one-line `note` on
+  why. Audit: 16 earn their screen (instruments, live operations, editorial), 14 are half and half,
+  6 are classic interfaces the rule replaces (onboarding wizard, settings tree, audit facets,
+  firewall rule editor, DNS record editor, create-key dialog).
+- The six, and Treasury as the flagship, have an AI-first rewrite: `<id>-now`, paired through
+  `era`/`pair`, with the job's `cost` counted on both sides (fields, steps, sentences, checks,
+  confirms). Same company, people and numbers as the Then screen; most import its data read-only.
+  The sample toolbar has a Then | Now switch; `?theme=dark|light` and `?chrome=0` (no toolbar, for
+  thumbnails) work on any sample.
+- `/samples` is now "Screens, sorted by what earns them": Then → Now pairs first, then earns, half,
+  and the three 0.1 examples.
+- The desk (DESIGN.md, layout patterns) is the composition of an AI-first screen: the conversation
+  as the spine, surfaces in named zones (State, Needs you, Done by <agent>). Its parts live in
+  `src/docs/samples/_kit/desk/` (DeskShell, DeskThread, DeskComposer, DeskZone, DeskCheck,
+  DeskTrail, `useDesk` and matching helpers), with a README. Scripts accept English and Indonesian.
+- The sentence ("We make UI to make things easier for people, not harder…") opens DESIGN.md,
+  the README, the docs Introduction (as its lead) and the gallery, and the 21strive.com homepage
+  (`21strive/21strive-home`, a "Why we build" band above the two doors).
+
+**Next.** The 13 remaining half-and-half screens are next to become desks (each note says what stays). Two
+small parts recur in the Now screens and belong in the kit or the library: a hold-to-confirm button
+(three screens built their own) and a focusable record after Revert (now in DeskTrail).
