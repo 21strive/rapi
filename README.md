@@ -5,6 +5,8 @@
   </picture>
 </h1>
 
+> **We make UI to make things easier for people, not harder.** A language model can now carry a complex interaction as a conversation, so a screen earns its place only where seeing, touching or deciding is faster than saying it.
+
 Rapi is the design language and the design system of 21 Strive, built for Vue 3. *Rapi* is Indonesian for tidy.
 
 It starts from the 21 Strive brand book (the logogram, cobalt `#1B3AAB` and `#7E94E2` on black `#151515` and white, Geist and Geist Mono, spec pages ruled into columns) and takes its seriousness from IBM Carbon, Linear, Cloudflare's dashboard and VoidZero, with a Teenage Engineering twist: instrument readouts, knobs, dot-matrix digits and one orange. Think of a treasury desk, a security operations floor or launch control. Nothing floats, nothing bounces, and the data is the loudest thing on screen.
