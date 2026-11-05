@@ -15,9 +15,12 @@ It starts from the 21 Strive brand book (the logogram, cobalt `#1B3AAB` and `#7E
 - Ink and greys do most of the work; cobalt marks the brand and the selection; International Orange (`#FF4F00`) marks what is live or now.
 - 44 components, 15 charts drawn as plain SVG from the tokens, light and dark themes, theme islands.
 - 36 sample screens across banking, security and defense, aerospace and operations, instruments, developer platforms, workspace tools and brand work, plus the three original examples restyled.
+- A moodboard of 1,000 live components on one page (`#/moodboard`), sorted by the job each does for a person: glance, decide, tune, watch, compare, ask, verify, respond, enter, identify.
 - No runtime dependencies beyond Vue and lucide-vue-next; no chart library.
 
-`DESIGN.md` is the source of truth for the language: principles, tokens to reach for, layout patterns, component and chart rules, copy and what not to do.
+`DESIGN.md` is the source of truth for the language: what gets a screen, principles, tokens to reach for, layout patterns, component and chart rules, copy and what not to do.
+
+Rapi only builds the UI that matters. A language model can now carry most complex interactions as a conversation, so a screen earns its place when seeing beats saying, when touch beats describing, or when a person decides; everything else is a conversation with a small surface for the check. The moodboard shows that rule a thousand times.
 
 ## Run the docs
 
@@ -72,6 +75,7 @@ src/
   docs/                   the documentation site
     pages/                one page per section of the docs
     samples/              the 36 sample screens, one folder each, and their registry
+    moodboard/            the 1,000-component moodboard: page, tile frame, kit, one folder per job
     examples/             the three original examples
     components/           docs-only building blocks
 ```

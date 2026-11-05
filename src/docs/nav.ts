@@ -7,6 +7,7 @@ import {
   Gauge,
   Hexagon,
   Layers,
+  LayoutDashboard,
   LayoutGrid,
   LayoutTemplate,
   MessageSquare,
@@ -41,7 +42,17 @@ export interface DocGroup {
 
 export const navGroups: DocGroup[] = [
   {
-    links: [{ title: 'Introduction', path: '/', icon: BookOpen }],
+    links: [
+      {
+        title: 'Introduction',
+        path: '/',
+        icon: BookOpen,
+        sections: [
+          { id: 'what-gets-a-screen', title: 'What gets a screen' },
+          { id: 'principles', title: 'Principles' },
+        ],
+      },
+    ],
   },
   {
     title: 'Foundations',
@@ -216,6 +227,7 @@ export const navGroups: DocGroup[] = [
     title: 'Samples',
     links: [
       { title: 'Gallery', path: '/samples', icon: LayoutTemplate },
+      { title: 'Moodboard', path: '/moodboard', icon: LayoutDashboard, bare: true },
       { title: 'Sales overview', path: '/examples/sales', icon: Gauge, bare: true },
       { title: 'Projects', path: '/examples/projects', icon: FolderKanban, bare: true },
       { title: 'Weekly schedule', path: '/examples/schedule', icon: CalendarDays, bare: true },

@@ -1,0 +1,87 @@
+/*
+ * Layout helpers for specimen bodies. A specimen's root fills the tile body under the caption;
+ * `.mk` gives it the standard inset. Everything else comes from the Rapi tokens and type classes.
+ */
+
+.mk {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 4px 12px 12px;
+}
+
+/* Edge to edge: charts, scopes, LCDs that draw their own frame. */
+.mk--bleed {
+  padding: 0;
+}
+
+.mk--center {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.mk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mk-between {
+  justify-content: space-between;
+}
+
+.mk-grow {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.mk-end {
+  margin-top: auto;
+}
+
+/* A figure: Geist SemiBold, tight, tabular. Size it with font-size. */
+.mk-fig {
+  font-weight: var(--r-weight-semibold);
+  letter-spacing: var(--r-tracking-tight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* A unit after a figure: Geist Mono, its own case, quiet. */
+.mk-unit {
+  font-family: var(--r-font-mono);
+  font-size: var(--r-text-2xs);
+  font-weight: var(--r-weight-medium);
+  color: var(--r-text-tertiary);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.mk-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A plain button reset for custom controls that draw their own look. */
+.mk-reset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+.mk-reset:focus-visible {
+  outline: 2px solid var(--r-focus);
+  outline-offset: 2px;
+}
