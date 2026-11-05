@@ -15,6 +15,27 @@ twist, Teenage Engineering (instruments, knobs, dot-matrix digits, one orange).
 Picture who uses it: a treasury desk at a neo bank, a security operations floor, launch control.
 Nothing floats, nothing bounces, nothing is decorated. The data is the loudest thing on screen.
 
+## What gets a screen
+
+This comes before every other rule. We make UI to make things easier for people, not harder, so we
+only build the UI that matters. A language model can now carry most complex interactions as a
+conversation, which means a screen has to earn its place. It does when one of three things is true:
+
+1. **Seeing beats saying.** State, change and shape are read in one look: readouts, lamps, live
+   values, charts, the identity of a person, a place or an account.
+2. **Touch beats describing.** A hand finds the value faster than a sentence: knobs, faders,
+   steppers, and the few fields worth a field (a code, an amount, a date, a signature).
+3. **A person decides.** Commitments, proof and interruptions: approve, release, undo, verify,
+   acknowledge.
+
+Everything else is a conversation. Filter builders, long forms, settings trees and wizards become a
+sentence, and the screen keeps only what the person needs to check: the terms that were
+understood, the draft to approve, the source, the one confirm. Before designing a screen, ask which
+of the three it is; if it is none, it is a conversation with a small surface for the check.
+
+The moodboard (`/moodboard` in the docs) sorts a thousand live Rapi components by these jobs:
+glance, decide, tune, watch, compare, ask, verify, respond, enter and identify.
+
 ## Principles
 
 1. **Square by default.** Every corner is 0. A circle always means a point or a state: a status
