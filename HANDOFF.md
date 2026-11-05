@@ -144,7 +144,8 @@ run `node scripts/moodboard/moodlint.mjs <job>` and `scripts/moodboard/moodshot.
 docs: the Gallery was conventional UI, the moodboard AI-first. Asked how to handle the two
 extremes, the answer was one story instead of two: the moodboard is the vocabulary, the Gallery
 the sentences, and some sentences were written in the old grammar. Three moves, all done here, plus
-the sentence as the opening line of Rapi and of 21strive.com.
+the sentence as the opening line of Rapi. The founder wants it on the Rapi site only: 21strive.com
+stays as it is (a homepage band was tried and taken back the same day).
 
 **Decisions.**
 - Every sample in `samples/registry.ts` now carries a `verdict` against "What gets a screen"
@@ -164,8 +165,8 @@ the sentence as the opening line of Rapi and of 21strive.com.
   `src/docs/samples/_kit/desk/` (DeskShell, DeskThread, DeskComposer, DeskZone, DeskCheck,
   DeskTrail, `useDesk` and matching helpers), with a README. Scripts accept English and Indonesian.
 - The sentence ("We make UI to make things easier for people, not harder…") opens DESIGN.md,
-  the README, the docs Introduction (as its lead) and the gallery, and the 21strive.com homepage
-  (`21strive/21strive-home`, a "Why we build" band above the two doors).
+  the README, the docs Introduction (as its lead) and the gallery. Not 21strive.com: leave the
+  homepage alone; at most a light touch to a sentence already on it.
 
 **Next.** The 13 remaining half-and-half screens are next to become desks (each note says what stays). Two
 small parts recur in the Now screens and belong in the kit or the library: a hold-to-confirm button
